@@ -1,0 +1,60 @@
+node_modules/
+**/node_modules/
+dist/
+**/dist/
+.env
+.env.*
+
+# ==========================================
+# Root & Operating System Files
+# ==========================================
+.DS_Store
+.DS_Store?
+ehthumbs.db
+Icon?
+Thumbs.db
+*.tmp
+*.log
+
+# Environment & Secret files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# IDE Files
+.idea/
+*.iml
+*.iws
+*.ipr
+.vscode/
+*.sublime-workspace
+*.sublime-project
+.settings/
+.classpath
+.project
+
+# ==========================================
+# Frontend: fsp_frontend
+# ==========================================
+fsp_frontend/node_modules/
+fsp_frontend/dist/
+fsp_frontend/dist-ssr/
+fsp_frontend/coverage/
+fsp_frontend/.cache/
+fsp_frontend/npm-debug.log*
+
+# ==========================================
+# Backend: fsp_backend
+# ==========================================
+fsp_backend/target/
+fsp_backend/*.jar
+fsp_backend/*.war
+fsp_backend/*.ear
+fsp_backend/.mvn/timing.tsv
+fsp_backend/.mvn/wrapper/maven-wrapper.jar
+
+# Crash Logs
+hs_err_pid*
+replay_pid*
