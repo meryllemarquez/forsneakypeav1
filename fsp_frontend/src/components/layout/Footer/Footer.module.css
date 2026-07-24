@@ -1,0 +1,33 @@
+.footer {
+  background-color: var(--color-burgundy-primary);
+  color: var(--color-cream-bg);
+  padding: var(--space-2xl) 0;
+  margin-top: auto;
+  border-top: 2px solid var(--color-gold-primary);
+}
+
+.container {
+  max-width: var(--max-width-container);
+  margin: 0 auto;
+  padding: 0 var(--space-lg);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.quote {
+  font-family: var(--font-family-serif);
+  font-style: italic;
+  font-size: var(--font-size-lg);
+  color: var(--color-gold-light);
+}
+
+.copyright {
+  font-size: var(--font-size-xs);
+  color: rgba(247, 243, 233, 0.7);
+}
+
+.heart {
+  color: #E57373;
+}

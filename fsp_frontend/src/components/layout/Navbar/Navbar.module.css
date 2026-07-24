@@ -1,0 +1,102 @@
+.header {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-sticky);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border-bottom: 1px solid var(--color-cream-border);
+  height: var(--navbar-height);
+  display: flex;
+  align-items: center;
+}
+
+.container {
+  width: 100%;
+  max-width: var(--max-width-container);
+  margin: 0 auto;
+  padding: 0 var(--space-lg);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  font-family: var(--font-family-serif);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-burgundy-primary);
+}
+
+.brandIcon {
+  color: var(--color-gold-primary);
+}
+
+.desktopNav {
+  display: flex;
+  gap: var(--space-xl);
+}
+
+.navLink {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-brown-primary);
+  position: relative;
+  transition: color var(--transition-fast);
+}
+
+.navLink:hover {
+  color: var(--color-burgundy-primary);
+}
+
+.activeLink {
+  color: var(--color-burgundy-primary);
+  font-weight: var(--font-weight-bold);
+}
+
+.activeLink::after {
+  content: '';
+  position: absolute;
+  bottom: -6px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: var(--color-gold-primary);
+  border-radius: var(--radius-full);
+}
+
+.mobileToggle {
+  display: none;
+  font-size: var(--font-size-2xl);
+  color: var(--color-burgundy-primary);
+}
+
+.mobileNav {
+  display: none;
+  flex-direction: column;
+  background-color: var(--color-cream-surface);
+  border-bottom: 1px solid var(--color-cream-border);
+  overflow: hidden;
+}
+
+.mobileNavLink {
+  padding: var(--space-md) var(--space-lg);
+  font-size: var(--font-size-md);
+  color: var(--color-text-main);
+  border-bottom: 1px solid var(--color-cream-border);
+}
+
+.activeMobileLink {
+  background-color: var(--color-burgundy-subtle);
+  color: var(--color-burgundy-primary);
+  font-weight: var(--font-weight-bold);
+}
+
+@media (max-width: 768px) {
+  .desktopNav { display: none; }
+  .mobileToggle { display: block; }
+  .mobileNav { display: flex; }
+}
