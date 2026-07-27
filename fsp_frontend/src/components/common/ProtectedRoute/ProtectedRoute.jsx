@@ -1,16 +1,24 @@
-import { Navigate, Outlet } from 'react-router-dom';
-import { useAuth } from '../../../hooks/useAuth';
+import { Navigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
-export default function ProtectedRoute() {
-  const { isAuthenticated, isLoading } = useAuth();
+export default function ProtectedRoute({ children, allowedRoles }) {
+  const { user, loading } = useAuth();
 
-  if (isLoading) {
-    return null; // Or a romantic loading spinner
+  if (loading) {
+    return (
+      <div style={{ textAlign: 'center', padding: '4rem', color: 'var(--color-brown-primary)' }}>
+        ✨ Loading sneaky pea application...
+      </div>
+    );
   }
 
-  if (!isAuthenticated) {
-    return <Navigate to="/welcome" replace />;
+  if (!user) {
+    return <Navigate to="/auth" replace />;
   }
 
-  return <Outlet />;
+  if (allowedRoles && !allowedRoles.includes(user.role)) {
+    return <Navigate to="/" replace />;
+  }
+
+  return children;
 }

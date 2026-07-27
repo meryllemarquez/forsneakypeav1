@@ -1,8 +1,10 @@
 package com.forsneakypea.fspbackend.service;
 
-import com.forsneakypea.fspbackend.dto.request.PinVerificationRequest;
-import com.forsneakypea.fspbackend.dto.response.PinVerificationResponse;
+import com.forsneakypea.fspbackend.dto.request.LoginRequest;
+import com.forsneakypea.fspbackend.dto.request.RegisterRequest;
+import com.forsneakypea.fspbackend.dto.response.AuthResponse;
 
 public interface AuthService {
-    PinVerificationResponse verifyPin(PinVerificationRequest request);
+    AuthResponse login(LoginRequest request);
+    AuthResponse register(RegisterRequest request);
 }

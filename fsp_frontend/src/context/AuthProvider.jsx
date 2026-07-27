@@ -2,26 +2,36 @@ import { useState } from 'react';
 import { AuthContext } from './AuthContext';
 
 export function AuthProvider({ children }) {
-  // Synchronous lazy state initialization — pinapatakbo bago i-paint ang DOM
-  const [isAuthenticated, setIsAuthenticated] = useState(() => {
-    return Boolean(sessionStorage.getItem('our_story_auth_token'));
+  const [user, setUser] = useState(() => {
+    const storedUser = localStorage.getItem('fsp_user');
+    const token = localStorage.getItem('fsp_token');
+    if (storedUser && token) {
+      try {
+        return JSON.parse(storedUser);
+      } catch {
+        localStorage.removeItem('fsp_user');
+        localStorage.removeItem('fsp_token');
+      }
+    }
+    return null;
   });
 
-  // Instant auth check means loading is complete immediately on mount
-  const isLoading = false;
+  const [loading] = useState(false);
 
-  const login = (token) => {
-    sessionStorage.setItem('our_story_auth_token', token);
-    setIsAuthenticated(true);
+  const login = (authData) => {
+    localStorage.setItem('fsp_token', authData.token);
+    localStorage.setItem('fsp_user', JSON.stringify(authData));
+    setUser(authData);
   };
 
   const logout = () => {
-    sessionStorage.removeItem('our_story_auth_token');
-    setIsAuthenticated(false);
+    localStorage.removeItem('fsp_token');
+    localStorage.removeItem('fsp_user');
+    setUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, isLoading, login, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

@@ -1,36 +1,32 @@
 .keypadGrid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: var(--space-md);
+  gap: 10px;
   width: 100%;
-  max-width: 300px;
+  max-width: 240px;
   margin: 0 auto;
-}
-
-.emptySpace {
-  width: 64px;
-  height: 64px;
 }
 
 .keyButton {
-  width: 64px;
-  height: 64px;
-  border-radius: var(--radius-full);
-  background-color: rgba(255, 253, 248, 0.12);
-  border: 1px solid rgba(197, 160, 89, 0.35);
-  color: var(--color-cream-surface);
+  height: 54px;
+  border-radius: 12px;
+  border: none;
+  background: #f2ebe1; /* Cream/off-white color */
+  color: #3b0005; /* Dark maroon color */
+  font-size: 1.75rem;
+  font-weight: 700;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0 auto;
   cursor: pointer;
-  backdrop-filter: blur(8px);
-  transition: background-color var(--transition-fast), border-color var(--transition-fast);
+  user-select: none;
+  outline: none;
+  transition: opacity 0.2s ease, background-color 0.2s ease;
+  font-family: inherit;
 }
 
-.keyButton:hover:not(:disabled) {
-  background-color: rgba(197, 160, 89, 0.25);
-  border-color: var(--color-gold-primary);
+.keyButton:active {
+  background: #e4dad0;
 }
 
 .keyButton:disabled {
@@ -38,19 +34,6 @@
   cursor: not-allowed;
 }
 
-.digitText {
-  font-family: var(--font-family-serif);
-  font-size: var(--font-size-2xl);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-cream-bg);
-}
-
-.deleteBtn {
-  border-color: transparent;
-  background-color: transparent;
-}
-
-.deleteIcon {
-  font-size: var(--font-size-2xl);
-  color: var(--color-gold-light);
+.deleteButton {
+  font-size: 1.4rem;
 }

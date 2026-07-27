@@ -1,8 +1,9 @@
 package com.forsneakypea.fspbackend.controller;
 
-import com.forsneakypea.fspbackend.dto.request.PinVerificationRequest;
+import com.forsneakypea.fspbackend.dto.request.LoginRequest;
+import com.forsneakypea.fspbackend.dto.request.RegisterRequest;
 import com.forsneakypea.fspbackend.dto.response.ApiResponse;
-import com.forsneakypea.fspbackend.dto.response.PinVerificationResponse;
+import com.forsneakypea.fspbackend.dto.response.AuthResponse;
 import com.forsneakypea.fspbackend.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -17,16 +18,15 @@ public class AuthController {
 
     private final AuthService authService;
 
-    @PostMapping("/verify-pin")
-    public ResponseEntity<ApiResponse<PinVerificationResponse>> verifyPin(
-            @Valid @RequestBody PinVerificationRequest request) {
-            
-        PinVerificationResponse response = authService.verifyPin(request);
+    @PostMapping("/login")
+    public ResponseEntity<ApiResponse<AuthResponse>> login(@Valid @RequestBody LoginRequest request) {
+        AuthResponse response = authService.login(request);
+        return ResponseEntity.ok(ApiResponse.success(response, "Login successful"));
+    }
 
-        if (response.isAuthenticated()) {
-            return ResponseEntity.ok(ApiResponse.success(response, "PIN verified successfully"));
-        } else {
-            return ResponseEntity.badRequest().body(ApiResponse.error(response.getMessage()));
-        }
+    @PostMapping("/register")
+    public ResponseEntity<ApiResponse<AuthResponse>> register(@Valid @RequestBody RegisterRequest request) {
+        AuthResponse response = authService.register(request);
+        return ResponseEntity.ok(ApiResponse.success(response, "Account created successfully"));
     }
 }

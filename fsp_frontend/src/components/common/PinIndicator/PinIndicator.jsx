@@ -1,30 +1,34 @@
 import { motion } from 'framer-motion';
 import styles from './PinIndicator.module.css';
 
-export default function PinIndicator({
-  length = 4,
-  value = '',
-  hasError = false,
-  isMasked = true
-}) {
-  const digits = Array.from({ length }, (_, index) => value[index] || '');
+const shakeVariants = {
+  idle: { x: 0 },
+  shake: {
+    x: [0, -10, 10, -8, 8, -4, 4, 0],
+    transition: { duration: 0.4 },
+  },
+};
+
+export default function PinIndicator({ length = 4, value = '', hasError = false }) {
+  const boxes = Array.from({ length });
 
   return (
-    <div className={`${styles.container} ${hasError ? styles.errorShake : ''}`}>
-      {digits.map((digit, idx) => {
-        const isFilled = digit !== '';
+    <motion.div
+      className={styles.indicatorContainer}
+      variants={shakeVariants}
+      animate={hasError ? 'shake' : 'idle'}
+    >
+      {boxes.map((_, index) => {
+        const isFilled = index < value.length;
         return (
-          <motion.div
-            key={idx}
-            className={`${styles.pinBox} ${isFilled ? styles.filled : ''} ${hasError ? styles.boxError : ''}`}
-            initial={{ scale: 1 }}
-            animate={{ scale: isFilled ? [1, 1.1, 1] : 1 }}
-            transition={{ duration: 0.2 }}
+          <div
+            key={index}
+            className={`${styles.box} ${hasError ? styles.errorBox : ''}`}
           >
-            {isFilled ? (isMasked ? '●' : digit) : ''}
-          </motion.div>
+            {isFilled && <span className={styles.dot}>●</span>}
+          </div>
         );
       })}
-    </div>
+    </motion.div>
   );
 }
