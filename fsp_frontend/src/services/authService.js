@@ -1,58 +1,61 @@
-import axios from 'axios';
-
-const API_BASE_URL = 'http://localhost:8080/api/v1';
-
-const api = axios.create({
-  baseURL: API_BASE_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
-
-// Auto-attach JWT token to requests if present
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('fsp_token') || localStorage.getItem('token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
+import api from '../api/axiosConfig';
 
 export const authService = {
-  // 1. PIN verification (for Welcome screen)
-  verifyPin: async (pin) => {
-    const response = await api.post('/auth/verify-pin', { pin });
-    return response.data;
-  },
+  // Flexible login handler supporting both login({ username, password }) AND login(username, password)
+  login: async (credentials, passwordArg) => {
+    const isObject = typeof credentials === 'object' && credentials !== null;
+    
+    const payload = isObject
+      ? {
+          username: credentials.username || credentials.email,
+          password: credentials.password,
+        }
+      : {
+          username: credentials,
+          password: passwordArg,
+        };
 
-  // 2. Master Key verification for Account Creation (0617)
-  verifyMasterKey: async (masterKey) => {
-    // Fast local verification for 0617
-    return masterKey === '0617';
-  },
+    const response = await api.post('/auth/login', payload);
 
-  // 3. User Login (Merylle / Cj / Admin)
-  login: async (username, password) => {
-    const response = await api.post('/auth/login', { username, password });
-    if (response.data && response.data.success) {
-      return response.data.data; // Returns { token, username, name, role }
+    // Support unwrapping ApiResponse wrapper or direct payload
+    const authData = response.data?.data || response.data;
+    if (authData?.token) {
+      localStorage.setItem('token', authData.token);
+      localStorage.setItem('user', JSON.stringify(authData));
     }
-    throw new Error(response.data.message || 'Login failed');
+    return authData;
   },
 
-  // 4. Create Account (Protected by Master Password)
-  register: async (accountData) => {
-    // accountData: { masterPassword, name, username, password, role }
-    const response = await api.post('/auth/register', accountData);
-    if (response.data && response.data.success) {
-      return response.data.data;
+  // Flexible register handler supporting both object payload AND positional arguments
+  register: async (registerData, passwordArg, nameArg, masterPasswordArg) => {
+    const isObject = typeof registerData === 'object' && registerData !== null;
+
+    const payload = isObject
+      ? {
+          name: registerData.name,
+          username: registerData.username,
+          password: registerData.password,
+          masterPassword: registerData.masterPassword || registerData.masterPasscode || '0617',
+        }
+      : {
+          username: registerData,
+          password: passwordArg,
+          name: nameArg,
+          masterPassword: masterPasswordArg || '0617',
+        };
+
+    const response = await api.post('/auth/register', payload);
+
+    const authData = response.data?.data || response.data;
+    if (authData?.token) {
+      localStorage.setItem('token', authData.token);
+      localStorage.setItem('user', JSON.stringify(authData));
     }
-    throw new Error(response.data.message || 'Registration failed');
+    return authData;
   },
 
-  // 5. Fetch current logged-in user session
-  getCurrentUser: async () => {
-    const response = await api.get('/auth/me');
-    return response.data;
-  },
+  logout: () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+  }
 };

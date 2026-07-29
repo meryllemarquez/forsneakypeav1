@@ -1,49 +1,56 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { NotificationProvider } from './context/NotificationProvider';
-import { AuthProvider } from './context/AuthProvider';
-import Layout from './components/layout/Layout/Layout';
-import ProtectedRoute from './components/ProtectedRoute';
-
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import AuthPage from './pages/AuthPage';
 import HomePage from './pages/HomePage';
 import AdminPage from './pages/AdminPage';
+import MemoriesPage from './pages/MemoriesPage';
+import ProtectedRoute from './components/ProtectedRoute';
+
+
+import { AuthProvider } from './context/AuthProvider';
 
 export default function App() {
   return (
-    <NotificationProvider>
+    <Router>
+      {/* 2. I-WRAP ANG ROUTES SA LOOB NG AUTHPROVIDER */}
       <AuthProvider>
-        <BrowserRouter>
-          <Routes>
-            {/* Fullscreen Landing / Auth Page (Walang Layout Header/Footer) */}
-            <Route path="/auth" element={<AuthPage />} />
+        <Routes>
+          {/* Public Landing & Login Page */}
+          <Route path="/auth" element={<AuthPage />} />
 
-            {/* Protected Pages (Nakabalot sa Layout) */}
-            <Route
-              path="/"
-              element={
-                <ProtectedRoute allowedRoles={['ROLE_USER', 'ROLE_ADMIN']}>
-                 
-                    <HomePage />
-                  
-                </ProtectedRoute>
-              }
-            />
+          {/* Protected Couple Sanctuary */}
+          <Route 
+            path="/home" 
+            element={
+              <ProtectedRoute>
+                <HomePage />
+              </ProtectedRoute>
+            } 
+          />
 
-            <Route
-              path="/admin"
-              element={
-                <ProtectedRoute allowedRoles={['ROLE_ADMIN']}>
-                  <Layout>
-                    <AdminPage />
-                  </Layout>
-                </ProtectedRoute>
-              }
-            />
+          {/* Phase 5: Memories & Album System */}
+          <Route 
+            path="/memories" 
+            element={
+              <ProtectedRoute>
+                <MemoriesPage />
+              </ProtectedRoute>
+            } 
+          />
 
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </BrowserRouter>
+          {/* Admin Route */}
+          <Route 
+            path="/admin" 
+            element={
+              <ProtectedRoute requiredRole="ROLE_ADMIN">
+                <AdminPage />
+              </ProtectedRoute>
+            } 
+          />
+
+          {/* Default Redirect */}
+          <Route path="*" element={<Navigate to="/home" replace />} />
+        </Routes>
       </AuthProvider>
-    </NotificationProvider>
+    </Router>
   );
 }

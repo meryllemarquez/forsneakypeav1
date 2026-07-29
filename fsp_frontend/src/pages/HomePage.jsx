@@ -50,15 +50,17 @@ const ArrowUpRightIcon = () => (
 
 export default function HomePage() {
   const { user, logout } = useAuth();
-  const navigate = useNavigate();
+  const navigate = useNavigate(); // Used for client-side routing (/memories, /admin, etc.)
   const [activeTab, setActiveTab] = useState('overview');
 
-  // Calculate Days Together dynamically
+  // Dynamically calculate days together since Anniversary: January 28, 2024
   const daysTogether = useMemo(() => {
-    const startDate = new Date('2023-06-17');
-    const today = new Date();
-    const diffTime = Math.abs(today - startDate);
-    return Math.floor(diffTime / (1000 * 60 * 60 * 24));
+    const startDate = Date.UTC(2024, 0, 28);
+    const now = new Date();
+    const todayDate = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
+    const diffInMs = todayDate - startDate;
+    const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
+    return Math.max(0, diffInDays);
   }, []);
 
   // Framer Motion Stagger Animation Variants
@@ -184,12 +186,15 @@ export default function HomePage() {
             >
               Overview
             </button>
+
+            {/* ✅ UPDATED: Navigates directly to the full Memories Page (/memories) */}
             <button 
               className={`${styles.tabBtn} ${activeTab === 'memories' ? styles.tabActive : ''}`}
-              onClick={() => setActiveTab('memories')}
+              onClick={() => navigate('/memories')}
             >
               Memories
             </button>
+
             <button 
               className={`${styles.tabBtn} ${activeTab === 'dates' ? styles.tabActive : ''}`}
               onClick={() => setActiveTab('dates')}
@@ -206,7 +211,7 @@ export default function HomePage() {
           initial="hidden"
           animate="visible"
         >
-{/* DAILY LOVE NOTE CARD */}
+          {/* DAILY LOVE NOTE CARD */}
           <motion.div className={styles.dailyNoteCard} variants={itemVariants}>
             <div className={styles.cardMetaHeader}>
               <span className={styles.sectionLabel}>DAILY NOTE</span>
@@ -235,7 +240,12 @@ export default function HomePage() {
                   <h2 className={styles.sectionTitle}>Featured Memories</h2>
                   <p className={styles.sectionSubtitle}>Captured moments from our journey together.</p>
                 </div>
-                <button className={styles.inlineLinkBtn}>
+
+                {/* ✅ UPDATED: Navigates directly to the full Memories Page (/memories) */}
+                <button 
+                  className={styles.inlineLinkBtn}
+                  onClick={() => navigate('/memories')}
+                >
                   <span>View All</span>
                   <ArrowUpRightIcon />
                 </button>
@@ -248,6 +258,8 @@ export default function HomePage() {
                     className={styles.memoryCard}
                     whileHover={{ y: -3 }}
                     transition={{ duration: 0.25 }}
+                    onClick={() => navigate('/memories')} // ✅ Card click also routes to /memories
+                    style={{ cursor: 'pointer' }}
                   >
                     <div className={styles.memoryImageWrapper}>
                       <img src={memory.image} alt={memory.title} className={styles.memoryImage} />
