@@ -20,6 +20,11 @@
     <properties>
         <java.version>21</java.version>
         <jjwt.version>0.11.5</jjwt.version>
+        <!-- Spring Boot 3.4.2 pins Lombok 1.18.36, which silently fails to run its
+             annotation processor (no getters, builders, or constructors generated,
+             no error surfaced) when cross-compiling to release 21 on a JDK 25/26
+             host. Bumping to a current release fixes it. -->
+        <lombok.version>1.18.46</lombok.version>
     </properties>
 
     <dependencies>
@@ -114,6 +119,25 @@
                             <artifactId>lombok</artifactId>
                         </exclude>
                     </excludes>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <!-- Newer javac (this project has been built against JDK 25) no longer
+                         reliably auto-discovers annotation processors from the plain
+                         -classpath — it silently skips them instead of erroring, which
+                         made every Lombok annotation in the project (getters, builders,
+                         @RequiredArgsConstructor, ...) quietly stop being generated.
+                         Pointing it at Lombok explicitly via -processorpath fixes it. -->
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>${lombok.version}</version>
+                        </path>
+                    </annotationProcessorPaths>
                 </configuration>
             </plugin>
         </plugins>

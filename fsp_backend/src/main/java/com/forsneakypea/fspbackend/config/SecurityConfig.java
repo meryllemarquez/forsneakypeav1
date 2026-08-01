@@ -47,7 +47,12 @@ public class SecurityConfig {
                 // 3. Protect Memory Module
                 .requestMatchers(AntPathRequestMatcher.antMatcher("/api/memories/**")).authenticated()
                 .requestMatchers(AntPathRequestMatcher.antMatcher("/api/v1/memories/**")).authenticated()
-                // 4. Authenticate everything else
+                // 4. Protect Date Bucket List Module
+                .requestMatchers(AntPathRequestMatcher.antMatcher("/api/dates/**")).authenticated()
+                .requestMatchers(AntPathRequestMatcher.antMatcher("/api/v1/dates/**")).authenticated()
+                .requestMatchers(AntPathRequestMatcher.antMatcher("/api/date-categories/**")).authenticated()
+                .requestMatchers(AntPathRequestMatcher.antMatcher("/api/v1/date-categories/**")).authenticated()
+                // 5. Authenticate everything else
                 .anyRequest().authenticated()
             )
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

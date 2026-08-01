@@ -195,9 +195,9 @@ export default function HomePage() {
               Memories
             </button>
 
-            <button 
+            <button
               className={`${styles.tabBtn} ${activeTab === 'dates' ? styles.tabActive : ''}`}
-              onClick={() => setActiveTab('dates')}
+              onClick={() => navigate('/dates')}
             >
               Upcoming Dates
             </button>
@@ -282,7 +282,7 @@ export default function HomePage() {
                   <h2 className={styles.sectionTitle}>Upcoming Plans</h2>
                   <p className={styles.sectionSubtitle}>Dates and activities we are looking forward to.</p>
                 </div>
-                <button className={styles.inlineLinkBtn}>
+                <button className={styles.inlineLinkBtn} onClick={() => navigate('/dates')}>
                   <span>Calendar</span>
                   <ArrowUpRightIcon />
                 </button>
@@ -290,11 +290,13 @@ export default function HomePage() {
 
               <div className={styles.datesList}>
                 {upcomingDates.map((item) => (
-                  <motion.div 
-                    key={item.id} 
+                  <motion.div
+                    key={item.id}
                     className={styles.dateCard}
                     whileHover={{ x: 3 }}
                     transition={{ duration: 0.2 }}
+                    onClick={() => navigate('/dates')}
+                    style={{ cursor: 'pointer' }}
                   >
                     <div className={styles.dateIconBox}>
                       <CalendarIcon />

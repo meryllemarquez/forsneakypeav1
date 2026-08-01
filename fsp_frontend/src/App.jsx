@@ -3,6 +3,7 @@ import AuthPage from './pages/AuthPage';
 import HomePage from './pages/HomePage';
 import AdminPage from './pages/AdminPage';
 import MemoriesPage from './pages/MemoriesPage';
+import DatesPage from './pages/DatesPage';
 import ProtectedRoute from './components/ProtectedRoute';
 
 
@@ -35,6 +36,16 @@ export default function App() {
                 <MemoriesPage />
               </ProtectedRoute>
             } 
+          />
+
+          {/* Phase 2: Premium Date Bucket List (mock data, backend not yet wired) */}
+          <Route
+            path="/dates"
+            element={
+              <ProtectedRoute>
+                <DatesPage />
+              </ProtectedRoute>
+            }
           />
 
           {/* Admin Route */}
