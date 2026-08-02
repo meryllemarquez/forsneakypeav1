@@ -52,7 +52,10 @@ public class SecurityConfig {
                 .requestMatchers(AntPathRequestMatcher.antMatcher("/api/v1/dates/**")).authenticated()
                 .requestMatchers(AntPathRequestMatcher.antMatcher("/api/date-categories/**")).authenticated()
                 .requestMatchers(AntPathRequestMatcher.antMatcher("/api/v1/date-categories/**")).authenticated()
-                // 5. Authenticate everything else
+                // 5. Protect Love Board Module (Phase 7)
+                .requestMatchers(AntPathRequestMatcher.antMatcher("/api/love-board/**")).authenticated()
+                .requestMatchers(AntPathRequestMatcher.antMatcher("/api/v1/love-board/**")).authenticated()
+                // 6. Authenticate everything else
                 .anyRequest().authenticated()
             )
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -72,7 +75,10 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:5173", "http://127.0.0.1:5173"));
+        configuration.setAllowedOrigins(List.of(
+            "http://localhost:5173", "http://127.0.0.1:5173",
+            "http://localhost:5174", "http://127.0.0.1:5174"
+        ));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Requested-With", "Accept", "Origin"));
         configuration.setExposedHeaders(List.of("Authorization"));

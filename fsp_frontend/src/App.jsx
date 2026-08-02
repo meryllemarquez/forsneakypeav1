@@ -4,6 +4,7 @@ import HomePage from './pages/HomePage';
 import AdminPage from './pages/AdminPage';
 import MemoriesPage from './pages/MemoriesPage';
 import DatesPage from './pages/DatesPage';
+import LoveLettersPage from './pages/LoveLettersPage';
 import ProtectedRoute from './components/ProtectedRoute';
 
 
@@ -44,6 +45,16 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <DatesPage />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Phase 7: Interactive Love Board */}
+          <Route
+            path="/letters"
+            element={
+              <ProtectedRoute>
+                <LoveLettersPage />
               </ProtectedRoute>
             }
           />

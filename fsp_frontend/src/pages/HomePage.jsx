@@ -201,6 +201,13 @@ export default function HomePage() {
             >
               Upcoming Dates
             </button>
+
+            <button
+              className={`${styles.tabBtn} ${activeTab === 'letters' ? styles.tabActive : ''}`}
+              onClick={() => navigate('/letters')}
+            >
+              Love Letters
+            </button>
           </div>
         </motion.section>
 

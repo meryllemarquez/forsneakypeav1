@@ -1,0 +1,708 @@
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { AnimatePresence } from 'framer-motion';
+import { ArrowLeft, MousePointer2, Hand, Undo2, Redo2, ZoomOut, ZoomIn, RotateCcw } from 'lucide-react';
+import '../styles/loveboard-tailwind.css';
+
+import CorkBoard from '../components/loveBoard/CorkBoard/CorkBoard';
+import BoardToolbar from '../components/loveBoard/Toolbar/BoardToolbar';
+import SearchFilterPanel from '../components/loveBoard/Toolbar/SearchFilterPanel';
+import StickerLibrary from '../components/loveBoard/StickerLibrary/StickerLibrary';
+import ArchiveDrawer from '../components/loveBoard/Archive/ArchiveDrawer';
+import LayerPanel from '../components/loveBoard/Layers/LayerPanel';
+import NoteComposerModal from '../components/loveBoard/Composer/NoteComposerModal';
+import NoteReaderModal from '../components/loveBoard/Note/NoteReaderModal';
+import ConfirmDialog from '../components/loveBoard/common/ConfirmDialog';
+
+import { useLoveBoardAssets } from '../hooks/useLoveBoardAssets';
+import { loveBoardService } from '../services/loveBoardService';
+import { randomBoardPosition, randomNoteRotation, randomStickerRotation } from '../constants/loveBoardConstants';
+
+function byFilename(list = []) {
+  return Object.fromEntries(list.map((item) => [item.filename, item.url]));
+}
+
+export default function LoveLettersPage() {
+  const navigate = useNavigate();
+  const assets = useLoveBoardAssets();
+  const boardRef = useRef(null);
+  const stickerDebounceRef = useRef({});
+
+  const [notes, setNotes] = useState([]);
+  const [stickers, setStickers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  const [decorateMode, setDecorateMode] = useState(false);
+  const [selectedStickerId, setSelectedStickerId] = useState(null);
+  const [stickerLibraryOpen, setStickerLibraryOpen] = useState(false);
+
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [query, setQuery] = useState('');
+  const [authorFilter, setAuthorFilter] = useState(null);
+  const [moodFilter, setMoodFilter] = useState(null);
+  const [paperFilter, setPaperFilter] = useState(null);
+  const [favoritesOnly, setFavoritesOnly] = useState(false);
+
+  const [archiveOpen, setArchiveOpen] = useState(false);
+  const [layersOpen, setLayersOpen] = useState(false);
+  const [composerOpen, setComposerOpen] = useState(false);
+  const [creating, setCreating] = useState(false);
+
+  const [readerNoteId, setReaderNoteId] = useState(null);
+  const [readerSaving, setReaderSaving] = useState(false);
+
+  const [topNoteId, setTopNoteId] = useState(null);
+  const [noteExitReasons, setNoteExitReasons] = useState({});
+
+  const [confirmState, setConfirmState] = useState(null);
+  const [confirmBusy, setConfirmBusy] = useState(false);
+
+  const [activeTool, setActiveTool] = useState('select');
+  const [zoomPercent, setZoomPercent] = useState(100);
+  const historyRef = useRef({ past: [], future: [] });
+  const transformSnapshotRef = useRef(null);
+  const [canUndo, setCanUndo] = useState(false);
+  const [canRedo, setCanRedo] = useState(false);
+
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        setLoading(true);
+        const [notesData, stickersData] = await Promise.all([
+          loveBoardService.getNotes(),
+          loveBoardService.getStickers(),
+        ]);
+        if (mounted) {
+          setNotes(notesData || []);
+          setStickers(stickersData || []);
+        }
+      } catch (err) {
+        console.error('Failed to load love board', err);
+        if (mounted) setError('Unable to load the board. Please check your connection.');
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const readerNote = useMemo(() => notes.find((n) => n.id === readerNoteId) || null, [notes, readerNoteId]);
+
+  const nextZIndex = useCallback(() => {
+    const maxNote = notes.reduce((m, n) => Math.max(m, n.zIndex || 1), 1);
+    const maxSticker = stickers.reduce((m, s) => Math.max(m, s.zIndex || 1), 1);
+    return Math.max(maxNote, maxSticker) + 1;
+  }, [notes, stickers]);
+
+  const prevZIndex = useCallback(() => {
+    const minNote = notes.reduce((m, n) => Math.min(m, n.zIndex || 1), 1);
+    const minSticker = stickers.reduce((m, s) => Math.min(m, s.zIndex || 1), 1);
+    return Math.min(minNote, minSticker) - 1;
+  }, [notes, stickers]);
+
+  /* ---------------------------------------------------------------
+     UNDO / REDO
+     Scoped to transform-style edits (move, resize, rotate, lock,
+     stacking order, favorite/archive toggle) — additions and hard
+     deletes are intentionally excluded. Notes/stickers are hard-deleted
+     server-side with no restore-by-id endpoint, so "undoing" a delete
+     would only be able to recreate a look-alike under a new id, which
+     would silently desync from any other history entries still
+     referencing the original id. Deletes already go through
+     ConfirmDialog as their safety net instead.
+  --------------------------------------------------------------- */
+
+  const syncHistoryFlags = () => {
+    setCanUndo(historyRef.current.past.length > 0);
+    setCanRedo(historyRef.current.future.length > 0);
+  };
+
+  const pushHistory = useCallback((entry) => {
+    const history = historyRef.current;
+    history.past.push(entry);
+    if (history.past.length > 50) history.past.shift();
+    history.future = [];
+    syncHistoryFlags();
+  }, []);
+
+  const applyStickerPatch = useCallback((id, patch) => {
+    setStickers((prev) => prev.map((s) => (s.id === id ? { ...s, ...patch } : s)));
+    loveBoardService.updateSticker(id, patch).catch((err) => console.error('Failed to persist sticker patch', err));
+  }, []);
+
+  const applyNotePatch = useCallback((id, patch) => {
+    setNotes((prev) => prev.map((n) => (n.id === id ? { ...n, ...patch } : n)));
+    const positionKeys = ['positionX', 'positionY', 'rotation', 'zIndex'];
+    const isPositionOnly = Object.keys(patch).every((k) => positionKeys.includes(k));
+    if (isPositionOnly) {
+      loveBoardService.updateNotePosition(id, patch).catch((err) => console.error('Failed to persist note patch', err));
+    } else {
+      loveBoardService
+        .updateNote(id, patch)
+        .then((updated) => setNotes((prev) => prev.map((n) => (n.id === updated.id ? updated : n))))
+        .catch((err) => console.error('Failed to persist note patch', err));
+    }
+  }, []);
+
+  const applyPatch = useCallback(
+    (type, id, patch) => (type === 'sticker' ? applyStickerPatch(id, patch) : applyNotePatch(id, patch)),
+    [applyStickerPatch, applyNotePatch]
+  );
+
+  const handleUndo = useCallback(() => {
+    const entry = historyRef.current.past.pop();
+    if (!entry) return;
+    historyRef.current.future.push(entry);
+    applyPatch(entry.type, entry.id, entry.before);
+    syncHistoryFlags();
+  }, [applyPatch]);
+
+  const handleRedo = useCallback(() => {
+    const entry = historyRef.current.future.pop();
+    if (!entry) return;
+    historyRef.current.past.push(entry);
+    applyPatch(entry.type, entry.id, entry.after);
+    syncHistoryFlags();
+  }, [applyPatch]);
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      const tag = e.target?.tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || e.target?.isContentEditable) return;
+      const isUndo = (e.ctrlKey || e.metaKey) && !e.shiftKey && e.key.toLowerCase() === 'z';
+      const isRedo = (e.ctrlKey || e.metaKey) && (e.key.toLowerCase() === 'y' || (e.shiftKey && e.key.toLowerCase() === 'z'));
+      if (isUndo) {
+        e.preventDefault();
+        handleUndo();
+      } else if (isRedo) {
+        e.preventDefault();
+        handleRedo();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [handleUndo, handleRedo]);
+
+  const visibleNotes = useMemo(() => {
+    return notes.filter((n) => {
+      if (n.isArchived) return false;
+      if (favoritesOnly && !n.isFavorite) return false;
+      if (authorFilter && n.authorName !== authorFilter) return false;
+      if (moodFilter && n.mood !== moodFilter) return false;
+      if (paperFilter && n.paperImage !== paperFilter) return false;
+      if (query) {
+        const q = query.toLowerCase();
+        const haystack = `${n.title || ''} ${n.content || ''}`.toLowerCase();
+        if (!haystack.includes(q)) return false;
+      }
+      return true;
+    });
+  }, [notes, favoritesOnly, authorFilter, moodFilter, paperFilter, query]);
+
+  const archivedNotes = useMemo(() => notes.filter((n) => n.isArchived), [notes]);
+  const authorOptions = useMemo(
+    () => [...new Set(notes.map((n) => n.authorName).filter(Boolean))],
+    [notes]
+  );
+  const papersByFilename = useMemo(() => byFilename(assets.papers), [assets]);
+  const stickerImagesByFilename = useMemo(() => byFilename(assets.stickers), [assets]);
+
+  const layerItems = useMemo(() => {
+    const noteItems = notes
+      .filter((n) => !n.isArchived)
+      .map((n) => ({
+        id: n.id,
+        type: 'note',
+        zIndex: n.zIndex || 1,
+        label: n.title || 'Untitled letter',
+        thumbnail: papersByFilename[n.paperImage],
+      }));
+    const stickerItems = stickers.map((s) => ({
+      id: s.id,
+      type: 'sticker',
+      zIndex: s.zIndex || 1,
+      label: s.image.replace(/\.[^.]+$/, '').replace(/[-_]/g, ' '),
+      thumbnail: stickerImagesByFilename[s.image],
+      locked: s.isLocked,
+    }));
+    return [...noteItems, ...stickerItems].sort((a, b) => b.zIndex - a.zIndex);
+  }, [notes, stickers, papersByFilename, stickerImagesByFilename]);
+
+  /* ---------------------------------------------------------------
+     NOTES
+  --------------------------------------------------------------- */
+
+  const handleCreateNote = async (form) => {
+    try {
+      setCreating(true);
+      const { x, y } = randomBoardPosition();
+      const created = await loveBoardService.createNote({
+        ...form,
+        positionX: x,
+        positionY: y,
+        rotation: randomNoteRotation(),
+        zIndex: nextZIndex(),
+      });
+      setNotes((prev) => [...prev, created]);
+      setComposerOpen(false);
+    } catch (err) {
+      console.error('Failed to create note', err);
+    } finally {
+      setCreating(false);
+    }
+  };
+
+  const handleNoteDragEnd = (id, x, y) => {
+    const before = notes.find((n) => n.id === id);
+    if (before) {
+      pushHistory({
+        type: 'note',
+        id,
+        before: { positionX: before.positionX, positionY: before.positionY },
+        after: { positionX: x, positionY: y },
+      });
+    }
+    applyNotePatch(id, { positionX: x, positionY: y });
+  };
+
+  const handleBringNoteToFront = (id) => {
+    const before = notes.find((n) => n.id === id);
+    const z = nextZIndex();
+    setTopNoteId(id);
+    if (before) pushHistory({ type: 'note', id, before: { zIndex: before.zIndex }, after: { zIndex: z } });
+    applyNotePatch(id, { zIndex: z });
+  };
+
+  const handleSendNoteBackward = (id) => {
+    const before = notes.find((n) => n.id === id);
+    const z = prevZIndex();
+    if (before) pushHistory({ type: 'note', id, before: { zIndex: before.zIndex }, after: { zIndex: z } });
+    applyNotePatch(id, { zIndex: z });
+  };
+
+  const handleSaveNoteEdit = async (patch) => {
+    if (!readerNote) return;
+    try {
+      setReaderSaving(true);
+      const updated = await loveBoardService.updateNote(readerNote.id, patch);
+      setNotes((prev) => prev.map((n) => (n.id === updated.id ? updated : n)));
+    } catch (err) {
+      console.error('Failed to save note', err);
+    } finally {
+      setReaderSaving(false);
+    }
+  };
+
+  const handleToggleFavorite = () => {
+    if (!readerNote) return;
+    pushHistory({
+      type: 'note',
+      id: readerNote.id,
+      before: { isFavorite: readerNote.isFavorite },
+      after: { isFavorite: !readerNote.isFavorite },
+    });
+    applyNotePatch(readerNote.id, { isFavorite: !readerNote.isFavorite });
+  };
+
+  const handleToggleArchive = () => {
+    if (!readerNote) return;
+    pushHistory({
+      type: 'note',
+      id: readerNote.id,
+      before: { isArchived: readerNote.isArchived },
+      after: { isArchived: !readerNote.isArchived },
+    });
+    setNoteExitReasons((prev) => ({ ...prev, [readerNote.id]: 'archive' }));
+    applyNotePatch(readerNote.id, { isArchived: !readerNote.isArchived });
+    setReaderNoteId(null);
+  };
+
+  const handleRestoreFromArchive = async (note) => {
+    const updated = await loveBoardService.updateNote(note.id, { isArchived: false });
+    setNotes((prev) => prev.map((n) => (n.id === updated.id ? updated : n)));
+  };
+
+  const requestDeleteNote = (note) => {
+    setConfirmState({
+      title: 'Delete this letter?',
+      message: 'This letter will be taken off the board for good, love. This can’t be undone.',
+      confirmLabel: 'Delete Letter',
+      onConfirm: async () => {
+        setNoteExitReasons((prev) => ({ ...prev, [note.id]: 'delete' }));
+        await loveBoardService.deleteNote(note.id);
+        setNotes((prev) => prev.filter((n) => n.id !== note.id));
+        setReaderNoteId((current) => (current === note.id ? null : current));
+      },
+    });
+  };
+
+  /* ---------------------------------------------------------------
+     STICKERS
+  --------------------------------------------------------------- */
+
+  const handleAddSticker = async (filename) => {
+    try {
+      const { x, y } = randomBoardPosition();
+      const created = await loveBoardService.createSticker({
+        image: filename,
+        positionX: x,
+        positionY: y,
+        rotation: randomStickerRotation(),
+        scale: 1,
+        zIndex: nextZIndex(),
+      });
+      setStickers((prev) => [...prev, created]);
+    } catch (err) {
+      console.error('Failed to add sticker', err);
+    }
+  };
+
+  const handleStickerDragEnd = (id, x, y) => {
+    const before = stickers.find((s) => s.id === id);
+    if (before) {
+      pushHistory({
+        type: 'sticker',
+        id,
+        before: { positionX: before.positionX, positionY: before.positionY },
+        after: { positionX: x, positionY: y },
+      });
+    }
+    applyStickerPatch(id, { positionX: x, positionY: y });
+  };
+
+  const handleBringStickerToFront = (id) => {
+    const before = stickers.find((s) => s.id === id);
+    const z = nextZIndex();
+    if (before) pushHistory({ type: 'sticker', id, before: { zIndex: before.zIndex }, after: { zIndex: z } });
+    applyStickerPatch(id, { zIndex: z });
+  };
+
+  const handleSendStickerBackward = (id) => {
+    const before = stickers.find((s) => s.id === id);
+    const z = prevZIndex();
+    if (before) pushHistory({ type: 'sticker', id, before: { zIndex: before.zIndex }, after: { zIndex: z } });
+    applyStickerPatch(id, { zIndex: z });
+  };
+
+  // Live, per-tick updates while a resize/rotate handle is being dragged —
+  // deliberately NOT pushed to history here (that would flood the undo
+  // stack with one entry per pixel/degree). See
+  // handleStickerTransformStart/End below for the coalesced version.
+  const handleStickerChange = (id, patch) => {
+    setStickers((prev) => prev.map((s) => (s.id === id ? { ...s, ...patch } : s)));
+    clearTimeout(stickerDebounceRef.current[id]);
+    stickerDebounceRef.current[id] = setTimeout(() => {
+      loveBoardService.updateSticker(id, patch).catch((err) => console.error(err));
+    }, 250);
+  };
+
+  const handleStickerTransformStart = (id) => {
+    const current = stickers.find((s) => s.id === id);
+    if (current) transformSnapshotRef.current = { id, before: { scale: current.scale, rotation: current.rotation } };
+  };
+
+  const handleStickerTransformEnd = (id) => {
+    const snap = transformSnapshotRef.current;
+    transformSnapshotRef.current = null;
+    if (!snap || snap.id !== id) return;
+    const current = stickers.find((s) => s.id === id);
+    if (!current) return;
+    const after = { scale: current.scale, rotation: current.rotation };
+    if (after.scale !== snap.before.scale || after.rotation !== snap.before.rotation) {
+      pushHistory({ type: 'sticker', id, before: snap.before, after });
+    }
+  };
+
+  const handleDuplicateSticker = async (sticker) => {
+    const created = await loveBoardService.createSticker({
+      image: sticker.image,
+      positionX: sticker.positionX + 24,
+      positionY: sticker.positionY + 24,
+      rotation: sticker.rotation,
+      scale: sticker.scale,
+      zIndex: nextZIndex(),
+    });
+    setStickers((prev) => [...prev, created]);
+  };
+
+  const handleToggleStickerLock = (sticker) => {
+    pushHistory({
+      type: 'sticker',
+      id: sticker.id,
+      before: { isLocked: sticker.isLocked },
+      after: { isLocked: !sticker.isLocked },
+    });
+    applyStickerPatch(sticker.id, { isLocked: !sticker.isLocked });
+  };
+
+  const requestDeleteSticker = (sticker) => {
+    setConfirmState({
+      title: 'Remove this sticker?',
+      message: 'This little decoration will be peeled off the board.',
+      confirmLabel: 'Remove Sticker',
+      onConfirm: async () => {
+        setSelectedStickerId(null);
+        await loveBoardService.deleteSticker(sticker.id);
+        setStickers((prev) => prev.filter((s) => s.id !== sticker.id));
+      },
+    });
+  };
+
+  const closeConfirm = () => {
+    if (confirmBusy) return;
+    setConfirmState(null);
+  };
+
+  const handleConfirmAccept = async () => {
+    if (!confirmState) return;
+    try {
+      setConfirmBusy(true);
+      await confirmState.onConfirm();
+      setConfirmState(null);
+    } catch (err) {
+      console.error('Confirmed action failed', err);
+    } finally {
+      setConfirmBusy(false);
+    }
+  };
+
+  const handleToggleDecorateMode = () => {
+    setDecorateMode((prev) => {
+      const next = !prev;
+      setStickerLibraryOpen(next);
+      if (!next) setSelectedStickerId(null);
+      return next;
+    });
+  };
+
+  const handleSelectLayerItem = (item) => {
+    if (item.type === 'note') {
+      setReaderNoteId(item.id);
+    } else {
+      setDecorateMode(true);
+      setSelectedStickerId(item.id);
+    }
+  };
+
+  const handleLayerBringToFront = (item) => {
+    if (item.type === 'note') handleBringNoteToFront(item.id);
+    else handleBringStickerToFront(item.id);
+  };
+
+  const handleLayerSendBackward = (item) => {
+    if (item.type === 'note') handleSendNoteBackward(item.id);
+    else handleSendStickerBackward(item.id);
+  };
+
+  const clearFilters = () => {
+    setQuery('');
+    setAuthorFilter(null);
+    setMoodFilter(null);
+    setPaperFilter(null);
+  };
+
+  return (
+    <div className="fixed inset-0 flex flex-col bg-[#1c140c] font-sans text-[#3a2b1e]">
+      <header className="z-[110] flex items-center justify-between gap-2 overflow-x-auto bg-[#2c2016] px-3 py-3 text-[#f4ece0] shadow-md sm:gap-3 sm:px-5">
+        <button
+          type="button"
+          onClick={() => navigate('/home')}
+          className="appearance-none inline-flex shrink-0 items-center gap-1.5 rounded-full border-0 bg-white/10 px-2.5 py-1.5 text-sm transition hover:bg-white/20 active:scale-95 sm:px-3"
+        >
+          <ArrowLeft size={15} strokeWidth={2.25} />
+          <span className="hidden sm:inline">Sanctuary</span>
+        </button>
+
+        <h1 className="m-0 hidden shrink-0 font-caveat text-2xl md:block">Our Love Board</h1>
+
+        <div className="flex shrink-0 items-center gap-0.5 rounded-xl bg-black/20 p-1 sm:gap-1">
+          <HeaderIconButton label="Select" active={activeTool === 'select'} onClick={() => setActiveTool('select')}>
+            <MousePointer2 size={15} strokeWidth={2} />
+          </HeaderIconButton>
+          <HeaderIconButton label="Hand Tool" active={activeTool === 'hand'} onClick={() => setActiveTool('hand')}>
+            <Hand size={15} strokeWidth={2} />
+          </HeaderIconButton>
+
+          <div className="mx-0.5 h-5 w-px shrink-0 bg-white/15" />
+
+          <HeaderIconButton label="Undo (Ctrl+Z)" disabled={!canUndo} onClick={handleUndo}>
+            <Undo2 size={15} strokeWidth={2} />
+          </HeaderIconButton>
+          <HeaderIconButton label="Redo (Ctrl+Shift+Z)" disabled={!canRedo} onClick={handleRedo}>
+            <Redo2 size={15} strokeWidth={2} />
+          </HeaderIconButton>
+
+          <div className="mx-0.5 h-5 w-px shrink-0 bg-white/15" />
+
+          <HeaderIconButton label="Zoom out" onClick={() => boardRef.current?.zoomOut()}>
+            <ZoomOut size={15} strokeWidth={2} />
+          </HeaderIconButton>
+          <span className="w-8 shrink-0 text-center text-xs tabular-nums text-white/70 sm:w-10">{zoomPercent}%</span>
+          <HeaderIconButton label="Zoom in" onClick={() => boardRef.current?.zoomIn()}>
+            <ZoomIn size={15} strokeWidth={2} />
+          </HeaderIconButton>
+          <HeaderIconButton label="Reset View" onClick={() => boardRef.current?.resetView()}>
+            <RotateCcw size={15} strokeWidth={2} />
+          </HeaderIconButton>
+        </div>
+      </header>
+
+      <main className="relative flex-1 overflow-hidden">
+        {loading && (
+          <div className="absolute inset-0 z-[130] flex items-center justify-center bg-[#1c140c]/80 text-[#f4ece0]">
+            Loading your board…
+          </div>
+        )}
+        {error && (
+          <div className="absolute top-4 left-1/2 z-[130] -translate-x-1/2 rounded-lg bg-red-100 px-4 py-2 text-sm text-red-700 shadow">
+            {error}
+          </div>
+        )}
+
+        <CorkBoard
+          ref={boardRef}
+          notes={visibleNotes}
+          stickers={stickers}
+          assets={assets}
+          decorateMode={decorateMode}
+          activeTool={activeTool}
+          selectedStickerId={selectedStickerId}
+          onSelectSticker={setSelectedStickerId}
+          onOpenNote={(note) => setReaderNoteId(note.id)}
+          onNoteDragEnd={handleNoteDragEnd}
+          onBringNoteToFront={handleBringNoteToFront}
+          onStickerDragEnd={handleStickerDragEnd}
+          onBringStickerToFront={handleBringStickerToFront}
+          onSendStickerBackward={handleSendStickerBackward}
+          onStickerChange={handleStickerChange}
+          onStickerTransformStart={handleStickerTransformStart}
+          onStickerTransformEnd={handleStickerTransformEnd}
+          onDuplicateSticker={handleDuplicateSticker}
+          onToggleStickerLock={handleToggleStickerLock}
+          onDeleteSticker={requestDeleteSticker}
+          onZoomChange={setZoomPercent}
+          topNoteId={topNoteId}
+          noteExitReasons={noteExitReasons}
+        />
+
+        <SearchFilterPanel
+          open={searchOpen}
+          query={query}
+          onQueryChange={setQuery}
+          authorOptions={authorOptions}
+          authorFilter={authorFilter}
+          onAuthorFilterChange={setAuthorFilter}
+          moodFilter={moodFilter}
+          onMoodFilterChange={setMoodFilter}
+          paperOptions={assets.papers}
+          paperFilter={paperFilter}
+          onPaperFilterChange={setPaperFilter}
+          onClear={clearFilters}
+        />
+
+        <StickerLibrary
+          open={stickerLibraryOpen}
+          stickers={assets.stickers}
+          onAdd={handleAddSticker}
+          onClose={() => setStickerLibraryOpen(false)}
+        />
+
+        <ArchiveDrawer
+          open={archiveOpen}
+          notes={archivedNotes}
+          papers={papersByFilename}
+          onClose={() => setArchiveOpen(false)}
+          onRestore={handleRestoreFromArchive}
+          onDelete={requestDeleteNote}
+        />
+
+        <LayerPanel
+          open={layersOpen}
+          items={layerItems}
+          onClose={() => setLayersOpen(false)}
+          onSelect={handleSelectLayerItem}
+          onBringToFront={handleLayerBringToFront}
+          onSendBackward={handleLayerSendBackward}
+        />
+
+        <BoardToolbar
+          onWriteLetter={() => setComposerOpen(true)}
+          stickerLibraryOpen={stickerLibraryOpen}
+          onToggleStickerLibrary={() => {
+            setLayersOpen(false);
+            setStickerLibraryOpen((v) => !v);
+          }}
+          searchOpen={searchOpen}
+          onToggleSearch={() => setSearchOpen((v) => !v)}
+          favoritesOnly={favoritesOnly}
+          onToggleFavorites={() => setFavoritesOnly((v) => !v)}
+          onOpenArchive={() => setArchiveOpen(true)}
+          layersOpen={layersOpen}
+          onToggleLayers={() => {
+            setStickerLibraryOpen(false);
+            setLayersOpen((v) => !v);
+          }}
+          decorateMode={decorateMode}
+          onToggleDecorateMode={handleToggleDecorateMode}
+        />
+      </main>
+
+      <AnimatePresence>
+        {composerOpen && (
+          <NoteComposerModal
+            assets={assets}
+            creating={creating}
+            onClose={() => setComposerOpen(false)}
+            onCreate={handleCreateNote}
+          />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {readerNote && (
+          <NoteReaderModal
+            note={readerNote}
+            assets={assets}
+            saving={readerSaving}
+            onClose={() => setReaderNoteId(null)}
+            onSave={handleSaveNoteEdit}
+            onToggleFavorite={handleToggleFavorite}
+            onToggleArchive={handleToggleArchive}
+            onDelete={() => requestDeleteNote(readerNote)}
+          />
+        )}
+      </AnimatePresence>
+
+      <ConfirmDialog
+        open={!!confirmState}
+        title={confirmState?.title}
+        message={confirmState?.message}
+        confirmLabel={confirmState?.confirmLabel}
+        busy={confirmBusy}
+        onConfirm={handleConfirmAccept}
+        onClose={closeConfirm}
+      />
+    </div>
+  );
+}
+
+function HeaderIconButton({ children, label, active, disabled, onClick }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      title={label}
+      aria-label={label}
+      className={`appearance-none rounded-lg border-0 p-1.5 transition active:scale-90 disabled:cursor-not-allowed disabled:opacity-30 disabled:active:scale-100 ${
+        active ? 'bg-[#a8391f] text-white' : 'bg-transparent text-white/80 hover:bg-white/10 hover:text-white disabled:hover:bg-transparent'
+      }`}
+    >
+      {children}
+    </button>
+  );
+}
