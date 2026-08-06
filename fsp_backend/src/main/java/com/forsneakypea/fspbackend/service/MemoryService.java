@@ -1,6 +1,8 @@
 package com.forsneakypea.fspbackend.service;
 
 
+import com.forsneakypea.fspbackend.dto.CalendarConflictDTO;
+import com.forsneakypea.fspbackend.dto.CalendarEntryDTO;
 import com.forsneakypea.fspbackend.dto.FolderDTO;
 import com.forsneakypea.fspbackend.dto.FolderRequestDTO;
 import com.forsneakypea.fspbackend.dto.PhotoDTO;
@@ -8,13 +10,16 @@ import com.forsneakypea.fspbackend.entity.MemoryFolder;
 import com.forsneakypea.fspbackend.entity.MemoryPhoto;
 import com.forsneakypea.fspbackend.entity.NotificationType;
 import com.forsneakypea.fspbackend.entity.RelatedEntityType;
+import com.forsneakypea.fspbackend.exception.CalendarConflictException;
 import com.forsneakypea.fspbackend.repository.MemoryFolderRepository;
 import com.forsneakypea.fspbackend.repository.MemoryPhotoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -53,7 +58,11 @@ public class MemoryService {
                 .coverImageUrl(request.getCoverImageUrl())
                 .createdBy(userId)
                 .isArchived(false)
+                .eventDate(request.getEventDate())
+                .isCalendarHighlight(request.getIsCalendarHighlight() != null ? request.getIsCalendarHighlight() : false)
                 .build();
+        // A brand-new folder never has photos yet, so highlightPhotoId stays null —
+        // no calendar conflict is possible at creation time.
 
         folder = folderRepository.save(folder);
         activityLogService.log(userId, "MEMORY_FOLDER_CREATED", RelatedEntityType.MEMORY_FOLDER, folder.getId());
@@ -64,7 +73,7 @@ public class MemoryService {
     }
 
     @Transactional
-    public FolderDTO updateFolder(UUID id, FolderRequestDTO.CreateOrUpdateFolder request, Long userId) {
+    public FolderDTO updateFolder(UUID id, FolderRequestDTO.CreateOrUpdateFolder request, boolean force, Long userId) {
         MemoryFolder folder = folderRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Folder not found"));
 
@@ -74,6 +83,19 @@ public class MemoryService {
         if (request.getIconStyle() != null) folder.setIconStyle(request.getIconStyle());
         if (request.getCoverImageUrl() != null) folder.setCoverImageUrl(request.getCoverImageUrl());
         if (request.getIsArchived() != null) folder.setIsArchived(request.getIsArchived());
+        folder.setEventDate(request.getEventDate());
+
+        boolean wantsCalendarHighlight = request.getIsCalendarHighlight() != null
+                ? request.getIsCalendarHighlight()
+                : Boolean.TRUE.equals(folder.getIsCalendarHighlight());
+        folder.setIsCalendarHighlight(wantsCalendarHighlight);
+
+        if (!wantsCalendarHighlight) {
+            // Toggled off — remove the highlight from the calendar entirely.
+            folder.setHighlightPhotoId(null);
+        } else if (folder.getHighlightPhotoId() != null && folder.getEventDate() != null) {
+            checkCalendarConflict(folder.getEventDate(), folder.getId(), force);
+        }
 
         folder = folderRepository.save(folder);
         activityLogService.log(userId, "MEMORY_FOLDER_UPDATED", RelatedEntityType.MEMORY_FOLDER, folder.getId());
@@ -81,6 +103,119 @@ public class MemoryService {
                 RelatedEntityType.MEMORY_FOLDER, folder.getId());
 
         return mapFolderToDTO(folder);
+    }
+
+    // Looks for another folder already highlighting the same day. If found and
+    // `force` is false, throws so the caller can offer a Replace/Keep choice; if
+    // `force` is true, silently un-highlights the other folder instead.
+    private void checkCalendarConflict(LocalDate eventDate, UUID excludeFolderId, boolean force) {
+        Optional<MemoryFolder> conflict = folderRepository
+                .findByEventDateAndIsCalendarHighlightTrueAndHighlightPhotoIdIsNotNullAndIdNot(eventDate, excludeFolderId);
+        if (conflict.isEmpty()) return;
+
+        MemoryFolder other = conflict.get();
+        if (!force) {
+            String photoUrl = photoRepository.findById(other.getHighlightPhotoId())
+                    .map(MemoryPhoto::getPhotoUrl)
+                    .orElse(null);
+            throw new CalendarConflictException(
+                    "This day already has a highlighted memory.",
+                    CalendarConflictDTO.builder()
+                            .conflictingFolderId(other.getId())
+                            .conflictingFolderName(other.getName())
+                            .conflictingHighlightPhotoUrl(photoUrl)
+                            .eventDate(eventDate)
+                            .build());
+        }
+
+        other.setHighlightPhotoId(null);
+        folderRepository.save(other);
+    }
+
+    @Transactional
+    public FolderDTO setCalendarHighlight(UUID folderId, UUID photoId, boolean force, Long userId) {
+        MemoryFolder folder = folderRepository.findById(folderId)
+                .orElseThrow(() -> new RuntimeException("Folder not found"));
+        MemoryPhoto photo = photoRepository.findById(photoId)
+                .orElseThrow(() -> new RuntimeException("Photo not found"));
+
+        if (!photo.getFolder().getId().equals(folderId)) {
+            throw new IllegalArgumentException("That photo doesn't belong to this album.");
+        }
+        if (!Boolean.TRUE.equals(folder.getIsCalendarHighlight()) || folder.getEventDate() == null) {
+            throw new IllegalArgumentException("Set a date and enable Calendar Dump for this album first.");
+        }
+
+        checkCalendarConflict(folder.getEventDate(), folder.getId(), force);
+
+        // A newly-chosen photo starts centered — any saved crop position was
+        // for the previous photo and wouldn't mean anything on this one.
+        boolean photoChanged = !photoId.equals(folder.getHighlightPhotoId());
+        folder.setHighlightPhotoId(photoId);
+        if (photoChanged) {
+            folder.setHighlightPhotoPositionX(50.0);
+            folder.setHighlightPhotoPositionY(50.0);
+        }
+        folder = folderRepository.save(folder);
+
+        activityLogService.log(userId, "MEMORY_FOLDER_UPDATED", RelatedEntityType.MEMORY_FOLDER, folder.getId());
+        return mapFolderToDTO(folder);
+    }
+
+    @Transactional
+    public FolderDTO clearCalendarHighlight(UUID folderId, Long userId) {
+        MemoryFolder folder = folderRepository.findById(folderId)
+                .orElseThrow(() -> new RuntimeException("Folder not found"));
+        folder.setHighlightPhotoId(null);
+        folder.setHighlightPhotoPositionX(50.0);
+        folder.setHighlightPhotoPositionY(50.0);
+        folder = folderRepository.save(folder);
+        activityLogService.log(userId, "MEMORY_FOLDER_UPDATED", RelatedEntityType.MEMORY_FOLDER, folder.getId());
+        return mapFolderToDTO(folder);
+    }
+
+    @Transactional
+    public FolderDTO updateHighlightPosition(UUID folderId, double positionX, double positionY, Long userId) {
+        MemoryFolder folder = folderRepository.findById(folderId)
+                .orElseThrow(() -> new RuntimeException("Folder not found"));
+        if (folder.getHighlightPhotoId() == null) {
+            throw new IllegalArgumentException("This album has no calendar highlight to reposition.");
+        }
+
+        folder.setHighlightPhotoPositionX(clampPercent(positionX));
+        folder.setHighlightPhotoPositionY(clampPercent(positionY));
+        folder = folderRepository.save(folder);
+
+        activityLogService.log(userId, "MEMORY_FOLDER_UPDATED", RelatedEntityType.MEMORY_FOLDER, folder.getId());
+        return mapFolderToDTO(folder);
+    }
+
+    private double clampPercent(double value) {
+        return Math.max(0, Math.min(100, value));
+    }
+
+    @Transactional(readOnly = true)
+    public List<CalendarEntryDTO> getCalendarEntries(int year, int month) {
+        LocalDate start = LocalDate.of(year, month, 1);
+        LocalDate end = start.withDayOfMonth(start.lengthOfMonth());
+
+        List<MemoryFolder> folders = folderRepository
+                .findByEventDateBetweenAndIsCalendarHighlightTrueAndHighlightPhotoIdIsNotNull(start, end);
+
+        return folders.stream().map(folder -> {
+            String photoUrl = photoRepository.findById(folder.getHighlightPhotoId())
+                    .map(MemoryPhoto::getPhotoUrl)
+                    .orElse(null);
+            return CalendarEntryDTO.builder()
+                    .folderId(folder.getId())
+                    .folderName(folder.getName())
+                    .description(folder.getDescription())
+                    .eventDate(folder.getEventDate())
+                    .highlightPhotoUrl(photoUrl)
+                    .highlightPhotoPositionX(folder.getHighlightPhotoPositionX())
+                    .highlightPhotoPositionY(folder.getHighlightPhotoPositionY())
+                    .build();
+        }).collect(Collectors.toList());
     }
 
     @Transactional
@@ -136,6 +271,15 @@ public class MemoryService {
 
     @Transactional
     public void deletePhoto(UUID photoId, Long userId) {
+        MemoryPhoto photo = photoRepository.findById(photoId)
+                .orElseThrow(() -> new RuntimeException("Photo not found"));
+
+        MemoryFolder folder = photo.getFolder();
+        if (folder != null && photoId.equals(folder.getHighlightPhotoId())) {
+            folder.setHighlightPhotoId(null);
+            folderRepository.save(folder);
+        }
+
         photoRepository.deleteById(photoId);
         activityLogService.log(userId, "MEMORY_PHOTO_DELETED", RelatedEntityType.MEMORY_PHOTO, photoId);
     }
@@ -158,7 +302,12 @@ public class MemoryService {
                 .isArchived(folder.getIsArchived())
                 .photoCount(folder.getPhotos() != null ? folder.getPhotos().size() : 0)
                 .createdAt(folder.getCreatedAt())
-                .photos(folder.getPhotos() != null ? 
+                .eventDate(folder.getEventDate())
+                .isCalendarHighlight(folder.getIsCalendarHighlight())
+                .highlightPhotoId(folder.getHighlightPhotoId())
+                .highlightPhotoPositionX(folder.getHighlightPhotoPositionX())
+                .highlightPhotoPositionY(folder.getHighlightPhotoPositionY())
+                .photos(folder.getPhotos() != null ?
                         folder.getPhotos().stream().map(this::mapPhotoToDTO).collect(Collectors.toList()) : List.of())
                 .build();
     }

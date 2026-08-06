@@ -1,14 +1,15 @@
 .toastContainer {
   position: fixed;
-  bottom: var(--space-xl);
-  right: var(--space-xl);
-  z-index: var(--z-toast);
+  bottom: 2rem;
+  right: 2rem;
+  z-index: 1400;
   display: flex;
   flex-direction: column;
-  gap: var(--space-xs);
+  gap: 0.5rem;
   max-width: 380px;
-  width: calc(100vw - var(--space-xl) * 2);
+  width: calc(100vw - 4rem);
   pointer-events: none;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 .toast {
@@ -16,38 +17,48 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--space-md) var(--space-lg);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-md);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
+  padding: 1rem 1.25rem;
+  border-radius: var(--radius-button, 14px);
+  box-shadow: 0 4px 12px rgba(31, 31, 31, 0.06), 0 20px 45px rgba(31, 31, 31, 0.14);
+  font-size: 0.9rem;
+  font-weight: 500;
   border: 1px solid transparent;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 
 .info {
-  background-color: var(--color-cream-surface);
-  color: var(--color-text-main);
-  border-color: var(--color-gold-primary);
+  background-color: rgba(255, 255, 255, 0.95);
+  color: var(--color-text-primary, #1F1F1F);
+  border-color: var(--color-border, #E7E7E7);
 }
 
 .success {
   background-color: #E8F5E9;
-  color: var(--color-success);
+  color: #2E7D32;
   border-color: #A5D6A7;
 }
 
 .error {
   background-color: #FFEBEE;
-  color: var(--color-error);
+  color: #C62828;
   border-color: #EF9A9A;
 }
 
 .gold {
-  background-color: var(--color-burgundy-primary);
-  color: var(--color-gold-light);
-  border-color: var(--color-gold-primary);
+  background-color: var(--color-burgundy-primary, #8C230F);
+  color: var(--color-warm-cream, #E8D7BC);
+  border-color: var(--color-golden-ochre, #A88A2B);
 }
 
 .message { flex: 1; }
-.dismissBtn { margin-left: var(--space-sm); opacity: 0.7; }
+.dismissBtn { margin-left: 0.75rem; opacity: 0.7; background: transparent; border: none; cursor: pointer; color: inherit; }
 .dismissBtn:hover { opacity: 1; }
+
+@media (max-width: 480px) {
+  .toastContainer {
+    bottom: 1rem;
+    right: 1rem;
+    width: calc(100vw - 2rem);
+  }
+}

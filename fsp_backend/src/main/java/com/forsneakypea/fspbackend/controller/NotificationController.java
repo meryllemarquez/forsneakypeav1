@@ -15,7 +15,6 @@ import java.util.UUID;
 @RestController
 @RequestMapping({"/api/notifications", "/api/v1/notifications"})
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 @PreAuthorize("isAuthenticated()")
 public class NotificationController {
 

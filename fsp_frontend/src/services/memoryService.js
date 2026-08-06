@@ -20,8 +20,8 @@ export const memoryService = {
   },
 
   // PUT /api/memories/folders/{id}
-  updateFolder: async (id, folderData) => {
-    const res = await api.put(`/memories/folders/${id}`, folderData);
+  updateFolder: async (id, folderData, force = false) => {
+    const res = await api.put(`/memories/folders/${id}?force=${force}`, folderData);
     return res.data;
   },
 
@@ -50,6 +50,30 @@ export const memoryService = {
   // GET /api/memories/photos/favorites
   getFavorites: async () => {
     const res = await api.get('/memories/photos/favorites');
+    return res.data;
+  },
+
+  // GET /api/memories/calendar?year=&month=
+  getCalendarMonth: async (year, month) => {
+    const res = await api.get(`/memories/calendar?year=${year}&month=${month}`);
+    return res.data;
+  },
+
+  // POST /api/memories/folders/{folderId}/calendar-highlight/{photoId}
+  setCalendarHighlight: async (folderId, photoId, force = false) => {
+    const res = await api.post(`/memories/folders/${folderId}/calendar-highlight/${photoId}?force=${force}`);
+    return res.data;
+  },
+
+  // DELETE /api/memories/folders/{folderId}/calendar-highlight
+  clearCalendarHighlight: async (folderId) => {
+    const res = await api.delete(`/memories/folders/${folderId}/calendar-highlight`);
+    return res.data;
+  },
+
+  // PATCH /api/memories/folders/{folderId}/calendar-highlight/position
+  updateHighlightPosition: async (folderId, positionX, positionY) => {
+    const res = await api.patch(`/memories/folders/${folderId}/calendar-highlight/position`, { positionX, positionY });
     return res.data;
   }
 };

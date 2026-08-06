@@ -70,6 +70,11 @@ public class AuthServiceImpl implements AuthService {
                 .username(user.getUsername())
                 .name(user.getName())
                 .role(userRole)
+                .nickname(user.getNickname())
+                .bio(user.getBio())
+                .favoriteEmoji(user.getFavoriteEmoji())
+                .accentColor(user.getAccentColor())
+                .avatarUrl(user.getAvatarUrl())
                 .build();
     }
 
@@ -114,6 +119,11 @@ public class AuthServiceImpl implements AuthService {
                 .username(user.getUsername())
                 .name(user.getName())
                 .role(userRole)
+                .nickname(user.getNickname())
+                .bio(user.getBio())
+                .favoriteEmoji(user.getFavoriteEmoji())
+                .accentColor(user.getAccentColor())
+                .avatarUrl(user.getAvatarUrl())
                 .build();
     }
 }

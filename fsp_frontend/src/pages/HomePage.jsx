@@ -1,334 +1,316 @@
-import { useState, useMemo } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth } from '../hooks/useAuth';
-import NotificationBell from '../components/notifications/NotificationBell';
+import { memoryService } from '../services/memoryService';
+import { dateService } from '../services/dateService';
+import { loveBoardService } from '../services/loveBoardService';
+import { getDaysTogether, ANNIVERSARY_LABEL } from '../constants/relationship';
+import Navbar from '../components/layout/Navbar/Navbar';
+import Footer from '../components/layout/Footer/Footer';
 import styles from './HomePage.module.css';
 
-// Minimal Outline Icons (React Icon / Lucide standard)
-const CalendarIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-    <line x1="16" y1="2" x2="16" y2="6"></line>
-    <line x1="8" y1="2" x2="8" y2="6"></line>
-    <line x1="3" y1="10" x2="21" y2="10"></line>
-  </svg>
-);
-
 const HeartOutlineIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M12 21s-7.2-4.6-10-9.3C.6 8.4 2 4.8 5.3 4.1c2-.4 3.9.5 5 2.2 1.1-1.7 3-2.6 5-2.2 3.3.7 4.7 4.3 3.3 7.6C19.2 16.4 12 21 12 21z"></path>
   </svg>
 );
 
-const ShieldAdminIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+const SparkleIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round">
+    <path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M18 6l-2.5 2.5M8.5 15.5 6 18" />
   </svg>
 );
 
-const LogOutIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-    <polyline points="16 17 21 12 16 7"></polyline>
-    <line x1="21" y1="12" x2="9" y2="12"></line>
+const FlowerIcon = () => (
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M12 12c0-3 -2-5-2-7a2 2 0 1 1 4 0c0 2-2 4-2 7zm0 0c3 0 5-2 7-2a2 2 0 1 1 0 4c-2 0-4-2-7-2zm0 0c0 3 2 5 2 7a2 2 0 1 1-4 0c0-2 2-4 2-7zm0 0c-3 0-5 2-7 2a2 2 0 1 1 0-4c2 0 4 2 7 2z" />
+    <circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none" />
   </svg>
 );
 
-const MapPinIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-    <circle cx="12" cy="10" r="3"></circle>
+const ArrowRightIcon = () => (
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M5 12h14M13 6l6 6-6 6" />
   </svg>
 );
 
 const ArrowUpRightIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <line x1="7" y1="17" x2="17" y2="7"></line>
     <polyline points="7 7 17 7 17 17"></polyline>
   </svg>
 );
 
+const COLLAGE_GRADIENTS = [
+  'linear-gradient(150deg, var(--color-blush, #F4A9B8), #f6cbd2)',
+  'linear-gradient(150deg, var(--color-sage, #8FAE7D), #d9e6cf)',
+  'linear-gradient(150deg, #f0d8b8, var(--color-blush, #F4A9B8))',
+];
+
+function formatDate(dateStr) {
+  if (!dateStr) return '';
+  const d = new Date(dateStr);
+  if (Number.isNaN(d.getTime())) return dateStr;
+  return d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+}
+
+function formatMonthDay(dateStr) {
+  if (!dateStr) return { mo: '', day: '' };
+  const d = new Date(dateStr);
+  if (Number.isNaN(d.getTime())) return { mo: '', day: '' };
+  return {
+    mo: d.toLocaleDateString('en-US', { month: 'short' }),
+    day: String(d.getDate()).padStart(2, '0'),
+  };
+}
+
 export default function HomePage() {
-  const { user, logout } = useAuth();
-  const navigate = useNavigate(); // Used for client-side routing (/memories, /admin, etc.)
-  const [activeTab, setActiveTab] = useState('overview');
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const daysTogether = getDaysTogether();
 
-  // Dynamically calculate days together since Anniversary: January 28, 2024
-  const daysTogether = useMemo(() => {
-    const startDate = Date.UTC(2024, 0, 28);
-    const now = new Date();
-    const todayDate = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
-    const diffInMs = todayDate - startDate;
-    const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
-    return Math.max(0, diffInDays);
+  const [featuredFolders, setFeaturedFolders] = useState([]);
+  const [upcomingDates, setUpcomingDates] = useState([]);
+  const [latestNote, setLatestNote] = useState(null);
+  const [loadingContent, setLoadingContent] = useState(true);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadHomeContent = async () => {
+      const [foldersResult, datesResult, notesResult] = await Promise.allSettled([
+        memoryService.getFolders(false),
+        dateService.getDates({ includeArchived: false }),
+        loveBoardService.getNotes(),
+      ]);
+
+      if (!isMounted) return;
+
+      if (foldersResult.status === 'fulfilled') {
+        setFeaturedFolders((foldersResult.value || []).slice(0, 3));
+      }
+
+      if (datesResult.status === 'fulfilled') {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const upcoming = (datesResult.value || [])
+          .filter((d) => d.plannedDate && new Date(d.plannedDate) >= today)
+          .sort((a, b) => new Date(a.plannedDate) - new Date(b.plannedDate))
+          .slice(0, 2);
+        setUpcomingDates(upcoming);
+      }
+
+      if (notesResult.status === 'fulfilled') {
+        const notes = Array.isArray(notesResult.value) ? notesResult.value : [];
+        const visible = notes
+          .filter((n) => !n.isArchived)
+          .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        setLatestNote(visible[0] || null);
+      }
+
+      setLoadingContent(false);
+    };
+
+    loadHomeContent();
+    return () => {
+      isMounted = false;
+    };
   }, []);
-
-  // Framer Motion Stagger Animation Variants
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1,
-        delayChildren: 0.1,
-      },
-    },
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 16 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.45, ease: [0.16, 1, 0.3, 1] },
-    },
-  };
-
-  // Mock Data (Ready to connect to API)
-  const featuredMemories = [
-    {
-      id: 1,
-      title: "Sunset by the Harbor",
-      date: "October 14, 2025",
-      category: "Travel",
-      image: "/landingbg.png",
-      caption: "A golden afternoon spent watching the quiet tide together."
-    },
-    {
-      id: 2,
-      title: "Late Night Coffee & Conversations",
-      date: "December 02, 2025",
-      category: "Date Night",
-      image: "/landingbg.png",
-      caption: "Endless laughter, hot chocolate, and quiet plans for tomorrow."
-    }
-  ];
-
-  const upcomingDates = [
-    {
-      id: 1,
-      title: "Pottery & Coffee Workshop",
-      date: "August 15, 2026",
-      time: "2:00 PM",
-      location: "Quezon City",
-      status: "Confirmed"
-    },
-    {
-      id: 2,
-      title: "Weekend Seaside Getaway",
-      date: "September 02, 2026",
-      time: "All Day",
-      location: "Batangas",
-      status: "Planning"
-    }
-  ];
 
   return (
     <div className={styles.pageContainer}>
-      {/* 1. EDITORIAL HEADER / NAVBAR */}
-      <header className={styles.navbar}>
-        <div className={styles.navLeft}>
-          <span className={styles.navBrand}>FOR SNEAKYPEA</span>
-          <span className={styles.navDivider}>/</span>
-          <span className={styles.navSubBrand}>Merylle & Cj</span>
-        </div>
+      <Navbar />
 
-        <div className={styles.navRight}>
-          {user?.role === 'ROLE_ADMIN' && (
-            <button
-              className={styles.adminBtn}
-              onClick={() => navigate('/admin')}
-            >
-              <ShieldAdminIcon />
-              <span>Admin Panel</span>
-            </button>
-          )}
+      <main>
+        {/* HERO */}
+        <section className={styles.hero}>
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}>
+            <span className={styles.heroBadge}>
+              <HeartOutlineIcon />
+              {ANNIVERSARY_LABEL} — day {daysTogether}
+            </span>
 
-          <NotificationBell />
+            <h1 className={styles.heroHeading}>
+              A quiet little<br /><span className={styles.emphasis}>archive of us.</span>
+            </h1>
 
-          <div className={styles.userProfilePill}>
-            <span className={styles.statusDot}></span>
-            <span className={styles.userName}>{user?.name || user?.username || 'User'}</span>
-          </div>
+            <p className={styles.heroSubtext}>
+              Every memory, plan, and love note {user?.name ? `${user.name} and ` : ''}the two of you have kept — folded into one gentle place that only you can open.
+            </p>
 
-          <button className={styles.logoutIconBtn} onClick={logout} title="Sign Out">
-            <LogOutIcon />
-          </button>
-        </div>
-      </header>
-
-      {/* 2. MAIN EDITORIAL DASHBOARD */}
-      <main className={styles.contentWrapper}>
-        
-        {/* HERO SECTION */}
-        <motion.section 
-          className={styles.heroSection}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-        >
-          <div className={styles.heroBadge}>
-            <HeartOutlineIcon />
-            <span>{daysTogether} Days Together</span>
-          </div>
-
-          <h1 className={styles.heroHeading}>
-            Our Private Sanctuary
-          </h1>
-
-          <p className={styles.heroSubtext}>
-            A quiet digital archive dedicated to the moments, plans, and memories shared between Merylle and Cj.
-          </p>
-
-          {/* EDITORIAL NAVIGATION TABS */}
-          <div className={styles.tabContainer}>
-            <button 
-              className={`${styles.tabBtn} ${activeTab === 'overview' ? styles.tabActive : ''}`}
-              onClick={() => setActiveTab('overview')}
-            >
-              Overview
-            </button>
-
-            {/* ✅ UPDATED: Navigates directly to the full Memories Page (/memories) */}
-            <button 
-              className={`${styles.tabBtn} ${activeTab === 'memories' ? styles.tabActive : ''}`}
-              onClick={() => navigate('/memories')}
-            >
-              Memories
-            </button>
-
-            <button
-              className={`${styles.tabBtn} ${activeTab === 'dates' ? styles.tabActive : ''}`}
-              onClick={() => navigate('/dates')}
-            >
-              Upcoming Dates
-            </button>
-
-            <button
-              className={`${styles.tabBtn} ${activeTab === 'letters' ? styles.tabActive : ''}`}
-              onClick={() => navigate('/letters')}
-            >
-              Love Letters
-            </button>
-          </div>
-        </motion.section>
-
-        {/* 3. DASHBOARD GRID CONTENT */}
-        <motion.div 
-          className={styles.dashboardGrid}
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-        >
-          {/* DAILY LOVE NOTE CARD */}
-          <motion.div className={styles.dailyNoteCard} variants={itemVariants}>
-            <div className={styles.cardMetaHeader}>
-              <span className={styles.sectionLabel}>DAILY NOTE</span>
-              <span className={styles.dateLabel}>July 27, 2026</span>
-            </div>
-            
-            <blockquote className={styles.quoteText}>
-              "I loved you yesterday, I love you still, I always have, I always will."
-            </blockquote>
-            
-            <div className={styles.quoteFooter}>
-              <span className={styles.quoteAuthor}>— Written by Cj</span>
-              <span className={styles.locationTag}>
-                <MapPinIcon /> Manila
-              </span>
+            <div className={styles.ctaRow}>
+              <button className={styles.primaryPillBtn} onClick={() => navigate('/memories')}>
+                Browse memories
+                <ArrowRightIcon />
+              </button>
+              <button className={styles.ghostPillBtn} onClick={() => navigate('/dates')}>
+                Plan a date
+              </button>
             </div>
           </motion.div>
 
-          {/* TWO-COLUMN GRID: MEMORIES + UPCOMING DATES */}
-          <div className={styles.splitGrid}>
-            
-            {/* FEATURED MEMORIES SECTION */}
-            <motion.section className={styles.sectionBlock} variants={itemVariants}>
-              <div className={styles.sectionHeader}>
-                <div>
-                  <h2 className={styles.sectionTitle}>Featured Memories</h2>
-                  <p className={styles.sectionSubtitle}>Captured moments from our journey together.</p>
-                </div>
+          <motion.div
+            className={styles.collage}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
+          >
+            {(featuredFolders.length > 0
+              ? featuredFolders.slice(0, 3)
+              : [{ id: 'p1', name: 'Your memories' }, { id: 'p2', name: 'will appear' }, { id: 'p3', name: 'right here' }]
+            ).map((folder, i) => (
+              <motion.div key={folder.id} className={`${styles.polaroid} ${styles[`p${i + 1}`]}`} whileHover={{ y: -6, rotate: 0 }}>
+                <div
+                  className={styles.polaroidFrame}
+                  style={{ background: folder.coverImageUrl ? `url(${folder.coverImageUrl}) center/cover` : COLLAGE_GRADIENTS[i % 3] }}
+                />
+                <div className={styles.polaroidCaption}>{folder.name}</div>
+              </motion.div>
+            ))}
+          </motion.div>
+        </section>
 
-                {/* ✅ UPDATED: Navigates directly to the full Memories Page (/memories) */}
-                <button 
-                  className={styles.inlineLinkBtn}
-                  onClick={() => navigate('/memories')}
-                >
-                  <span>View All</span>
-                  <ArrowUpRightIcon />
-                </button>
-              </div>
+        <div className={styles.divider}>
+          <span className={styles.dividerLine} />
+          <FlowerIcon />
+          <span className={styles.dividerLine} />
+        </div>
 
-              <div className={styles.memoriesGrid}>
-                {featuredMemories.map((memory) => (
-                  <motion.div 
-                    key={memory.id} 
-                    className={styles.memoryCard}
-                    whileHover={{ y: -3 }}
-                    transition={{ duration: 0.25 }}
-                    onClick={() => navigate('/memories')} // ✅ Card click also routes to /memories
-                    style={{ cursor: 'pointer' }}
-                  >
-                    <div className={styles.memoryImageWrapper}>
-                      <img src={memory.image} alt={memory.title} className={styles.memoryImage} />
-                      <span className={styles.categoryBadge}>{memory.category}</span>
-                    </div>
-                    <div className={styles.memoryBody}>
-                      <span className={styles.memoryDate}>{memory.date}</span>
-                      <h3 className={styles.memoryTitle}>{memory.title}</h3>
-                      <p className={styles.memoryCaption}>{memory.caption}</p>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-            </motion.section>
-
-            {/* UPCOMING DATES SECTION */}
-            <motion.section className={styles.sectionBlock} variants={itemVariants}>
-              <div className={styles.sectionHeader}>
-                <div>
-                  <h2 className={styles.sectionTitle}>Upcoming Plans</h2>
-                  <p className={styles.sectionSubtitle}>Dates and activities we are looking forward to.</p>
-                </div>
-                <button className={styles.inlineLinkBtn} onClick={() => navigate('/dates')}>
-                  <span>Calendar</span>
-                  <ArrowUpRightIcon />
-                </button>
-              </div>
-
-              <div className={styles.datesList}>
-                {upcomingDates.map((item) => (
-                  <motion.div
-                    key={item.id}
-                    className={styles.dateCard}
-                    whileHover={{ x: 3 }}
-                    transition={{ duration: 0.2 }}
-                    onClick={() => navigate('/dates')}
-                    style={{ cursor: 'pointer' }}
-                  >
-                    <div className={styles.dateIconBox}>
-                      <CalendarIcon />
-                    </div>
-                    <div className={styles.dateDetails}>
-                      <h4 className={styles.dateTitle}>{item.title}</h4>
-                      <p className={styles.dateMeta}>
-                        {item.date} • {item.time} • {item.location}
-                      </p>
-                    </div>
-                    <span className={item.status === 'Confirmed' ? styles.statusConfirmed : styles.statusPlanning}>
-                      {item.status}
-                    </span>
-                  </motion.div>
-                ))}
-              </div>
-            </motion.section>
-
+        {/* FEATURED MEMORIES */}
+        <section className={styles.section}>
+          <div className={styles.sectionHead}>
+            <div>
+              <span className={styles.eyebrow}>Recently added</span>
+              <h2 className={styles.sectionTitle}>Featured memories</h2>
+            </div>
+            <button className={styles.sectionLink} onClick={() => navigate('/memories')}>
+              View all
+              <ArrowUpRightIcon />
+            </button>
           </div>
 
-        </motion.div>
+          {loadingContent ? (
+            <p className={styles.mutedNote}>Loading your memories…</p>
+          ) : featuredFolders.length === 0 ? (
+            <div className={styles.emptyCard}>
+              <p>No albums yet — start your first one.</p>
+              <button className={styles.primaryPillBtn} onClick={() => navigate('/memories')}>
+                Create an album
+                <ArrowRightIcon />
+              </button>
+            </div>
+          ) : (
+            <div className={styles.memoryGrid}>
+              {featuredFolders.map((folder) => (
+                <motion.article
+                  key={folder.id}
+                  className={styles.memoryCard}
+                  whileHover={{ y: -5 }}
+                  onClick={() => navigate('/memories')}
+                >
+                  <div
+                    className={styles.memoryPhoto}
+                    style={{ background: folder.coverImageUrl ? `url(${folder.coverImageUrl}) center/cover` : COLLAGE_GRADIENTS[0] }}
+                  >
+                    <span className={styles.photoChip}>{folder.photoCount ?? 0} photos</span>
+                  </div>
+                  <div className={styles.memoryBody}>
+                    <h3 className={styles.memoryTitle}>{folder.name}</h3>
+                    <p className={styles.memoryCaption}>{folder.description || 'A little pocket of time.'}</p>
+                  </div>
+                </motion.article>
+              ))}
+            </div>
+          )}
+        </section>
+
+        {/* UPCOMING + NOTE */}
+        <section className={styles.section}>
+          <div className={styles.twoCol}>
+            <div>
+              <div className={styles.sectionHead}>
+                <div>
+                  <span className={styles.eyebrow}>Coming up</span>
+                  <h2 className={styles.sectionTitle}>Upcoming adventures</h2>
+                </div>
+                <button className={styles.sectionLink} onClick={() => navigate('/dates')}>
+                  Calendar
+                  <ArrowUpRightIcon />
+                </button>
+              </div>
+
+              {loadingContent ? (
+                <p className={styles.mutedNote}>Loading your plans…</p>
+              ) : upcomingDates.length === 0 ? (
+                <div className={styles.emptyCard}>
+                  <p>Nothing planned yet.</p>
+                  <button className={styles.primaryPillBtn} onClick={() => navigate('/dates')}>
+                    Plan something
+                    <ArrowRightIcon />
+                  </button>
+                </div>
+              ) : (
+                upcomingDates.map((item) => {
+                  const { mo, day } = formatMonthDay(item.plannedDate);
+                  return (
+                    <motion.div key={item.id} className={styles.dateCard} whileHover={{ x: 4 }} onClick={() => navigate('/dates')}>
+                      <div className={styles.dateBadge}>
+                        <span className={styles.dateBadgeMo}>{mo}</span>
+                        <span className={styles.dateBadgeDay}>{day}</span>
+                      </div>
+                      <div className={styles.dateDetails}>
+                        <h4 className={styles.dateTitle}>{item.title}</h4>
+                        <p className={styles.dateMeta}>{formatDate(item.plannedDate)}{item.location ? ` · ${item.location}` : ''}</p>
+                      </div>
+                      <span className={styles.statusPill}>{item.status || 'Planned'}</span>
+                    </motion.div>
+                  );
+                })
+              )}
+            </div>
+
+            <div>
+              <div className={styles.sectionHead}>
+                <div>
+                  <span className={styles.eyebrow}>A little something</span>
+                  <h2 className={styles.sectionTitle}>Recent note</h2>
+                </div>
+              </div>
+
+              <div className={styles.noteCard}>
+                <span className={styles.noteSparkle}><SparkleIcon /></span>
+                {loadingContent ? (
+                  <p className={styles.mutedNote}>Loading…</p>
+                ) : latestNote ? (
+                  <>
+                    <span className={styles.eyebrow}>{formatDate(latestNote.createdAt)}</span>
+                    <blockquote className={styles.noteQuote}>
+                      {(latestNote.content || 'A note without words, but full of feeling.').slice(0, 160)}
+                    </blockquote>
+                    <div className={styles.noteFoot}>
+                      <span>— {latestNote.authorName ? `written by ${latestNote.authorName}` : 'written for you'}</span>
+                      <button className={styles.sectionLink} onClick={() => navigate('/letters')}>Read more</button>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <p className={styles.noteQuote}>No love notes yet — write the first one.</p>
+                    <div className={styles.noteFoot}>
+                      <button className={styles.sectionLink} onClick={() => navigate('/letters')}>
+                        Open Love Letters
+                        <ArrowUpRightIcon />
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+        </section>
       </main>
+
+      <Footer />
     </div>
   );
 }

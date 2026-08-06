@@ -3,6 +3,9 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { memoryService } from '../services/memoryService';
 import { uploadToSupabaseStorage } from '../api/supabaseClient';
+import Navbar from '../components/layout/Navbar/Navbar';
+import Footer from '../components/layout/Footer/Footer';
+import CalendarView from '../components/memories/CalendarDump/CalendarView';
 import styles from './MemoriesPage.module.css';
 
 // Minimal Lucide Outline Icons
@@ -34,7 +37,7 @@ const SearchIcon = () => (
 );
 
 const HeartIcon = ({ filled }) => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill={filled ? "#C73616" : "none"} stroke={filled ? "#C73616" : "currentColor"} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill={filled ? "#E38A96" : "none"} stroke={filled ? "#E38A96" : "currentColor"} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
     <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
   </svg>
 );
@@ -88,12 +91,27 @@ const AlertIcon = () => (
   </svg>
 );
 
+const StarIcon = ({ filled }) => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill={filled ? '#D97785' : 'none'} stroke={filled ? '#D97785' : 'currentColor'} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+  </svg>
+);
+
+const CalendarIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+    <line x1="16" y1="2" x2="16" y2="6"></line>
+    <line x1="8" y1="2" x2="8" y2="6"></line>
+    <line x1="3" y1="10" x2="21" y2="10"></line>
+  </svg>
+);
+
 const PALETTE_ACCENTS = [
-  { name: 'Burnt Red', value: '#C73616' },
-  { name: 'Deep Burgundy', value: '#8C230F' },
-  { name: 'Golden Ochre', value: '#A88A2B' },
-  { name: 'Warm Cream', value: '#E8D7BC' },
-  { name: 'Dark Charcoal', value: '#1F1F1F' },
+  { name: 'Coral', value: '#E38A96' },
+  { name: 'Coral Deep', value: '#D97785' },
+  { name: 'Sage', value: '#8FAE7D' },
+  { name: 'Blush', value: '#F4A9B8' },
+  { name: 'Warm Ink', value: '#3E332E' },
 ];
 
 // Framer Motion slide variants for the Lightbox carousel.
@@ -131,6 +149,14 @@ export default function MemoriesPage() {
   const [submitting, setSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
+  // 'albums' | 'calendar' — the Memories page's two viewing modes
+  const [viewMode, setViewMode] = useState('albums');
+
+  // Pending Replace/Keep dialog for the "one highlight per day" rule.
+  // retry() re-runs whichever save/highlight action hit the conflict, with force=true.
+  const [calendarConflict, setCalendarConflict] = useState(null);
+  const [calendarConflictBusy, setCalendarConflictBusy] = useState(false);
+
   // Modals state
   const [isFolderModalOpen, setIsFolderModalOpen] = useState(false);
   const [editingFolder, setEditingFolder] = useState(null);
@@ -152,9 +178,11 @@ export default function MemoriesPage() {
   const [folderForm, setFolderForm] = useState({
     name: '',
     description: '',
-    accentColor: '#C73616',
+    accentColor: '#E38A96',
     iconStyle: 'camera',
     coverImageUrl: '',
+    eventDate: '',
+    isCalendarHighlight: false,
   });
 
   const [uploadState, setUploadState] = useState({
@@ -214,6 +242,13 @@ export default function MemoriesPage() {
       console.error('Failed to load folder details', err);
       return null;
     }
+  };
+
+  // "Open Album" from a Calendar Dump day — jump back to the Albums view
+  // with that album already open.
+  const handleOpenAlbumFromCalendar = async (folderId) => {
+    setViewMode('albums');
+    await loadFolderDetails(folderId);
   };
 
   /* ---------------------------------------------------------------
@@ -317,7 +352,7 @@ export default function MemoriesPage() {
   // Lock body scroll while any overlay is open
   useEffect(() => {
     const anyOverlayOpen =
-      isFolderModalOpen || isUploadModalOpen || lightbox.index >= 0 || !!confirmState;
+      isFolderModalOpen || isUploadModalOpen || lightbox.index >= 0 || !!confirmState || !!calendarConflict;
 
     if (!anyOverlayOpen) return undefined;
 
@@ -326,7 +361,7 @@ export default function MemoriesPage() {
     return () => {
       document.body.style.overflow = previousOverflow;
     };
-  }, [isFolderModalOpen, isUploadModalOpen, lightbox.index, confirmState]);
+  }, [isFolderModalOpen, isUploadModalOpen, lightbox.index, confirmState, calendarConflict]);
 
   /* ---------------------------------------------------------------
      LUXURY CONFIRMATION MODAL
@@ -365,42 +400,47 @@ export default function MemoriesPage() {
       setFolderForm({
         name: folder.name || '',
         description: folder.description || '',
-        accentColor: folder.accentColor || '#C73616',
+        accentColor: folder.accentColor || '#E38A96',
         iconStyle: folder.iconStyle || 'camera',
         coverImageUrl: folder.coverImageUrl || '',
+        eventDate: folder.eventDate || '',
+        isCalendarHighlight: !!folder.isCalendarHighlight,
       });
     } else {
       setEditingFolder(null);
       setFolderForm({
         name: '',
         description: '',
-        accentColor: '#C73616',
+        accentColor: '#E38A96',
         iconStyle: 'camera',
         coverImageUrl: '',
+        eventDate: '',
+        isCalendarHighlight: false,
       });
     }
     setIsFolderModalOpen(true);
   };
 
-  // Save Folder (Create/Update Album)
-  const handleSaveFolder = async (e) => {
-    e.preventDefault();
-    if (!folderForm.name.trim()) return;
-
+  // Save Folder (Create/Update Album). `force` re-submits after the user chose
+  // "Replace Existing Highlight" in the calendar conflict dialog.
+  const saveFolder = async (force = false) => {
+    setSubmitting(true);
+    setErrorMessage('');
     try {
-      setSubmitting(true);
-      setErrorMessage('');
+      const payload = {
+        name: folderForm.name.trim(),
+        description: folderForm.description.trim(),
+        accentColor: folderForm.accentColor || '#E38A96',
+        iconStyle: folderForm.iconStyle || 'camera',
+        coverImageUrl: folderForm.coverImageUrl || '',
+        eventDate: folderForm.eventDate || null,
+        isCalendarHighlight: folderForm.isCalendarHighlight,
+      };
 
       if (editingFolder) {
-        await memoryService.updateFolder(editingFolder.id, folderForm);
+        await memoryService.updateFolder(editingFolder.id, payload, force);
       } else {
-        await memoryService.createFolder({
-          name: folderForm.name.trim(),
-          description: folderForm.description.trim(),
-          accentColor: folderForm.accentColor || '#C73616',
-          iconStyle: folderForm.iconStyle || 'camera',
-          coverImageUrl: folderForm.coverImageUrl || '',
-        });
+        await memoryService.createFolder(payload);
       }
 
       setIsFolderModalOpen(false);
@@ -410,11 +450,25 @@ export default function MemoriesPage() {
         await loadFolderDetails(selectedFolder.id);
       }
     } catch (err) {
-      console.error('Failed to save folder:', err);
-      setErrorMessage(err?.response?.data?.message || 'Failed to save album. Please try again.');
+      if (err?.response?.status === 409) {
+        setCalendarConflict({ conflict: err.response.data.data, retry: () => saveFolder(true) });
+      } else {
+        console.error('Failed to save folder:', err);
+        setErrorMessage(err?.response?.data?.message || 'Failed to save album. Please try again.');
+      }
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const handleSaveFolder = async (e) => {
+    e.preventDefault();
+    if (!folderForm.name.trim()) return;
+    if (folderForm.isCalendarHighlight && !folderForm.eventDate) {
+      setErrorMessage('Add a "Date Happened" before turning on Calendar Dump.');
+      return;
+    }
+    await saveFolder(false);
   };
 
   // Delete Folder — routed through the frosted glass confirmation modal
@@ -507,6 +561,27 @@ export default function MemoriesPage() {
     }
   };
 
+  // Set (or clear) this photo as the album's one Calendar Dump highlight.
+  // `force` re-submits after "Replace Existing Highlight" is chosen.
+  const setPhotoHighlight = async (photo, force = false) => {
+    if (!selectedFolder) return;
+    try {
+      if (photo.id === selectedFolder.highlightPhotoId) {
+        await memoryService.clearCalendarHighlight(selectedFolder.id);
+      } else {
+        await memoryService.setCalendarHighlight(selectedFolder.id, photo.id, force);
+      }
+      await loadFolderDetails(selectedFolder.id);
+    } catch (err) {
+      if (err?.response?.status === 409) {
+        setCalendarConflict({ conflict: err.response.data.data, retry: () => setPhotoHighlight(photo, true) });
+      } else {
+        console.error('Failed to update calendar highlight', err);
+        setErrorMessage(err?.response?.data?.message || 'Could not update the calendar highlight. Please try again.');
+      }
+    }
+  };
+
   // Delete Photo — routed through the frosted glass confirmation modal
   const requestDeletePhoto = (photo) => {
     const remainingAfterDelete = photos.length - 1;
@@ -546,19 +621,20 @@ export default function MemoriesPage() {
 
   return (
     <div className={styles.pageContainer}>
-      {/* 1. EDITORIAL NAVBAR (Matching HomePage style) */}
-      <header className={styles.navbar}>
-        <div className={styles.navLeft}>
-          <button className={styles.backHomeBtn} onClick={() => navigate('/home')}>
-            <ArrowLeftIcon />
-            <span>Sanctuary</span>
-          </button>
-          <span className={styles.navDivider}>/</span>
-          <span className={styles.navBrand}>FOR SNEAKYPEA</span>
-          <span className={styles.navDivider}>/</span>
-          <span className={styles.navSubBrand}>Memories</span>
-        </div>
+      <Navbar />
 
+      {/* PAGE HEAD */}
+      <div className={styles.pageHead}>
+        <button className={styles.breadcrumb} onClick={() => navigate('/home')}>
+          <ArrowLeftIcon />
+          <span>Back home</span>
+        </button>
+        <h1 className={styles.pageTitle}>Our memories</h1>
+        <p className={styles.pageSubtitle}>Every folder is a little pocket of time — open one to relive it.</p>
+      </div>
+
+      {/* TOOLBAR */}
+      <div className={styles.toolbar}>
         <div className={styles.searchBar}>
           <SearchIcon />
           <input
@@ -568,41 +644,50 @@ export default function MemoriesPage() {
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
+        <button className={styles.primaryActionBtn} onClick={() => openFolderModal()}>
+          <PlusIcon />
+          <span>New Album</span>
+        </button>
+      </div>
 
-        <div className={styles.navRight}>
+      {/* VIEW SWITCHER */}
+      <div className={`${styles.viewTabsWrapper} ${viewMode === 'calendar' ? styles.contentWrapperWide : ''}`}>
+        <div className={styles.segmentedControl}>
           <button
-            className={styles.primaryActionBtn}
-            onClick={() => openFolderModal()}
+            className={`${styles.segmentBtn} ${viewMode === 'albums' ? styles.segmentActive : ''}`}
+            onClick={() => setViewMode('albums')}
           >
-            <PlusIcon />
-            <span>New Album</span>
+            <FolderIcon />
+            <span>Albums</span>
+          </button>
+          <button
+            className={`${styles.segmentBtn} ${viewMode === 'calendar' ? styles.segmentActive : ''}`}
+            onClick={() => setViewMode('calendar')}
+          >
+            <CalendarIcon />
+            <span>Calendar Dump</span>
           </button>
         </div>
-      </header>
+      </div>
 
-      {/* 2. MAIN EDITORIAL CONTENT */}
-      <main className={styles.contentWrapper}>
+      {/* MAIN CONTENT */}
+      <main className={`${styles.contentWrapper} ${viewMode === 'calendar' ? styles.contentWrapperWide : ''}`}>
         {errorMessage && (
           <div className={styles.errorBanner}>{errorMessage}</div>
         )}
 
+        {/* VIEW: CALENDAR DUMP */}
+        {viewMode === 'calendar' && (
+          <CalendarView onOpenAlbum={handleOpenAlbumFromCalendar} />
+        )}
+
         {/* VIEW 1: ALBUMS GRID */}
-        {!selectedFolder && (
+        {viewMode === 'albums' && !selectedFolder && (
           <motion.div
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <div className={styles.heroHeader}>
-              <div className={styles.heroBadge}>
-                <FolderIcon />
-                <span>Memory Archives</span>
-              </div>
-              <h1 className={styles.pageTitle}>Our Shared Albums</h1>
-              <p className={styles.pageSubtitle}>
-                A quiet digital vault dedicated to the moments, dates, and memories shared between Merylle and Cj.
-              </p>
-            </div>
 
             {loading ? (
               <div className={styles.loadingState}>Loading sanctuary memories...</div>
@@ -667,7 +752,7 @@ export default function MemoriesPage() {
         )}
 
         {/* VIEW 2: SELECTED ALBUM GALLERY */}
-        {selectedFolder && (
+        {viewMode === 'albums' && selectedFolder && (
           <motion.div
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
@@ -682,11 +767,17 @@ export default function MemoriesPage() {
               <div className={styles.albumTitleBlock}>
                 <div
                   className={styles.colorPillIndicator}
-                  style={{ backgroundColor: selectedFolder.accentColor || '#C73616' }}
+                  style={{ backgroundColor: selectedFolder.accentColor || '#E38A96' }}
                 />
                 <div>
                   <h1 className={styles.albumHeading}>{selectedFolder.name}</h1>
                   <p className={styles.albumMeta}>{selectedFolder.description || 'Private Collection'}</p>
+                  {selectedFolder.isCalendarHighlight && selectedFolder.eventDate && (
+                    <span className={styles.calendarBadge}>
+                      <CalendarIcon />
+                      {selectedFolder.highlightPhotoId ? 'On the Calendar' : 'Pick a highlight photo below'} · {selectedFolder.eventDate}
+                    </span>
+                  )}
                 </div>
               </div>
 
@@ -728,12 +819,23 @@ export default function MemoriesPage() {
                       onLoad={(e) => recordOrientation(photo, e)}
                     />
                     <div className={styles.photoCardOverlay}>
-                      <button
-                        className={styles.favIconBtn}
-                        onClick={(e) => handleToggleFavorite(photo, e)}
-                      >
-                        <HeartIcon filled={photo.isFavorite} />
-                      </button>
+                      <div className={styles.overlayIconRow}>
+                        {selectedFolder.isCalendarHighlight && selectedFolder.eventDate && (
+                          <button
+                            className={styles.favIconBtn}
+                            onClick={(e) => { e.stopPropagation(); setPhotoHighlight(photo); }}
+                            title={photo.id === selectedFolder.highlightPhotoId ? 'Remove as calendar highlight' : 'Set as calendar highlight'}
+                          >
+                            <StarIcon filled={photo.id === selectedFolder.highlightPhotoId} />
+                          </button>
+                        )}
+                        <button
+                          className={styles.favIconBtn}
+                          onClick={(e) => handleToggleFavorite(photo, e)}
+                        >
+                          <HeartIcon filled={photo.isFavorite} />
+                        </button>
+                      </div>
                       {photo.caption && <p className={styles.photoCaptionSnippet}>{photo.caption}</p>}
                     </div>
                   </motion.div>
@@ -806,6 +908,36 @@ export default function MemoriesPage() {
                     ))}
                   </div>
                 </div>
+
+                <div className={styles.formGroup}>
+                  <label>Date Happened</label>
+                  <input
+                    type="date"
+                    value={folderForm.eventDate}
+                    onChange={(e) => setFolderForm({ ...folderForm, eventDate: e.target.value })}
+                  />
+                </div>
+
+                <div className={styles.toggleRow}>
+                  <label className={styles.toggleSwitch}>
+                    <input
+                      type="checkbox"
+                      checked={folderForm.isCalendarHighlight}
+                      onChange={(e) => setFolderForm({ ...folderForm, isCalendarHighlight: e.target.checked })}
+                    />
+                    <span className={styles.toggleTrack}><span className={styles.toggleThumb} /></span>
+                  </label>
+                  <div>
+                    <p className={styles.toggleLabel}>Add to Calendar Dump</p>
+                    <p className={styles.toggleHint}>
+                      {editingFolder && editingFolder.photoCount > 0
+                        ? 'Once saved, pick one photo from this album as its calendar highlight.'
+                        : 'You’ll pick a highlight photo after adding photos to this album.'}
+                    </p>
+                  </div>
+                </div>
+
+                {errorMessage && <p className={styles.inlineFormError}>{errorMessage}</p>}
 
                 <div className={styles.modalFooter}>
                   <button type="button" className={styles.secondaryBtn} onClick={() => setIsFolderModalOpen(false)}>
@@ -993,6 +1125,16 @@ export default function MemoriesPage() {
                         </div>
 
                         <div className={styles.landscapeActions}>
+                          {selectedFolder?.isCalendarHighlight && selectedFolder?.eventDate && (
+                            <button
+                              className={styles.glassActionBtn}
+                              onClick={() => setPhotoHighlight(activePhoto)}
+                            >
+                              <StarIcon filled={activePhoto.id === selectedFolder.highlightPhotoId} />
+                              <span>{activePhoto.id === selectedFolder.highlightPhotoId ? 'Highlighted' : 'Highlight'}</span>
+                            </button>
+                          )}
+
                           <button
                             className={styles.glassActionBtn}
                             onClick={(e) => handleToggleFavorite(activePhoto, e)}
@@ -1024,6 +1166,16 @@ export default function MemoriesPage() {
 
                   <div className={styles.lightboxBody}>
                     <div className={styles.lightboxHeader}>
+                      {selectedFolder?.isCalendarHighlight && selectedFolder?.eventDate && (
+                        <button
+                          className={styles.lightboxFavBtn}
+                          onClick={() => setPhotoHighlight(activePhoto)}
+                        >
+                          <StarIcon filled={activePhoto.id === selectedFolder.highlightPhotoId} />
+                          <span>{activePhoto.id === selectedFolder.highlightPhotoId ? 'Highlighted' : 'Highlight'}</span>
+                        </button>
+                      )}
+
                       <button
                         className={styles.lightboxFavBtn}
                         onClick={(e) => handleToggleFavorite(activePhoto, e)}
@@ -1108,6 +1260,77 @@ export default function MemoriesPage() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* CALENDAR CONFLICT DIALOG — "one highlight per day" */}
+      <AnimatePresence>
+        {calendarConflict && (
+          <motion.div
+            className={styles.confirmBackdrop}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.24 }}
+            onClick={() => !calendarConflictBusy && setCalendarConflict(null)}
+          >
+            <motion.div
+              className={styles.confirmCard}
+              initial={{ opacity: 0, y: 26, scale: 0.94 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 18, scale: 0.96 }}
+              transition={{ duration: 0.34, ease: [0.22, 1, 0.36, 1] }}
+              onClick={(e) => e.stopPropagation()}
+              role="alertdialog"
+              aria-modal="true"
+            >
+              {calendarConflict.conflict.conflictingHighlightPhotoUrl && (
+                <img
+                  src={calendarConflict.conflict.conflictingHighlightPhotoUrl}
+                  alt=""
+                  className={styles.conflictThumb}
+                />
+              )}
+
+              <h3 className={styles.confirmTitle}>This day already has a highlighted memory</h3>
+              <p className={styles.confirmMessage}>
+                “{calendarConflict.conflict.conflictingFolderName}” is already highlighted on{' '}
+                {calendarConflict.conflict.eventDate}. Replacing it will remove that album from the calendar.
+              </p>
+
+              <div className={styles.confirmFooter}>
+                <button
+                  type="button"
+                  className={styles.confirmCancelBtn}
+                  onClick={() => setCalendarConflict(null)}
+                  disabled={calendarConflictBusy}
+                >
+                  Keep Existing Highlight
+                </button>
+                <button
+                  type="button"
+                  className={styles.confirmDeleteBtn}
+                  disabled={calendarConflictBusy}
+                  onClick={async () => {
+                    setCalendarConflictBusy(true);
+                    try {
+                      await calendarConflict.retry();
+                      setCalendarConflict(null);
+                    } catch (err) {
+                      console.error('Failed to replace calendar highlight', err);
+                      setErrorMessage('Could not replace the existing highlight. Please try again.');
+                    } finally {
+                      setCalendarConflictBusy(false);
+                    }
+                  }}
+                >
+                  {calendarConflictBusy ? 'Replacing…' : 'Replace Existing Highlight'}
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <Footer />
     </div>
   );
 }

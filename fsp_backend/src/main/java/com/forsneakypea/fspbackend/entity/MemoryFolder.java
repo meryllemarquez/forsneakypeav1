@@ -2,6 +2,7 @@ package com.forsneakypea.fspbackend.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -43,6 +44,27 @@ public class MemoryFolder {
 
     @Column(name = "created_by")
     private Long createdBy;
+
+    @Column(name = "event_date")
+    private LocalDate eventDate;
+
+    @Column(name = "is_calendar_highlight")
+    @Builder.Default
+    private Boolean isCalendarHighlight = false;
+
+    @Column(name = "highlight_photo_id")
+    private UUID highlightPhotoId;
+
+    // Where within the calendar cell the highlight photo is focused/cropped —
+    // CSS background-position percentages (0-100), not pixels, so they stay
+    // valid at any cell/export size.
+    @Column(name = "highlight_photo_position_x")
+    @Builder.Default
+    private Double highlightPhotoPositionX = 50.0;
+
+    @Column(name = "highlight_photo_position_y")
+    @Builder.Default
+    private Double highlightPhotoPositionY = 50.0;
 
     @Column(name = "created_at", insertable = false, updatable = false)
     private OffsetDateTime createdAt;

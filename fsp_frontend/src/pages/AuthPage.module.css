@@ -4,13 +4,12 @@
 .heroContainer {
   position: fixed;
   inset: 0;
-  width: 100vw;
-  height: 100vh;
   background: url('/landingbg.png') center/cover no-repeat;
   display: flex;
   align-items: center;
   justify-content: center;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   margin: 0;
   padding: 0;
@@ -329,8 +328,8 @@
   .mainContentLayout {
     flex-direction: column;
     justify-content: center;
-    gap: 2.5rem;
-    padding: 0 1.5rem;
+    gap: 1.5rem;
+    padding: 2rem 1.5rem;
   }
 
   .heroContentLeft {
@@ -338,8 +337,21 @@
     text-align: center;
   }
 
+  .layoutActive .coupleTitle {
+    font-size: clamp(2.4rem, 9vw, 3.5rem);
+  }
+
+  .layoutActive .subtitle {
+    margin-top: 0.6rem;
+    margin-bottom: 0;
+  }
+
   .modalGlassCard {
     max-width: 100%;
-    padding: 32px 24px;
+    padding: 28px 22px;
+  }
+
+  .fieldGroup {
+    margin-bottom: 16px;
   }
 }

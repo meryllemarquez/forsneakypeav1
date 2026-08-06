@@ -1,123 +1,97 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,500;0,600;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700;800&family=Fraunces:ital,wght@0,500;0,600;1,500&display=swap');
 
 /* Main Layout & Light Background */
 .pageContainer {
   min-height: 100vh;
-  background-color: var(--color-bg-main, #FAFAF9);
-  color: var(--color-text-primary, #1F1F1F);
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  padding-bottom: 5rem;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--color-bg-main, #FBF3EA);
+  color: var(--color-text-primary, #3E332E);
+  font-family: 'Quicksand', -apple-system, BlinkMacSystemFont, sans-serif;
+  padding-bottom: 0;
 }
 
-/* Minimal Editorial Navbar */
-.navbar {
-  height: 72px;
-  border-bottom: 1px solid var(--color-border, #E7E7E7);
-  background: rgba(250, 250, 249, 0.85);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  position: sticky;
-  top: 0;
-  z-index: 50;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 2.5rem;
-  max-width: 1280px;
+.pageHead {
+  max-width: 1600px;
   margin: 0 auto;
+  padding: clamp(2rem, 5vw, 3rem) 2rem 0.5rem;
 }
 
-.navLeft {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.backHomeBtn {
-  display: flex;
+.breadcrumb {
+  display: inline-flex;
   align-items: center;
   gap: 6px;
   background: transparent;
   border: none;
-  color: var(--color-text-secondary, #6B6B6B);
-  font-size: 0.875rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: color 0.2s ease;
-}
-
-.backHomeBtn:hover {
-  color: var(--color-burgundy-primary, #8C230F);
-}
-
-.navDivider {
-  color: var(--color-border, #E7E7E7);
-  font-weight: 300;
-}
-
-.navBrand {
-  font-size: 0.875rem;
+  color: var(--color-text-secondary, #8A7568);
+  font-size: 0.82rem;
   font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--color-burgundy-primary, #8C230F);
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 1rem;
+  transition: color 0.2s ease;
+  font-family: inherit;
 }
 
-.navSubBrand {
-  font-size: 0.875rem;
-  color: var(--color-text-secondary, #6B6B6B);
-  font-weight: 500;
+.breadcrumb:hover {
+  color: var(--color-burgundy-primary, #D97785);
+}
+
+.toolbar {
+  max-width: 1600px;
+  margin: 0 auto 2rem;
+  padding: 0 2rem;
+  display: flex;
+  gap: 0.9rem;
+  flex-wrap: wrap;
 }
 
 .searchBar {
+  flex: 1;
+  min-width: 240px;
   display: flex;
   align-items: center;
   gap: 8px;
-  background: #ffffff;
-  border: 1px solid var(--color-border, #E7E7E7);
-  padding: 6px 14px;
+  background: var(--color-surface, #FFFEFB);
+  border: 1px solid var(--color-border, #EEDFCC);
+  padding: 10px 16px;
   border-radius: 999px;
-  width: 280px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
-  color: var(--color-text-secondary, #6B6B6B);
+  box-shadow: 0 2px 10px rgba(62, 51, 46, 0.03);
+  color: var(--color-text-secondary, #8A7568);
 }
 
 .searchBar input {
   border: none;
   background: transparent;
   outline: none;
-  font-size: 0.85rem;
-  color: var(--color-text-primary, #1F1F1F);
+  font-size: 0.9rem;
+  font-family: inherit;
+  color: var(--color-text-primary, #3E332E);
   width: 100%;
 }
 
 .searchBar input::placeholder {
-  color: var(--color-text-secondary, #6B6B6B);
-}
-
-.navRight {
-  display: flex;
-  align-items: center;
-  gap: 12px;
+  color: var(--color-text-secondary, #8A7568);
 }
 
 .primaryActionBtn {
   display: flex;
   align-items: center;
   gap: 6px;
-  background: var(--color-burgundy-primary, #8C230F);
+  background: var(--color-burnt-red, #E38A96);
   color: #ffffff;
   border: none;
-  padding: 8px 18px;
-  border-radius: var(--radius-button, 14px);
+  padding: 8px 20px;
+  border-radius: var(--radius-pill, 999px);
   font-size: 0.85rem;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
+  font-family: inherit;
   transition: transform 0.2s ease, background-color 0.2s ease;
 }
 
 .primaryActionBtn:hover {
-  background: var(--color-burnt-red, #C73616);
+  background: var(--color-burgundy-primary, #D97785);
   transform: translateY(-2px);
 }
 
@@ -143,11 +117,61 @@
   background: var(--color-hover, #F5F5F5);
 }
 
+/* View Switcher (Albums / Calendar Dump) */
+.viewTabsWrapper {
+  max-width: 1600px;
+  margin: 0 auto 1.5rem;
+  padding: 0 2rem;
+}
+
+.segmentedControl {
+  display: inline-flex;
+  gap: 4px;
+  background: var(--color-surface, #FFFEFB);
+  border: 1px solid var(--color-border, #EEDFCC);
+  padding: 5px;
+  border-radius: var(--radius-pill, 999px);
+}
+
+.segmentBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: none;
+  background: transparent;
+  padding: 9px 18px;
+  border-radius: var(--radius-pill, 999px);
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: var(--color-text-secondary, #8A7568);
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.segmentBtn:hover {
+  color: var(--color-text-primary, #3E332E);
+}
+
+.segmentActive {
+  background: var(--color-burnt-red, #E38A96);
+  color: #ffffff;
+}
+
+.segmentActive:hover {
+  color: #ffffff;
+}
+
 /* Main Content Wrapper */
 .contentWrapper {
-  max-width: 1200px;
+  max-width: 1600px;
   margin: 0 auto;
   padding: 3rem 2rem 0;
+}
+
+/* Calendar Dump gets extra breathing room so each day cell has more space */
+.contentWrapperWide {
+  max-width: 1800px;
 }
 
 .errorBanner {
@@ -167,41 +191,19 @@
   font-weight: 500;
 }
 
-/* Hero Header */
-.heroHeader {
-  text-align: center;
-  max-width: 680px;
-  margin: 0 auto 3.5rem;
-}
-
-.heroBadge {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  background: #ffffff;
-  border: 1px solid var(--color-border, #E7E7E7);
-  padding: 6px 16px;
-  border-radius: 999px;
-  font-size: 0.825rem;
-  font-weight: 600;
-  color: var(--color-burgundy-primary, #8C230F);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
-  margin-bottom: 1.25rem;
-}
-
 .pageTitle {
-  font-family: 'Playfair Display', Georgia, serif;
-  font-size: clamp(2.2rem, 5vw, 3.2rem);
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: clamp(2rem, 4.4vw, 2.6rem);
   font-weight: 600;
-  letter-spacing: -0.02em;
-  color: var(--color-text-primary, #1F1F1F);
-  margin: 0 0 0.75rem;
+  letter-spacing: -0.015em;
+  color: var(--color-text-primary, #3E332E);
+  margin: 0 0 0.6rem;
 }
 
 .pageSubtitle {
-  font-size: 1.05rem;
-  color: var(--color-text-secondary, #6B6B6B);
-  line-height: 1.65;
+  font-size: 1rem;
+  color: var(--color-text-secondary, #8A7568);
+  line-height: 1.6;
   margin: 0;
 }
 
@@ -219,11 +221,38 @@
   box-shadow: var(--shadow-soft, 0 8px 30px rgba(0, 0, 0, 0.06));
 }
 
-/* Album Folder Grid */
+/* Album Folder Grid — fluid auto-fit so column count grows with the
+   viewport instead of being pinned to a fixed number. `auto-fit` (rather
+   than `auto-fill`) lets existing cards stretch to fill a short last row
+   instead of leaving dead empty tracks, so a handful of albums on a wide
+   screen still reads as a full-width grid, not a few small cards adrift in
+   empty space. The `minmax()` floor is tuned per breakpoint below to land
+   in roughly the 4-6 / 3-4 / 2-3 / 1-2 columns-per-row ranges for
+   desktop/laptop/tablet/mobile respectively. */
 .folderGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 2rem;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.75rem;
+}
+
+@media (min-width: 1440px) {
+  .folderGrid {
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  }
+}
+
+@media (max-width: 1023px) {
+  .folderGrid {
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.5rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .folderGrid {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+  }
 }
 
 .folderCard {
@@ -235,6 +264,11 @@
   cursor: pointer;
   display: flex;
   flex-direction: column;
+  /* Grid items default to min-width:auto, which lets a long unbroken word
+     in the title force the whole track (and therefore the column count)
+     wider than intended — min-width:0 lets the card shrink to its grid
+     track and rely on the title's own text-overflow instead. */
+  min-width: 0;
   transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 
@@ -297,6 +331,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 8px;
 }
 
 .folderTitle {
@@ -305,11 +340,16 @@
   color: var(--color-text-primary, #1F1F1F);
   margin: 0;
   letter-spacing: -0.01em;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .folderActions {
   display: flex;
   gap: 4px;
+  flex-shrink: 0;
 }
 
 .iconGhostBtn {
@@ -375,7 +415,7 @@
 }
 
 .albumHeading {
-  font-family: 'Playfair Display', Georgia, serif;
+  font-family: 'Fraunces', Georgia, serif;
   font-size: 2rem;
   font-weight: 600;
   margin: 0;
@@ -386,6 +426,19 @@
   font-size: 0.85rem;
   color: var(--color-text-secondary, #6B6B6B);
   margin: 0;
+}
+
+.calendarBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: var(--color-surface-sunk, #F5EAE0);
+  color: var(--color-burgundy-primary, #D97785);
+  font-size: 0.75rem;
+  font-weight: 700;
 }
 
 .photoGrid {
@@ -432,8 +485,13 @@
   opacity: 1;
 }
 
-.favIconBtn {
+.overlayIconRow {
   align-self: flex-end;
+  display: flex;
+  gap: 8px;
+}
+
+.favIconBtn {
   background: rgba(255, 255, 255, 0.9);
   border: none;
   border-radius: 50%;
@@ -492,7 +550,7 @@
 }
 
 .modalHeader h2 {
-  font-family: 'Playfair Display', Georgia, serif;
+  font-family: 'Fraunces', Georgia, serif;
   font-size: 1.5rem;
   font-weight: 600;
   color: var(--color-text-primary, #1F1F1F);
@@ -565,6 +623,73 @@
 .colorChipActive {
   border-color: var(--color-text-primary, #1F1F1F);
   transform: scale(1.15);
+}
+
+.toggleRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.toggleSwitch {
+  position: relative;
+  flex-shrink: 0;
+  display: inline-block;
+  cursor: pointer;
+}
+
+.toggleSwitch input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+}
+
+.toggleTrack {
+  display: block;
+  width: 42px;
+  height: 24px;
+  border-radius: 999px;
+  background: var(--color-border, #E7E7E7);
+  transition: background-color 0.2s ease;
+}
+
+.toggleThumb {
+  display: block;
+  width: 18px;
+  height: 18px;
+  margin: 3px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+  transition: transform 0.2s ease;
+}
+
+.toggleSwitch input:checked + .toggleTrack {
+  background: var(--color-burnt-red, #E38A96);
+}
+
+.toggleSwitch input:checked + .toggleTrack .toggleThumb {
+  transform: translateX(18px);
+}
+
+.toggleSwitch input:focus-visible + .toggleTrack {
+  outline: 2px solid var(--color-golden-ochre, #A88A2B);
+  outline-offset: 2px;
+}
+
+.toggleLabel {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--color-text-primary, #1F1F1F);
+}
+
+.toggleHint {
+  margin: 2px 0 0;
+  font-size: 0.78rem;
+  line-height: 1.4;
+  color: var(--color-text-secondary, #6B6B6B);
 }
 
 .modalFooter {
@@ -826,7 +951,7 @@
 }
 
 .landscapeCaption {
-  font-family: 'Playfair Display', Georgia, serif;
+  font-family: 'Fraunces', Georgia, serif;
   font-size: 1.05rem;
   font-weight: 500;
   line-height: 1.5;
@@ -949,7 +1074,7 @@
 }
 
 .lightboxCaption {
-  font-family: 'Playfair Display', Georgia, serif;
+  font-family: 'Fraunces', Georgia, serif;
   font-size: 1.05rem;
   line-height: 1.6;
   color: var(--color-text-primary, #1F1F1F);
@@ -997,6 +1122,16 @@
     inset 0 1px 0 rgba(255, 255, 255, 0.85);
 }
 
+.conflictThumb {
+  width: 96px;
+  height: 96px;
+  object-fit: cover;
+  border-radius: 18px;
+  margin: 0 auto 1.25rem;
+  display: block;
+  box-shadow: 0 8px 22px rgba(31, 31, 31, 0.15);
+}
+
 .confirmIconRing {
   width: 56px;
   height: 56px;
@@ -1012,7 +1147,7 @@
 }
 
 .confirmTitle {
-  font-family: 'Playfair Display', Georgia, serif;
+  font-family: 'Fraunces', Georgia, serif;
   font-size: 1.5rem;
   font-weight: 600;
   letter-spacing: -0.01em;
@@ -1113,6 +1248,10 @@
     padding: 2rem 1.25rem 0;
   }
 
+  .viewTabsWrapper {
+    padding: 0 1.25rem;
+  }
+
   .lightboxBackdrop, .modalBackdrop {
     padding: 0.75rem;
   }
@@ -1205,6 +1344,21 @@
 
   .confirmFooter {
     flex-direction: column-reverse;
+  }
+
+  .viewTabsWrapper {
+    padding: 0 1.25rem;
+  }
+
+  .segmentedControl {
+    width: 100%;
+  }
+
+  .segmentBtn {
+    flex: 1;
+    justify-content: center;
+    padding: 9px 10px;
+    font-size: 0.78rem;
   }
 }
 

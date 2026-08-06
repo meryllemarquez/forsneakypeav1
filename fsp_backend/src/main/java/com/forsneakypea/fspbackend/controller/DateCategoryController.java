@@ -17,7 +17,6 @@ import java.util.List;
 @RestController
 @RequestMapping({"/api/date-categories", "/api/v1/date-categories"})
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 public class DateCategoryController {
 
     private final DateCategoryService dateCategoryService;

@@ -4,8 +4,11 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Date;
 import java.util.function.Function;
@@ -13,8 +16,20 @@ import java.util.function.Function;
 @Component
 public class JwtUtil {
 
-    // Secret Key generated for HS256 algorithm
-    private final Key key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
+    // Signing key must be derived from the configured secret (app.jwt.secret),
+    // not Keys.secretKeyFor(...) which generates a NEW RANDOM key every time
+    // this bean is constructed — that would invalidate every issued token on
+    // every restart/redeploy and break auth entirely across multiple instances.
+    @Value("${app.jwt.secret}")
+    private String jwtSecret;
+
+    private Key key;
+
+    @PostConstruct
+    private void init() {
+        key = Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
+    }
+
     private final long expirationMs = 86400000; // 24 hours in milliseconds
 
     // 1. Generate JWT Token

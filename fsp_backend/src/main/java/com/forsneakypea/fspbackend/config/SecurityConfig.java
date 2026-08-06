@@ -3,6 +3,7 @@ package com.forsneakypea.fspbackend.config;
 import com.forsneakypea.fspbackend.security.JwtAuthenticationFilter;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -20,6 +21,8 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Configuration
@@ -30,6 +33,12 @@ public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthFilter;
     private final AuthenticationProvider authenticationProvider;
+
+    // Comma-separated production origin(s) (e.g. https://forsneakypea.vercel.app),
+    // set as a real env var on the host — never hardcoded here. Local dev ports
+    // below always stay allowed regardless of this value.
+    @Value("${app.allowed-origins:}")
+    private String extraAllowedOrigins;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -61,7 +70,10 @@ public class SecurityConfig {
                 .requestMatchers(AntPathRequestMatcher.antMatcher("/api/v1/admin/**")).hasAuthority("ROLE_ADMIN")
                 .requestMatchers(AntPathRequestMatcher.antMatcher("/api/notifications/**")).authenticated()
                 .requestMatchers(AntPathRequestMatcher.antMatcher("/api/v1/notifications/**")).authenticated()
-                // 7. Authenticate everything else
+                // 7. Protect Profile Customization Module — couple accounts only, not admin
+                .requestMatchers(AntPathRequestMatcher.antMatcher("/api/profile/**")).hasAuthority("ROLE_USER")
+                .requestMatchers(AntPathRequestMatcher.antMatcher("/api/v1/profile/**")).hasAuthority("ROLE_USER")
+                // 8. Authenticate everything else
                 .anyRequest().authenticated()
             )
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -80,13 +92,21 @@ public class SecurityConfig {
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of(
+        List<String> allowedOrigins = new ArrayList<>(List.of(
             "http://localhost:5173", "http://127.0.0.1:5173",
             "http://localhost:5174", "http://127.0.0.1:5174",
             "http://localhost:5175", "http://127.0.0.1:5175",
             "http://localhost:5176", "http://127.0.0.1:5176"
         ));
+        if (extraAllowedOrigins != null && !extraAllowedOrigins.isBlank()) {
+            Arrays.stream(extraAllowedOrigins.split(","))
+                    .map(String::trim)
+                    .filter(origin -> !origin.isEmpty())
+                    .forEach(allowedOrigins::add);
+        }
+
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(allowedOrigins);
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Requested-With", "Accept", "Origin"));
         configuration.setExposedHeaders(List.of("Authorization"));

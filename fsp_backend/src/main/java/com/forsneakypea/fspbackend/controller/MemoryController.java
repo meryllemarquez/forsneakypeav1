@@ -1,5 +1,6 @@
 package com.forsneakypea.fspbackend.controller;
 
+import com.forsneakypea.fspbackend.dto.CalendarEntryDTO;
 import com.forsneakypea.fspbackend.dto.FolderDTO;
 import com.forsneakypea.fspbackend.dto.FolderRequestDTO;
 import com.forsneakypea.fspbackend.dto.PhotoDTO;
@@ -19,7 +20,6 @@ import java.util.UUID;
 @RestController
 @RequestMapping({"/api/memories", "/api/v1/memories"})
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 public class MemoryController {
 
     private final MemoryService memoryService;
@@ -47,8 +47,9 @@ public class MemoryController {
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<FolderDTO> updateFolder(
             @PathVariable UUID id,
-            @Valid @RequestBody FolderRequestDTO.CreateOrUpdateFolder request) {
-        return ResponseEntity.ok(memoryService.updateFolder(id, request, getCurrentUserId()));
+            @Valid @RequestBody FolderRequestDTO.CreateOrUpdateFolder request,
+            @RequestParam(defaultValue = "false") boolean force) {
+        return ResponseEntity.ok(memoryService.updateFolder(id, request, force, getCurrentUserId()));
     }
 
     @DeleteMapping("/folders/{id}")
@@ -93,6 +94,37 @@ public class MemoryController {
     @GetMapping("/photos/favorites")
     public ResponseEntity<List<PhotoDTO>> getFavorites() {
         return ResponseEntity.ok(memoryService.getFavorites());
+    }
+
+    @PostMapping("/folders/{folderId}/calendar-highlight/{photoId}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<FolderDTO> setCalendarHighlight(
+            @PathVariable UUID folderId,
+            @PathVariable UUID photoId,
+            @RequestParam(defaultValue = "false") boolean force) {
+        return ResponseEntity.ok(memoryService.setCalendarHighlight(folderId, photoId, force, getCurrentUserId()));
+    }
+
+    @DeleteMapping("/folders/{folderId}/calendar-highlight")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<FolderDTO> clearCalendarHighlight(@PathVariable UUID folderId) {
+        return ResponseEntity.ok(memoryService.clearCalendarHighlight(folderId, getCurrentUserId()));
+    }
+
+    @PatchMapping("/folders/{folderId}/calendar-highlight/position")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<FolderDTO> updateHighlightPosition(
+            @PathVariable UUID folderId,
+            @Valid @RequestBody FolderRequestDTO.PositionUpdate request) {
+        return ResponseEntity.ok(memoryService.updateHighlightPosition(
+                folderId, request.getPositionX(), request.getPositionY(), getCurrentUserId()));
+    }
+
+    @GetMapping("/calendar")
+    public ResponseEntity<List<CalendarEntryDTO>> getCalendarEntries(
+            @RequestParam int year,
+            @RequestParam int month) {
+        return ResponseEntity.ok(memoryService.getCalendarEntries(year, month));
     }
 
     // ✅ FIXED: Returns Long to match User.java (private Long id)

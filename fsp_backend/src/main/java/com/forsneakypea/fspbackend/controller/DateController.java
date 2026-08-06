@@ -19,7 +19,6 @@ import java.util.UUID;
 @RestController
 @RequestMapping({"/api/dates", "/api/v1/dates"})
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 public class DateController {
 
     private final DateService dateService;

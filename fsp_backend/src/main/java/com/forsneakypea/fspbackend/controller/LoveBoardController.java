@@ -19,7 +19,6 @@ import java.util.UUID;
 @RestController
 @RequestMapping({"/api/love-board", "/api/v1/love-board"})
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 public class LoveBoardController {
 
     private final LoveBoardService loveBoardService;

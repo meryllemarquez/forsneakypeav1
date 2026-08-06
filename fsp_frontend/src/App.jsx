@@ -4,6 +4,7 @@ import HomePage from './pages/HomePage';
 import MemoriesPage from './pages/MemoriesPage';
 import DatesPage from './pages/DatesPage';
 import LoveLettersPage from './pages/LoveLettersPage';
+import ProfilePage from './pages/ProfilePage';
 import ProtectedRoute from './components/ProtectedRoute';
 
 import AdminLayout from './components/admin/AdminLayout';
@@ -20,12 +21,14 @@ import SystemSettingsPage from './pages/admin/SystemSettingsPage';
 
 
 import { AuthProvider } from './context/AuthProvider';
+import { NotificationProvider } from './context/NotificationProvider';
 
 export default function App() {
   return (
     <Router>
       {/* 2. I-WRAP ANG ROUTES SA LOOB NG AUTHPROVIDER */}
       <AuthProvider>
+      <NotificationProvider>
         <Routes>
           {/* Public Landing & Login Page */}
           <Route path="/auth" element={<AuthPage />} />
@@ -70,6 +73,16 @@ export default function App() {
             }
           />
 
+          {/* Profile Customization — couple accounts only, admin excluded */}
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute allowedRoles={['ROLE_USER']}>
+                <ProfilePage />
+              </ProtectedRoute>
+            }
+          />
+
           {/* Phase 8: Admin Control Center */}
           <Route
             path="/admin"
@@ -94,6 +107,7 @@ export default function App() {
           {/* Default Redirect */}
           <Route path="*" element={<Navigate to="/home" replace />} />
         </Routes>
+      </NotificationProvider>
       </AuthProvider>
     </Router>
   );

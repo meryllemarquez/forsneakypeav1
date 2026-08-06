@@ -47,6 +47,25 @@ public class User implements UserDetails {
     @Column(name = "last_login_at")
     private LocalDateTime lastLoginAt;
 
+    // --- Profile Customization (couple accounts only) ---
+    @Column(length = 20)
+    private String nickname;
+
+    @Column(length = 100)
+    private String bio;
+
+    @Column(name = "favorite_emoji", length = 8)
+    private String favoriteEmoji;
+
+    @Column(name = "accent_color", length = 20)
+    @Builder.Default
+    private String accentColor = "rose";
+
+    @Column(name = "avatar_url", columnDefinition = "text")
+    private String avatarUrl;
+
+    @Column(name = "avatar_storage_path", columnDefinition = "text")
+    private String avatarStoragePath;
 
     @Column(name = "created_at", insertable = false, updatable = false)
     private OffsetDateTime createdAt;

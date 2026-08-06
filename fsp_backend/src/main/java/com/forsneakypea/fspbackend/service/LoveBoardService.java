@@ -49,6 +49,15 @@ public class LoveBoardService {
     @Transactional(readOnly = true)
     public LoveNoteDTO getNoteById(UUID id, Long currentUserId) {
         LoveNote note = findNoteOrThrow(id);
+        // Same visibility rule as getVisibleNotes: a private note is only readable by
+        // its author. Thrown as "not found" rather than "forbidden" so a guessed ID
+        // can't be used to confirm a private note's existence.
+        boolean isPrivateToSomeoneElse = Boolean.TRUE.equals(note.getIsPrivate())
+                && note.getCreatedBy() != null
+                && !note.getCreatedBy().equals(currentUserId);
+        if (isPrivateToSomeoneElse) {
+            throw new RuntimeException("Note not found");
+        }
         return mapNoteToDTO(note, currentUserId);
     }
 

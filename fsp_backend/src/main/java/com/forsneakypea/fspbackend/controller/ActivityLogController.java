@@ -19,7 +19,6 @@ import java.util.UUID;
 @RestController
 @RequestMapping({"/api/activity-logs", "/api/v1/activity-logs"})
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 @PreAuthorize("hasAuthority('ROLE_ADMIN')")
 public class ActivityLogController {
 

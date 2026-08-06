@@ -18,7 +18,6 @@ import java.util.UUID;
 @RestController
 @RequestMapping({"/api/dates/{dateId}/checklist-items", "/api/v1/dates/{dateId}/checklist-items"})
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 public class ChecklistItemController {
 
     private final ChecklistItemService checklistItemService;

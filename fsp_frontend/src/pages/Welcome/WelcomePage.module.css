@@ -1,8 +1,6 @@
 .pageContainer {
   position: fixed;
   inset: 0;
-  width: 100vw;
-  height: 100vh;
   background-color: #3b0005; /* Solid Deep Burgundy/Red matching screenshot */
   display: flex;
   align-items: center;
@@ -36,8 +34,6 @@
 .unlockOverlay {
   position: fixed;
   inset: 0;
-  width: 100vw;
-  height: 100vh;
   background-color: #3b0005;
   display: flex;
   align-items: center;

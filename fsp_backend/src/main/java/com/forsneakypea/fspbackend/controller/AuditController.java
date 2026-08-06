@@ -16,7 +16,6 @@ import java.util.UUID;
 @RestController
 @RequestMapping({"/api/audit", "/api/v1/audit"})
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 @PreAuthorize("hasAuthority('ROLE_ADMIN')")
 public class AuditController {
 

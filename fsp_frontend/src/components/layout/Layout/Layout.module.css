@@ -12,3 +12,9 @@
   margin: 0 auto;
   padding: var(--space-xl) var(--space-lg);
 }
+
+@media (max-width: 480px) {
+  .mainContent {
+    padding: var(--space-lg) var(--space-md);
+  }
+}

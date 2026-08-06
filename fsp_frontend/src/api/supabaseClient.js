@@ -30,3 +30,47 @@ export async function uploadToSupabaseStorage(file, folderPath = 'photos') {
     storagePath: data.path,
   };
 }
+
+const PROFILE_PICTURES_BUCKET = 'profile-pictures';
+
+// Uploads an already-cropped/compressed avatar blob for the given user.
+// Mirrors uploadToSupabaseStorage's shape (photoUrl/storagePath) so both
+// helpers can be persisted to the backend the same way.
+export async function uploadProfileAvatar(file, userId) {
+  const fileExt = (file.name && file.name.split('.').pop()) || 'webp';
+  const fileName = `${Date.now()}_${Math.random().toString(36).substring(2, 8)}.${fileExt}`;
+  const filePath = `avatars/${userId}/${fileName}`;
+
+  const { data, error } = await supabase.storage
+    .from(PROFILE_PICTURES_BUCKET)
+    .upload(filePath, file, {
+      cacheControl: '3600',
+      upsert: false,
+      contentType: file.type || 'image/webp',
+    });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  const { data: publicUrlData } = supabase.storage
+    .from(PROFILE_PICTURES_BUCKET)
+    .getPublicUrl(filePath);
+
+  return {
+    avatarUrl: publicUrlData.publicUrl,
+    storagePath: data.path,
+  };
+}
+
+// Best-effort cleanup of a previous avatar file. Failures are swallowed by the
+// caller (the DB record is the source of truth — an orphaned file is a minor
+// storage cost, not a correctness issue) so a replace/remove action never
+// fails just because the old file was already gone.
+export async function deleteProfileAvatar(storagePath) {
+  if (!storagePath) return;
+  const { error } = await supabase.storage.from(PROFILE_PICTURES_BUCKET).remove([storagePath]);
+  if (error) {
+    throw new Error(error.message);
+  }
+}
