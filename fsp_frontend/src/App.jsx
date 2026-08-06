@@ -1,122 +1,114 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import AuthPage from './pages/AuthPage';
+import HomePage from './pages/HomePage';
+import MemoriesPage from './pages/MemoriesPage';
+import DatesPage from './pages/DatesPage';
+import LoveLettersPage from './pages/LoveLettersPage';
+import ProfilePage from './pages/ProfilePage';
+import ProtectedRoute from './components/ProtectedRoute';
 
-function App() {
-  const [count, setCount] = useState(0)
+import AdminLayout from './components/admin/AdminLayout';
+import DashboardHome from './pages/admin/DashboardHome';
+import NotificationsPage from './pages/admin/NotificationsPage';
+import ActivityLogPage from './pages/admin/ActivityLogPage';
+import AuditTrailPage from './pages/admin/AuditTrailPage';
+import UsersPage from './pages/admin/UsersPage';
+import AdminMemoriesPage from './pages/admin/AdminMemoriesPage';
+import AdminLettersPage from './pages/admin/AdminLettersPage';
+import AdminDatesPage from './pages/admin/AdminDatesPage';
+import AdminGalleryPage from './pages/admin/AdminGalleryPage';
+import SystemSettingsPage from './pages/admin/SystemSettingsPage';
 
+
+import { AuthProvider } from './context/AuthProvider';
+import { NotificationProvider } from './context/NotificationProvider';
+
+export default function App() {
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+    <Router>
+      {/* 2. I-WRAP ANG ROUTES SA LOOB NG AUTHPROVIDER */}
+      <AuthProvider>
+      <NotificationProvider>
+        <Routes>
+          {/* Public Landing & Login Page */}
+          <Route path="/auth" element={<AuthPage />} />
 
-      <div className="ticks"></div>
+          {/* Protected Couple Sanctuary */}
+          <Route 
+            path="/home" 
+            element={
+              <ProtectedRoute>
+                <HomePage />
+              </ProtectedRoute>
+            } 
+          />
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+          {/* Phase 5: Memories & Album System */}
+          <Route 
+            path="/memories" 
+            element={
+              <ProtectedRoute>
+                <MemoriesPage />
+              </ProtectedRoute>
+            } 
+          />
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+          {/* Phase 2: Premium Date Bucket List (mock data, backend not yet wired) */}
+          <Route
+            path="/dates"
+            element={
+              <ProtectedRoute>
+                <DatesPage />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Phase 7: Interactive Love Board */}
+          <Route
+            path="/letters"
+            element={
+              <ProtectedRoute>
+                <LoveLettersPage />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Profile Customization — couple accounts only, admin excluded */}
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute allowedRoles={['ROLE_USER']}>
+                <ProfilePage />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Phase 8: Admin Control Center */}
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute allowedRoles={['ROLE_ADMIN']}>
+                <AdminLayout />
+              </ProtectedRoute>
+            }
+          >
+            <Route index element={<DashboardHome />} />
+            <Route path="notifications" element={<NotificationsPage />} />
+            <Route path="activity" element={<ActivityLogPage />} />
+            <Route path="users" element={<UsersPage />} />
+            <Route path="memories" element={<AdminMemoriesPage />} />
+            <Route path="letters" element={<AdminLettersPage />} />
+            <Route path="dates" element={<AdminDatesPage />} />
+            <Route path="gallery" element={<AdminGalleryPage />} />
+            <Route path="settings" element={<SystemSettingsPage />} />
+            <Route path="audit" element={<AuditTrailPage />} />
+          </Route>
+
+          {/* Default Redirect */}
+          <Route path="*" element={<Navigate to="/home" replace />} />
+        </Routes>
+      </NotificationProvider>
+      </AuthProvider>
+    </Router>
+  );
 }
-
-export default App

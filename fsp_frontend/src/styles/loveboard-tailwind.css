@@ -1,0 +1,33 @@
+/*
+  Tailwind v4, CSS-first config, imported ONLY from LoveLettersPage.jsx.
+  Preflight is intentionally skipped (only theme + utilities are imported) so
+  this can't reset default element styling on every other page, which relies
+  on the plain CSS reset in src/index.css.
+*/
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/utilities.css" layer(utilities);
+
+@theme {
+  /* Interface chrome (toolbar, panels, buttons, labels) — never handwriting,
+     never Times New Roman. Note *content* fonts are chosen per-note from
+     HANDWRITING_FONTS/PLAIN_FONTS in loveBoardConstants.js instead. */
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+
+  --font-patrick: "Patrick Hand", cursive;
+  --font-caveat: "Caveat", cursive;
+  --font-kalam: "Kalam", cursive;
+  --font-indie: "Indie Flower", cursive;
+  --font-gloria: "Gloria Hallelujah", cursive;
+  --font-architects: "Architects Daughter", cursive;
+  --font-inter: "Inter", sans-serif;
+  --font-poppins: "Poppins", sans-serif;
+  --font-nunito: "Nunito", sans-serif;
+  --font-quicksand: "Quicksand", sans-serif;
+  --font-outfit: "Outfit", sans-serif;
+  --font-manrope: "Manrope", sans-serif;
+
+  --color-cork: #b98a5e;
+  --color-cork-dark: #8a6339;
+  --color-cork-shadow: #5a3d20;
+  --color-paper-edge: rgba(60, 40, 20, 0.25);
+}

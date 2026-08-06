@@ -1,0 +1,29 @@
+.indicatorContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  margin: 18px 0 24px 0;
+}
+
+.box {
+  width: 56px;
+  height: 48px;
+  border: 1.5px solid rgba(255, 255, 255, 0.7);
+  border-radius: 14px;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.box.errorBox {
+  border-color: #ff4d4d;
+  box-shadow: 0 0 8px rgba(255, 77, 77, 0.6);
+}
+
+.dot {
+  color: #ffffff;
+  font-size: 1.2rem;
+}

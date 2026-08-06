@@ -1,0 +1,67 @@
+/*
+  Tailwind v4, CSS-first config, imported ONLY from AdminLayout.jsx.
+  Preflight is intentionally skipped (only theme + utilities are imported) so
+  this can't reset default element styling on every other page — same
+  pattern as styles/loveboard-tailwind.css.
+*/
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/utilities.css" layer(utilities);
+
+/* Preflight is skipped above, so there's no `box-sizing: border-box` reset —
+   without it, padded elements using `w-full` (inputs, selects, ...) compute
+   their 100% against content-box and overflow their container. Scope just
+   that one rule to the admin tree so it can't leak into other pages. */
+.admin-shell,
+.admin-shell *,
+.admin-shell *::before,
+.admin-shell *::after {
+  box-sizing: border-box;
+}
+
+@theme {
+  /* Sans for dense UI (tables, nav, forms). A separate serif is used only
+     for page-title "hero" moments — see .page-title in DashboardHome etc. */
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-serif: Georgia, "Iowan Old Style", "Times New Roman", serif;
+
+  /* Japanese-inspired cream/red/gold palette — scoped to the admin tree
+     only (the rest of the app keeps styles/design-tokens.css as-is). */
+  --color-admin-bg: #f3ead6;
+  --color-admin-surface: #fbf6ea;
+  --color-admin-surface-2: #f3ead6;
+  --color-admin-border: #e3d5b0;
+  --color-admin-text: #4a3a22;
+  --color-admin-text-muted: #8a7a5c;
+  --color-admin-text-faint: #b3a582;
+
+  /* Warm dark-brown sidebar (not neutral black) so the rail still reads
+     as part of this palette rather than a generic dark-mode admin shell. */
+  --color-admin-sidebar: #4a3a22;
+  --color-admin-sidebar-hover: #5c4930;
+
+  /* Primary accent: warm vermillion red, with a light red-tinted "soft"
+     background for active/unread states. */
+  --color-admin-accent: #b23b24;
+  --color-admin-accent-soft: #fdefe4;
+  --color-admin-golden: #c99a3a;
+  --color-admin-golden-soft: #f7efd9;
+  --color-admin-cream: #e3d5b0;
+
+  /* Danger stays a distinct deep maroon so delete/error states don't
+     visually collide with the (now red) primary accent. Success/warning
+     stay standard green/amber — universal meaning independent of brand. */
+  --color-admin-danger: #7a2618;
+  --color-admin-danger-soft: #f5e3de;
+  --color-admin-success: #3f7a4e;
+  --color-admin-success-soft: #e8f1e7;
+  --color-admin-warning: #b8801f;
+  --color-admin-warning-soft: #f7ecd6;
+
+  /* Same corner-radius/shadow rhythm as HomePage.module.css cards —
+     Tailwind v4 auto-generates rounded-card/rounded-button/shadow-soft/
+     shadow-modal utilities from these theme tokens. */
+  --radius-card: 20px;
+  --radius-button: 14px;
+  --shadow-soft: 0 8px 30px rgba(74, 58, 34, 0.06);
+  --shadow-modal: 0 20px 50px rgba(74, 58, 34, 0.18);
+}
