@@ -64,7 +64,7 @@ public class LoveBoardController {
     @DeleteMapping("/notes/{id}")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Void> deleteNote(@PathVariable UUID id) {
-        loveBoardService.deleteNote(id);
+        loveBoardService.deleteNote(id, getCurrentUserId());
         return ResponseEntity.noContent().build();
     }
 
@@ -95,7 +95,7 @@ public class LoveBoardController {
     @DeleteMapping("/stickers/{id}")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Void> deleteSticker(@PathVariable UUID id) {
-        loveBoardService.deleteSticker(id);
+        loveBoardService.deleteSticker(id, getCurrentUserId());
         return ResponseEntity.noContent().build();
     }
 

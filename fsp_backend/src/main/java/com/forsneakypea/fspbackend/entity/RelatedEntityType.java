@@ -10,5 +10,10 @@ public enum RelatedEntityType {
     CHECKLIST_ITEM,
     CATEGORY,
     REMINDER,
-    ATTACHMENT
+    ATTACHMENT,
+    MEMORY_FOLDER,
+    MEMORY_PHOTO,
+    LOVE_NOTE,
+    LOVE_STICKER,
+    USER
 }

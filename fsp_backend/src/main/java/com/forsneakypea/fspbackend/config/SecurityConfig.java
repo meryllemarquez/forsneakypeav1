@@ -55,7 +55,13 @@ public class SecurityConfig {
                 // 5. Protect Love Board Module (Phase 7)
                 .requestMatchers(AntPathRequestMatcher.antMatcher("/api/love-board/**")).authenticated()
                 .requestMatchers(AntPathRequestMatcher.antMatcher("/api/v1/love-board/**")).authenticated()
-                // 6. Authenticate everything else
+                // 6. Protect Admin Control Center (Phase 8) — admin role required,
+                // not just authentication. Notifications are per-user, not admin-only.
+                .requestMatchers(AntPathRequestMatcher.antMatcher("/api/admin/**")).hasAuthority("ROLE_ADMIN")
+                .requestMatchers(AntPathRequestMatcher.antMatcher("/api/v1/admin/**")).hasAuthority("ROLE_ADMIN")
+                .requestMatchers(AntPathRequestMatcher.antMatcher("/api/notifications/**")).authenticated()
+                .requestMatchers(AntPathRequestMatcher.antMatcher("/api/v1/notifications/**")).authenticated()
+                // 7. Authenticate everything else
                 .anyRequest().authenticated()
             )
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -77,7 +83,9 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(List.of(
             "http://localhost:5173", "http://127.0.0.1:5173",
-            "http://localhost:5174", "http://127.0.0.1:5174"
+            "http://localhost:5174", "http://127.0.0.1:5174",
+            "http://localhost:5175", "http://127.0.0.1:5175",
+            "http://localhost:5176", "http://127.0.0.1:5176"
         ));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Requested-With", "Accept", "Origin"));

@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useCallback, useRef, memo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence, Reorder, useDragControls } from 'framer-motion';
 import { dateService } from '../services/dateService';
 import { checklistService } from '../services/checklistService';
@@ -13,7 +13,7 @@ const ArrowLeftIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
     <line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline>
   </svg>
-);
+); 
 const SearchIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
     <circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line>
@@ -460,6 +460,7 @@ const EMPTY_FORM = {
 
 export default function DatesPage() {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const [dates, setDates] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -641,7 +642,7 @@ export default function DatesPage() {
     setDrawerLoading(true);
     try {
       const full = await dateService.getDateById(date.id);
-      setDrawerDate(full);
+      setDrawerDate(full); 
     } catch (err) {
       console.error('Failed to load date details', err);
     } finally {
@@ -658,6 +659,27 @@ export default function DatesPage() {
       console.error('Failed to refresh date details', err);
     }
   };
+
+  // Deep-link from a notification ("?dateId=...") — open that date's
+  // drawer once, then strip the param.
+  useEffect(() => {
+    const dateId = searchParams.get('dateId');
+    if (!dateId) return undefined;
+    let cancelled = false;
+    (async () => {
+      if (!cancelled) await openDrawer({ id: dateId });
+      if (cancelled) return;
+      setSearchParams((prev) => {
+        const next = new URLSearchParams(prev);
+        next.delete('dateId');
+        return next;
+      }, { replace: true });
+    })();
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
 
   const patchDateInList = (id, patch) => {
     setDates((prev) => prev.map((d) => (d.id === id ? { ...d, ...patch } : d)));

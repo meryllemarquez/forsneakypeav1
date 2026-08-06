@@ -4,6 +4,7 @@ import com.forsneakypea.fspbackend.dto.ChecklistItemDTO;
 import com.forsneakypea.fspbackend.dto.ChecklistItemRequestDTO;
 import com.forsneakypea.fspbackend.entity.ChecklistItem;
 import com.forsneakypea.fspbackend.entity.DateEntry;
+import com.forsneakypea.fspbackend.entity.RelatedEntityType;
 import com.forsneakypea.fspbackend.exception.ResourceNotFoundException;
 import com.forsneakypea.fspbackend.exception.ValidationException;
 import com.forsneakypea.fspbackend.repository.ChecklistItemRepository;
@@ -26,6 +27,7 @@ public class ChecklistItemService {
 
     private final ChecklistItemRepository checklistItemRepository;
     private final DateEntryRepository dateEntryRepository;
+    private final ActivityLogService activityLogService;
 
     @Transactional(readOnly = true)
     public List<ChecklistItemDTO> getItemsForDate(UUID dateId) {
@@ -56,7 +58,9 @@ public class ChecklistItemService {
                 .createdBy(userId)
                 .build();
 
-        return mapToDTO(checklistItemRepository.save(item));
+        item = checklistItemRepository.save(item);
+        activityLogService.log(userId, "CHECKLIST_ITEM_CREATED", RelatedEntityType.CHECKLIST_ITEM, item.getId());
+        return mapToDTO(item);
     }
 
     @Transactional
@@ -86,7 +90,11 @@ public class ChecklistItemService {
             }
         }
 
-        return mapToDTO(checklistItemRepository.save(item));
+        item = checklistItemRepository.save(item);
+        if (request.getIsCompleted() != null) {
+            activityLogService.log(userId, "CHECKLIST_ITEM_UPDATED", RelatedEntityType.CHECKLIST_ITEM, item.getId());
+        }
+        return mapToDTO(item);
     }
 
     @Transactional

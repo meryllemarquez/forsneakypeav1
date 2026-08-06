@@ -3,9 +3,11 @@ package com.forsneakypea.fspbackend.service.impl;
 import com.forsneakypea.fspbackend.dto.request.LoginRequest;
 import com.forsneakypea.fspbackend.dto.request.RegisterRequest;
 import com.forsneakypea.fspbackend.dto.response.AuthResponse;
+import com.forsneakypea.fspbackend.entity.RelatedEntityType;
 import com.forsneakypea.fspbackend.entity.Role;
 import com.forsneakypea.fspbackend.entity.User;
 import com.forsneakypea.fspbackend.repository.UserRepository;
+import com.forsneakypea.fspbackend.service.ActivityLogService;
 import com.forsneakypea.fspbackend.service.AuthService;
 import com.forsneakypea.fspbackend.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +26,7 @@ public class AuthServiceImpl implements AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
+    private final ActivityLogService activityLogService;
 
     // Master passcode required to unlock account registration
     private static final String MASTER_PASSWORD = "0617";
@@ -59,8 +62,10 @@ public class AuthServiceImpl implements AuthService {
 
         // 5. Generate signed JWT token
         String token = jwtUtil.generateToken(user.getUsername(), userRole.name());
+        activityLogService.log(user.getId(), "USER_LOGIN", RelatedEntityType.USER, null);
 
         return AuthResponse.builder()
+                .id(user.getId())
                 .token(token)
                 .username(user.getUsername())
                 .name(user.getName())
@@ -101,8 +106,10 @@ public class AuthServiceImpl implements AuthService {
         // 4. Generate signed JWT token for the new user
         Role userRole = user.getRole() != null ? user.getRole() : Role.ROLE_USER;
         String token = jwtUtil.generateToken(user.getUsername(), userRole.name());
+        activityLogService.log(user.getId(), "USER_REGISTERED", RelatedEntityType.USER, null);
 
         return AuthResponse.builder()
+                .id(user.getId())
                 .token(token)
                 .username(user.getUsername())
                 .name(user.getName())

@@ -8,6 +8,8 @@ import com.forsneakypea.fspbackend.entity.AttachmentType;
 import com.forsneakypea.fspbackend.entity.LoveNote;
 import com.forsneakypea.fspbackend.entity.LoveSticker;
 import com.forsneakypea.fspbackend.entity.NoteMood;
+import com.forsneakypea.fspbackend.entity.NotificationType;
+import com.forsneakypea.fspbackend.entity.RelatedEntityType;
 import com.forsneakypea.fspbackend.entity.User;
 import com.forsneakypea.fspbackend.repository.LoveNoteRepository;
 import com.forsneakypea.fspbackend.repository.LoveStickerRepository;
@@ -27,6 +29,8 @@ public class LoveBoardService {
     private final LoveNoteRepository noteRepository;
     private final LoveStickerRepository stickerRepository;
     private final UserRepository userRepository;
+    private final ActivityLogService activityLogService;
+    private final NotificationService notificationService;
 
     /* ---------------------------------------------------------------
        NOTES
@@ -74,7 +78,14 @@ public class LoveBoardService {
                 .createdBy(userId)
                 .build();
 
-        return mapNoteToDTO(noteRepository.saveAndFlush(note), userId);
+        note = noteRepository.saveAndFlush(note);
+        activityLogService.log(userId, "LOVE_NOTE_CREATED", RelatedEntityType.LOVE_NOTE, note.getId());
+        if (!Boolean.TRUE.equals(note.getIsPrivate())) {
+            notificationService.notifyOthers(userId, NotificationType.LOVE_NOTE_CREATED, note.getTitle(),
+                    RelatedEntityType.LOVE_NOTE, note.getId());
+        }
+
+        return mapNoteToDTO(note, userId);
     }
 
     @Transactional
@@ -98,7 +109,13 @@ public class LoveBoardService {
         if (request.getIsPrivate() != null) note.setIsPrivate(request.getIsPrivate());
         if (request.getMood() != null) note.setMood(parseMood(request.getMood()));
 
-        return mapNoteToDTO(noteRepository.saveAndFlush(note), currentUserId);
+        note = noteRepository.saveAndFlush(note);
+        if (!Boolean.TRUE.equals(note.getIsPrivate())) {
+            notificationService.notifyOthers(currentUserId, NotificationType.LOVE_NOTE_UPDATED, note.getTitle(),
+                    RelatedEntityType.LOVE_NOTE, note.getId());
+        }
+
+        return mapNoteToDTO(note, currentUserId);
     }
 
     @Transactional
@@ -114,11 +131,18 @@ public class LoveBoardService {
     }
 
     @Transactional
-    public void deleteNote(UUID id) {
-        if (!noteRepository.existsById(id)) {
-            throw new RuntimeException("Note not found");
-        }
+    public void deleteNote(UUID id, Long userId) {
+        LoveNote note = noteRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Note not found"));
+        String title = note.getTitle();
+        boolean wasPrivate = Boolean.TRUE.equals(note.getIsPrivate());
+
         noteRepository.deleteById(id);
+        activityLogService.log(userId, "LOVE_NOTE_DELETED", RelatedEntityType.LOVE_NOTE, id);
+        if (!wasPrivate) {
+            notificationService.notifyOthers(userId, NotificationType.LOVE_NOTE_DELETED, title,
+                    RelatedEntityType.LOVE_NOTE, id);
+        }
     }
 
     /* ---------------------------------------------------------------
@@ -144,7 +168,10 @@ public class LoveBoardService {
                 .createdBy(userId)
                 .build();
 
-        return mapStickerToDTO(stickerRepository.saveAndFlush(sticker));
+        sticker = stickerRepository.saveAndFlush(sticker);
+        activityLogService.log(userId, "LOVE_STICKER_ADDED", RelatedEntityType.LOVE_STICKER, sticker.getId());
+
+        return mapStickerToDTO(sticker);
     }
 
     @Transactional
@@ -163,11 +190,12 @@ public class LoveBoardService {
     }
 
     @Transactional
-    public void deleteSticker(UUID id) {
+    public void deleteSticker(UUID id, Long userId) {
         if (!stickerRepository.existsById(id)) {
             throw new RuntimeException("Sticker not found");
         }
         stickerRepository.deleteById(id);
+        activityLogService.log(userId, "LOVE_STICKER_DELETED", RelatedEntityType.LOVE_STICKER, id);
     }
 
     /* ---------------------------------------------------------------

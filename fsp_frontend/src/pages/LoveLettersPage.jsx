@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import { ArrowLeft, MousePointer2, Hand, Undo2, Redo2, ZoomOut, ZoomIn, RotateCcw } from 'lucide-react';
 import '../styles/loveboard-tailwind.css';
@@ -24,6 +24,7 @@ function byFilename(list = []) {
 
 export default function LoveLettersPage() {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const assets = useLoveBoardAssets();
   const boardRef = useRef(null);
   const stickerDebounceRef = useRef({});
@@ -89,6 +90,21 @@ export default function LoveLettersPage() {
       mounted = false;
     };
   }, []);
+
+  // Deep-link from a notification ("?noteId=...") — open that note's reader
+  // once notes have loaded, then strip the param so it doesn't re-trigger.
+  useEffect(() => {
+    const noteId = searchParams.get('noteId');
+    if (!noteId || !notes.some((n) => n.id === noteId)) return;
+    queueMicrotask(() => {
+      setReaderNoteId(noteId);
+      setSearchParams((prev) => {
+        const next = new URLSearchParams(prev);
+        next.delete('noteId');
+        return next;
+      }, { replace: true });
+    });
+  }, [notes, searchParams, setSearchParams]);
 
   const readerNote = useMemo(() => notes.find((n) => n.id === readerNoteId) || null, [notes, readerNoteId]);
 

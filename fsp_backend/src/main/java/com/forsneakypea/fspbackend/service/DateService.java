@@ -2,7 +2,6 @@ package com.forsneakypea.fspbackend.service;
 
 import com.forsneakypea.fspbackend.dto.DateEntryDTO;
 import com.forsneakypea.fspbackend.dto.DateRequestDTO;
-import com.forsneakypea.fspbackend.entity.ActivityLog;
 import com.forsneakypea.fspbackend.entity.ChecklistItem;
 import com.forsneakypea.fspbackend.entity.DateCategory;
 import com.forsneakypea.fspbackend.entity.DateEntry;
@@ -13,8 +12,8 @@ import com.forsneakypea.fspbackend.entity.Favorite;
 import com.forsneakypea.fspbackend.entity.ReservationStatus;
 import com.forsneakypea.fspbackend.entity.RelatedEntityType;
 import com.forsneakypea.fspbackend.entity.User;
+import com.forsneakypea.fspbackend.entity.NotificationType;
 import com.forsneakypea.fspbackend.exception.ResourceNotFoundException;
-import com.forsneakypea.fspbackend.repository.ActivityLogRepository;
 import com.forsneakypea.fspbackend.repository.ChecklistItemRepository;
 import com.forsneakypea.fspbackend.repository.DateCategoryRepository;
 import com.forsneakypea.fspbackend.repository.DateEntryRepository;
@@ -37,7 +36,8 @@ public class DateService {
 
     private final DateEntryRepository dateEntryRepository;
     private final DateCategoryRepository dateCategoryRepository;
-    private final ActivityLogRepository activityLogRepository;
+    private final ActivityLogService activityLogService;
+    private final NotificationService notificationService;
     private final FavoriteRepository favoriteRepository;
     private final ChecklistItemRepository checklistItemRepository;
     private final UserRepository userRepository;
@@ -69,6 +69,8 @@ public class DateService {
 
         date = dateEntryRepository.save(date);
         logActivity("DATE_CREATED", date.getId(), userId);
+        notificationService.notifyOthers(userId, NotificationType.DATE_CREATED, date.getTitle(),
+                RelatedEntityType.DATE, date.getId());
 
         return mapToDTO(date, userId, false);
     }
@@ -99,6 +101,7 @@ public class DateService {
     @Transactional
     public DateEntryDTO updateDate(UUID id, DateRequestDTO.Update request, Long currentUserId) {
         DateEntry date = findActiveOrThrow(id);
+        DateStatus previousStatus = date.getStatus();
 
         date.setTitle(request.getTitle());
         date.setDescription(request.getDescription());
@@ -118,7 +121,10 @@ public class DateService {
         date.setCategory(resolveCategory(request.getCategoryId()));
 
         date = dateEntryRepository.save(date);
-        logActivity("DATE_UPDATED", date.getId(), currentUserId);
+        boolean justCompleted = date.getStatus() == DateStatus.COMPLETED && previousStatus != DateStatus.COMPLETED;
+        logActivity(justCompleted ? "DATE_COMPLETED" : "DATE_UPDATED", date.getId(), currentUserId);
+        notificationService.notifyOthers(currentUserId, justCompleted ? NotificationType.DATE_COMPLETED : NotificationType.DATE_UPDATED,
+                date.getTitle(), RelatedEntityType.DATE, date.getId());
 
         return mapToDTO(date, currentUserId, false);
     }
@@ -245,13 +251,7 @@ public class DateService {
     }
 
     private void logActivity(String action, UUID entityId, Long userId) {
-        ActivityLog log = ActivityLog.builder()
-                .userId(userId)
-                .action(action)
-                .entityType(RelatedEntityType.DATE)
-                .entityId(entityId)
-                .build();
-        activityLogRepository.save(log);
+        activityLogService.log(userId, action, RelatedEntityType.DATE, entityId);
     }
 
     private Set<UUID> favoriteDateIds(Long userId) {

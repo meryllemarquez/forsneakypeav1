@@ -48,13 +48,13 @@ public class MemoryController {
     public ResponseEntity<FolderDTO> updateFolder(
             @PathVariable UUID id,
             @Valid @RequestBody FolderRequestDTO.CreateOrUpdateFolder request) {
-        return ResponseEntity.ok(memoryService.updateFolder(id, request));
+        return ResponseEntity.ok(memoryService.updateFolder(id, request, getCurrentUserId()));
     }
 
     @DeleteMapping("/folders/{id}")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Void> deleteFolder(@PathVariable UUID id) {
-        memoryService.deleteFolder(id);
+        memoryService.deleteFolder(id, getCurrentUserId());
         return ResponseEntity.noContent().build();
     }
 
@@ -86,7 +86,7 @@ public class MemoryController {
     @DeleteMapping("/photos/{photoId}")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Void> deletePhoto(@PathVariable UUID photoId) {
-        memoryService.deletePhoto(photoId);
+        memoryService.deletePhoto(photoId, getCurrentUserId());
         return ResponseEntity.noContent().build();
     }
 

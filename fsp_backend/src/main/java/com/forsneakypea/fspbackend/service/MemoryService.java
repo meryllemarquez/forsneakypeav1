@@ -6,6 +6,8 @@ import com.forsneakypea.fspbackend.dto.FolderRequestDTO;
 import com.forsneakypea.fspbackend.dto.PhotoDTO;
 import com.forsneakypea.fspbackend.entity.MemoryFolder;
 import com.forsneakypea.fspbackend.entity.MemoryPhoto;
+import com.forsneakypea.fspbackend.entity.NotificationType;
+import com.forsneakypea.fspbackend.entity.RelatedEntityType;
 import com.forsneakypea.fspbackend.repository.MemoryFolderRepository;
 import com.forsneakypea.fspbackend.repository.MemoryPhotoRepository;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +24,8 @@ public class MemoryService {
 
     private final MemoryFolderRepository folderRepository;
     private final MemoryPhotoRepository photoRepository;
+    private final ActivityLogService activityLogService;
+    private final NotificationService notificationService;
 
     @Transactional(readOnly = true)
     public List<FolderDTO> getAllFolders(boolean includeArchived) {
@@ -51,11 +55,16 @@ public class MemoryService {
                 .isArchived(false)
                 .build();
 
-        return mapFolderToDTO(folderRepository.save(folder));
+        folder = folderRepository.save(folder);
+        activityLogService.log(userId, "MEMORY_FOLDER_CREATED", RelatedEntityType.MEMORY_FOLDER, folder.getId());
+        notificationService.notifyOthers(userId, NotificationType.MEMORY_CREATED, folder.getName(),
+                RelatedEntityType.MEMORY_FOLDER, folder.getId());
+
+        return mapFolderToDTO(folder);
     }
 
     @Transactional
-    public FolderDTO updateFolder(UUID id, FolderRequestDTO.CreateOrUpdateFolder request) {
+    public FolderDTO updateFolder(UUID id, FolderRequestDTO.CreateOrUpdateFolder request, Long userId) {
         MemoryFolder folder = folderRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Folder not found"));
 
@@ -66,15 +75,23 @@ public class MemoryService {
         if (request.getCoverImageUrl() != null) folder.setCoverImageUrl(request.getCoverImageUrl());
         if (request.getIsArchived() != null) folder.setIsArchived(request.getIsArchived());
 
-        return mapFolderToDTO(folderRepository.save(folder));
+        folder = folderRepository.save(folder);
+        activityLogService.log(userId, "MEMORY_FOLDER_UPDATED", RelatedEntityType.MEMORY_FOLDER, folder.getId());
+        notificationService.notifyOthers(userId, NotificationType.MEMORY_UPDATED, folder.getName(),
+                RelatedEntityType.MEMORY_FOLDER, folder.getId());
+
+        return mapFolderToDTO(folder);
     }
 
     @Transactional
-    public void deleteFolder(UUID id) {
-        if (!folderRepository.existsById(id)) {
-            throw new RuntimeException("Folder not found");
-        }
+    public void deleteFolder(UUID id, Long userId) {
+        MemoryFolder folder = folderRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Folder not found"));
+        String name = folder.getName();
         folderRepository.deleteById(id);
+        activityLogService.log(userId, "MEMORY_FOLDER_DELETED", RelatedEntityType.MEMORY_FOLDER, id);
+        notificationService.notifyOthers(userId, NotificationType.MEMORY_DELETED, name,
+                RelatedEntityType.MEMORY_FOLDER, id);
     }
 
     @Transactional
@@ -97,7 +114,12 @@ public class MemoryService {
             folderRepository.save(folder);
         }
 
-        return mapPhotoToDTO(photoRepository.save(photo));
+        photo = photoRepository.save(photo);
+        activityLogService.log(userId, "MEMORY_PHOTO_UPLOADED", RelatedEntityType.MEMORY_PHOTO, photo.getId());
+        notificationService.notifyOthers(userId, NotificationType.GALLERY_UPLOAD, folder.getName(),
+                RelatedEntityType.MEMORY_PHOTO, photo.getId());
+
+        return mapPhotoToDTO(photo);
     }
 
     @Transactional
@@ -113,8 +135,9 @@ public class MemoryService {
     }
 
     @Transactional
-    public void deletePhoto(UUID photoId) {
+    public void deletePhoto(UUID photoId, Long userId) {
         photoRepository.deleteById(photoId);
+        activityLogService.log(userId, "MEMORY_PHOTO_DELETED", RelatedEntityType.MEMORY_PHOTO, photoId);
     }
 
     @Transactional(readOnly = true)

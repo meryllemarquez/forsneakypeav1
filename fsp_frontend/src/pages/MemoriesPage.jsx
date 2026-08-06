@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { memoryService } from '../services/memoryService';
 import { uploadToSupabaseStorage } from '../api/supabaseClient';
@@ -123,6 +123,7 @@ const SWIPE_VELOCITY_THRESHOLD = 450;
 
 export default function MemoriesPage() {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [folders, setFolders] = useState([]);
   const [selectedFolder, setSelectedFolder] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -208,8 +209,10 @@ export default function MemoriesPage() {
       setErrorMessage('');
       const data = await memoryService.getFolderById(folderId);
       setSelectedFolder(data);
+      return data;
     } catch (err) {
       console.error('Failed to load folder details', err);
+      return null;
     }
   };
 
@@ -219,6 +222,35 @@ export default function MemoriesPage() {
 
   const openLightbox = (index) => setLightbox({ index, direction: 0 });
   const closeLightbox = useCallback(() => setLightbox({ index: -1, direction: 0 }), []);
+
+  // Deep-link from a notification ("?folderId=...", optionally "&photoId=...")
+  // — open that folder (and photo, if present) once, then strip the params.
+  useEffect(() => {
+    const folderId = searchParams.get('folderId');
+    if (!folderId) return undefined;
+    let cancelled = false;
+    (async () => {
+      const data = await loadFolderDetails(folderId);
+      if (cancelled) return;
+      if (data) {
+        const photoId = searchParams.get('photoId');
+        if (photoId) {
+          const idx = (data.photos || []).findIndex((p) => p.id === photoId);
+          if (idx >= 0) openLightbox(idx);
+        }
+      }
+      setSearchParams((prev) => {
+        const next = new URLSearchParams(prev);
+        next.delete('folderId');
+        next.delete('photoId');
+        return next;
+      }, { replace: true });
+    })();
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
 
   const paginate = useCallback(
     (direction) => {

@@ -38,6 +38,10 @@ public class ActivityLog {
     @Column(columnDefinition = "jsonb")
     private String metadata;
 
+    @Column(length = 20)
+    @Builder.Default
+    private String status = "SUCCESS";
+
     @Column(name = "created_at", insertable = false, updatable = false)
     private OffsetDateTime createdAt;
 

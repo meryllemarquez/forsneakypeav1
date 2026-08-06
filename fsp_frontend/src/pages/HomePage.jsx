@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth } from '../hooks/useAuth';
+import NotificationBell from '../components/notifications/NotificationBell';
 import styles from './HomePage.module.css';
 
 // Minimal Outline Icons (React Icon / Lucide standard)
@@ -143,6 +144,8 @@ export default function HomePage() {
               <span>Admin Panel</span>
             </button>
           )}
+
+          <NotificationBell />
 
           <div className={styles.userProfilePill}>
             <span className={styles.statusDot}></span>
