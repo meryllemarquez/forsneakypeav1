@@ -1,0 +1,46 @@
+package com.forsneakypea.fspbackend.controller;
+
+import com.forsneakypea.fspbackend.dto.request.LoginRequest;
+import com.forsneakypea.fspbackend.dto.request.RegisterRequest;
+import com.forsneakypea.fspbackend.dto.response.ApiResponse;
+import com.forsneakypea.fspbackend.dto.response.AuthResponse;
+import com.forsneakypea.fspbackend.security.AuthRateLimiter;
+import com.forsneakypea.fspbackend.service.AuthService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping({"/api/auth", "/api/v1/auth"}) // ✅ Supports both /api/auth and /api/v1/auth!
+@RequiredArgsConstructor
+public class AuthController {
+
+    private final AuthService authService;
+    private final AuthRateLimiter rateLimiter;
+
+    @PostMapping("/login")
+    public ResponseEntity<ApiResponse<AuthResponse>> login(@Valid @RequestBody LoginRequest request, HttpServletRequest httpRequest) {
+        rateLimiter.checkAllowed("login:" + clientIp(httpRequest));
+        AuthResponse response = authService.login(request);
+        return ResponseEntity.ok(ApiResponse.success(response, "Login successful"));
+    }
+
+    @PostMapping("/register")
+    public ResponseEntity<ApiResponse<AuthResponse>> register(@Valid @RequestBody RegisterRequest request, HttpServletRequest httpRequest) {
+        rateLimiter.checkAllowed("register:" + clientIp(httpRequest));
+        AuthResponse response = authService.register(request);
+        return ResponseEntity.ok(ApiResponse.success(response, "Account created successfully"));
+    }
+
+    // Render (and most hosts) sit behind a proxy, so the real client IP arrives via
+    // X-Forwarded-For rather than the raw socket address.
+    private String clientIp(HttpServletRequest request) {
+        String forwardedFor = request.getHeader("X-Forwarded-For");
+        if (forwardedFor != null && !forwardedFor.isBlank()) {
+            return forwardedFor.split(",")[0].trim();
+        }
+        return request.getRemoteAddr();
+    }
+}
