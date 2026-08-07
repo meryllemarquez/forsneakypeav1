@@ -13,7 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping({"/api/auth", "/api/v1/auth"}) // ✅ Supports both /api/auth and /api/v1/auth!
+@RequestMapping({"/api/auth", "/api/v1/auth", "/auth"}) // ✅ Supports both /api/auth and /api/v1/auth!
 @RequiredArgsConstructor
 public class AuthController {
 
