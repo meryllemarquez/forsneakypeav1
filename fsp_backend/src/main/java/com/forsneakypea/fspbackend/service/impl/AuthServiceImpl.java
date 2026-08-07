@@ -12,11 +12,13 @@ import com.forsneakypea.fspbackend.service.AuthService;
 import com.forsneakypea.fspbackend.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.UUID; // Added import for UUID
 
 @Service
 @RequiredArgsConstructor
@@ -28,8 +30,9 @@ public class AuthServiceImpl implements AuthService {
     private final JwtUtil jwtUtil;
     private final ActivityLogService activityLogService;
 
-    // Master passcode required to unlock account registration
-    private static final String MASTER_PASSWORD = "0617";
+    // Added default value :"" to prevent Spring Boot startup crash if property is missing
+    @Value("${app.master-password:}")
+    private String masterPassword;
 
     /**
      * Authenticates an existing user and returns a signed JWT token.
@@ -49,20 +52,18 @@ public class AuthServiceImpl implements AuthService {
             throw new IllegalArgumentException("Oops! Incorrect username or password, love. 💕");
         }
 
-        // 3. Update last login timestamp safely without crashing if database column is missing
-        try {
-            user.setLastLoginAt(LocalDateTime.now());
-            userRepository.save(user);
-        } catch (Exception e) {
-            log.warn("Could not update lastLoginAt for user {}: {}", user.getUsername(), e.getMessage());
-        }
+        // 3. Update last login timestamp safely
+        user.setLastLoginAt(LocalDateTime.now());
+        userRepository.save(user);
 
         // 4. Ensure role is non-null to prevent NullPointerException
         Role userRole = user.getRole() != null ? user.getRole() : Role.ROLE_USER;
 
         // 5. Generate signed JWT token
         String token = jwtUtil.generateToken(user.getUsername(), userRole.name());
-        activityLogService.log(user.getId(), "USER_LOGIN", RelatedEntityType.USER, null);
+        
+        // Log user login activity (Converting Long user.getId() to UUID)
+        activityLogService.log(user.getId(), "USER_LOGIN", RelatedEntityType.USER, new UUID(0L, user.getId()));
 
         return AuthResponse.builder()
                 .id(user.getId())
@@ -79,7 +80,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     /**
-     * Registers a new user account protected by master passcode 0617.
+     * Registers a new user account protected by the configured master passcode.
      *
      * @param request Contains master passcode, name, username, and password.
      * @return AuthResponse containing JWT token and newly created user profile details.
@@ -87,8 +88,8 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional
     public AuthResponse register(RegisterRequest request) {
-        // 1. Verify master passcode (0617)
-        if (!MASTER_PASSWORD.equals(request.getMasterPassword())) {
+        // 1. Safe master passcode verification (prevents NullPointerException)
+        if (masterPassword == null || masterPassword.isEmpty() || !masterPassword.equals(request.getMasterPassword())) {
             throw new IllegalArgumentException("Invalid master passcode. Cannot create account.");
         }
 
@@ -106,12 +107,14 @@ public class AuthServiceImpl implements AuthService {
                 .active(true)
                 .build();
 
-        userRepository.save(user);
+        user = userRepository.save(user);
 
         // 4. Generate signed JWT token for the new user
         Role userRole = user.getRole() != null ? user.getRole() : Role.ROLE_USER;
         String token = jwtUtil.generateToken(user.getUsername(), userRole.name());
-        activityLogService.log(user.getId(), "USER_REGISTERED", RelatedEntityType.USER, null);
+        
+        // Log user registered activity (Converting Long user.getId() to UUID)
+        activityLogService.log(user.getId(), "USER_REGISTERED", RelatedEntityType.USER, new UUID(0L, user.getId()));
 
         return AuthResponse.builder()
                 .id(user.getId())
