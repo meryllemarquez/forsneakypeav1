@@ -44,21 +44,19 @@ public class SecurityConfig {
             .cors(Customizer.withDefaults())
             .csrf(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(auth -> auth
-                // 1. Permit internal Spring Boot error dispatches (prevents 401 on internal errors)
+                // Allow internal dispatches (error handling)
                 .dispatcherTypeMatchers(DispatcherType.ERROR, DispatcherType.FORWARD).permitAll()
-
-                // 2. Permit CORS preflight OPTIONS requests
+                // Permit preflight OPTIONS
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-
-                // 3. Public Auth & Error Endpoints using strict AntPathMatchers
+                // Permit public authentication endpoints (wildcard matched)
                 .requestMatchers(
                     AntPathRequestMatcher.antMatcher("/api/v1/auth/**"),
                     AntPathRequestMatcher.antMatcher("/api/auth/**"),
+                    AntPathRequestMatcher.antMatcher("/**/auth/**"),
                     AntPathRequestMatcher.antMatcher("/error"),
                     AntPathRequestMatcher.antMatcher("/error/**")
                 ).permitAll()
-
-                // 4. Authenticated Endpoints
+                // Authenticated endpoints
                 .requestMatchers(
                     AntPathRequestMatcher.antMatcher("/api/memories/**"),
                     AntPathRequestMatcher.antMatcher("/api/v1/memories/**"),
@@ -71,8 +69,6 @@ public class SecurityConfig {
                     AntPathRequestMatcher.antMatcher("/api/notifications/**"),
                     AntPathRequestMatcher.antMatcher("/api/v1/notifications/**")
                 ).authenticated()
-
-                // 5. Role-based Endpoints
                 .requestMatchers(
                     AntPathRequestMatcher.antMatcher("/api/admin/**"),
                     AntPathRequestMatcher.antMatcher("/api/v1/admin/**")
@@ -81,7 +77,6 @@ public class SecurityConfig {
                     AntPathRequestMatcher.antMatcher("/api/profile/**"),
                     AntPathRequestMatcher.antMatcher("/api/v1/profile/**")
                 ).hasAuthority("ROLE_USER")
-
                 .anyRequest().authenticated()
             )
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
