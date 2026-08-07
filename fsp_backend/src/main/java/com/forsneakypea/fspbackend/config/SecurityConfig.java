@@ -1,6 +1,7 @@
 package com.forsneakypea.fspbackend.config;
 
 import com.forsneakypea.fspbackend.security.JwtAuthenticationFilter;
+import jakarta.servlet.DispatcherType;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,6 +17,7 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -33,7 +35,6 @@ public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthFilter;
     private final AuthenticationProvider authenticationProvider;
 
-    // Reads both app.allowed-origins AND ALLOWED_ORIGINS env variables
     @Value("${app.allowed-origins:${ALLOWED_ORIGINS:}}")
     private String extraAllowedOrigins;
 
@@ -43,22 +44,44 @@ public class SecurityConfig {
             .cors(Customizer.withDefaults())
             .csrf(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(auth -> auth
-                // 1. Permit Preflight CORS OPTIONS
+                // 1. Permit internal Spring Boot error dispatches (prevents 401 on internal errors)
+                .dispatcherTypeMatchers(DispatcherType.ERROR, DispatcherType.FORWARD).permitAll()
+
+                // 2. Permit CORS preflight OPTIONS requests
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                // 2. Permit Auth Endpoints & Error Pages
-                .requestMatchers("/api/v1/auth/**", "/api/auth/**", "/error", "/error/**").permitAll()
-                // 3. Protect Memory Module
-                .requestMatchers("/api/memories/**", "/api/v1/memories/**").authenticated()
-                // 4. Protect Date Bucket List Module
-                .requestMatchers("/api/dates/**", "/api/v1/dates/**", "/api/date-categories/**", "/api/v1/date-categories/**").authenticated()
-                // 5. Protect Love Board Module
-                .requestMatchers("/api/love-board/**", "/api/v1/love-board/**").authenticated()
-                // 6. Protect Admin Control Center & Notifications
-                .requestMatchers("/api/admin/**", "/api/v1/admin/**").hasAuthority("ROLE_ADMIN")
-                .requestMatchers("/api/notifications/**", "/api/v1/notifications/**").authenticated()
-                // 7. Protect Profile Customization Module
-                .requestMatchers("/api/profile/**", "/api/v1/profile/**").hasAuthority("ROLE_USER")
-                // 8. Authenticate everything else
+
+                // 3. Public Auth & Error Endpoints using strict AntPathMatchers
+                .requestMatchers(
+                    AntPathRequestMatcher.antMatcher("/api/v1/auth/**"),
+                    AntPathRequestMatcher.antMatcher("/api/auth/**"),
+                    AntPathRequestMatcher.antMatcher("/error"),
+                    AntPathRequestMatcher.antMatcher("/error/**")
+                ).permitAll()
+
+                // 4. Authenticated Endpoints
+                .requestMatchers(
+                    AntPathRequestMatcher.antMatcher("/api/memories/**"),
+                    AntPathRequestMatcher.antMatcher("/api/v1/memories/**"),
+                    AntPathRequestMatcher.antMatcher("/api/dates/**"),
+                    AntPathRequestMatcher.antMatcher("/api/v1/dates/**"),
+                    AntPathRequestMatcher.antMatcher("/api/date-categories/**"),
+                    AntPathRequestMatcher.antMatcher("/api/v1/date-categories/**"),
+                    AntPathRequestMatcher.antMatcher("/api/love-board/**"),
+                    AntPathRequestMatcher.antMatcher("/api/v1/love-board/**"),
+                    AntPathRequestMatcher.antMatcher("/api/notifications/**"),
+                    AntPathRequestMatcher.antMatcher("/api/v1/notifications/**")
+                ).authenticated()
+
+                // 5. Role-based Endpoints
+                .requestMatchers(
+                    AntPathRequestMatcher.antMatcher("/api/admin/**"),
+                    AntPathRequestMatcher.antMatcher("/api/v1/admin/**")
+                ).hasAuthority("ROLE_ADMIN")
+                .requestMatchers(
+                    AntPathRequestMatcher.antMatcher("/api/profile/**"),
+                    AntPathRequestMatcher.antMatcher("/api/v1/profile/**")
+                ).hasAuthority("ROLE_USER")
+
                 .anyRequest().authenticated()
             )
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -79,7 +102,6 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        // Automatically allows localhost AND any *.vercel.app domain
         List<String> allowedOriginPatterns = new ArrayList<>(List.of(
             "http://localhost:*",
             "http://127.0.0.1:*",

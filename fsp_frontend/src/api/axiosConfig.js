@@ -20,18 +20,27 @@ const getStoredToken = () => {
       const userObj = JSON.parse(localStorage.getItem('user') || '{}');
       token = userObj.token || userObj.jwt;
     } catch {
-      // Ignore JSON parse errors cleanly without unused variable
+      // Ignore JSON parse errors cleanly
     }
   }
   return token;
 };
 
-// Request Interceptor: Attach JWT Token if available
+// Request Interceptor: Attach JWT Token ONLY if NOT calling public auth routes
 api.interceptors.request.use(
   (config) => {
-    const token = getStoredToken();
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+    const isAuthRoute = config.url?.includes('/auth/login') || config.url?.includes('/auth/register');
+    
+    // Wag mag-attach ng Authorization header kapag nag-lologin/register
+    if (!isAuthRoute) {
+      const token = getStoredToken();
+      if (token) {
+        if (config.headers.set) {
+          config.headers.set('Authorization', `Bearer ${token}`);
+        } else {
+          config.headers['Authorization'] = `Bearer ${token}`;
+        }
+      }
     }
     return config;
   },

@@ -25,12 +25,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final UserDetailsService userDetailsService;
 
     /**
-     * Explicitly bypass JWT filter execution for public authentication endpoints.
+     * Explicitly bypass JWT filter execution for public authentication endpoints and preflight requests.
      */
     @Override
     protected boolean shouldNotFilter(@NonNull HttpServletRequest request) {
-        String path = request.getServletPath();
-        return path.startsWith("/api/v1/auth/") || path.startsWith("/api/auth/");
+        String path = request.getRequestURI();
+        return "OPTIONS".equalsIgnoreCase(request.getMethod())
+                || path.contains("/api/v1/auth/")
+                || path.contains("/api/auth/");
     }
 
     @Override
