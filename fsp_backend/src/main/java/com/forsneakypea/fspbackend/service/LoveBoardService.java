@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -38,11 +39,16 @@ public class LoveBoardService {
 
     @Transactional(readOnly = true)
     public List<LoveNoteDTO> getVisibleNotes(Long currentUserId) {
+        // Author names are batch-loaded once instead of once per note (see
+        // mapNoteToDTO's authorNames-map overload).
+        Map<Long, String> authorNames = userRepository.findAll().stream()
+                .collect(Collectors.toMap(User::getId, User::getName));
+
         return noteRepository.findAllByOrderByUpdatedAtDesc().stream()
                 .filter(note -> !Boolean.TRUE.equals(note.getIsPrivate())
                         || note.getCreatedBy() == null
                         || note.getCreatedBy().equals(currentUserId))
-                .map(note -> mapNoteToDTO(note, currentUserId))
+                .map(note -> mapNoteToDTO(note, currentUserId, authorNames))
                 .collect(Collectors.toList());
     }
 
@@ -233,7 +239,18 @@ public class LoveBoardService {
                     .map(User::getName)
                     .orElse("Unknown");
         }
+        return mapNoteToDTO(note, currentUserId, authorName);
+    }
 
+    // Bulk-lookup variant used by getVisibleNotes() to avoid one findById() per note.
+    private LoveNoteDTO mapNoteToDTO(LoveNote note, Long currentUserId, Map<Long, String> authorNames) {
+        String authorName = note.getCreatedBy() != null
+                ? authorNames.getOrDefault(note.getCreatedBy(), "Unknown")
+                : null;
+        return mapNoteToDTO(note, currentUserId, authorName);
+    }
+
+    private LoveNoteDTO mapNoteToDTO(LoveNote note, Long currentUserId, String authorName) {
         return LoveNoteDTO.builder()
                 .id(note.getId())
                 .title(note.getTitle())

@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping({"/api/memories", "/api/v1/memories"})
+@RequestMapping({"/api/memories", "/api/v1/memories", "/memories"})
 @RequiredArgsConstructor
 public class MemoryController {
 

@@ -711,7 +711,7 @@ export default function MemoriesPage() {
                   >
                     <div className={styles.coverImageWrapper}>
                       {folder.coverImageUrl ? (
-                        <img src={folder.coverImageUrl} alt={folder.name} className={styles.coverImage} />
+                        <img src={folder.coverImageUrl} alt={folder.name} className={styles.coverImage} loading="lazy" />
                       ) : (
                         <div className={styles.placeholderCover}>
                           <FolderIcon />
@@ -816,6 +816,7 @@ export default function MemoriesPage() {
                       src={photo.photoUrl}
                       alt={photo.caption || 'Memory'}
                       className={styles.photoImage}
+                      loading="lazy"
                       onLoad={(e) => recordOrientation(photo, e)}
                     />
                     <div className={styles.photoCardOverlay}>

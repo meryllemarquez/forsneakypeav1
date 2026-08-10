@@ -74,6 +74,7 @@ export default function HomePage() {
   const [upcomingDates, setUpcomingDates] = useState([]);
   const [latestNote, setLatestNote] = useState(null);
   const [loadingContent, setLoadingContent] = useState(true);
+  const [contentError, setContentError] = useState('');
 
   useEffect(() => {
     let isMounted = true;
@@ -109,6 +110,12 @@ export default function HomePage() {
         setLatestNote(visible[0] || null);
       }
 
+      // All three independent sections failed at once — almost certainly the
+      // backend is unreachable rather than one section being empty, so say so
+      // instead of silently showing the "nothing here yet" placeholders.
+      const allFailed = [foldersResult, datesResult, notesResult].every((r) => r.status === 'rejected');
+      setContentError(allFailed ? "We couldn't reach the server just now. Pull-to-refresh or try again in a moment." : '');
+
       setLoadingContent(false);
     };
 
@@ -121,6 +128,8 @@ export default function HomePage() {
   return (
     <div className={styles.pageContainer}>
       <Navbar />
+
+      {contentError && <div className={styles.errorBanner}>{contentError}</div>}
 
       <main>
         {/* HERO */}

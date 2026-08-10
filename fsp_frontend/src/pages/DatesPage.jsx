@@ -929,7 +929,7 @@ export default function DatesPage() {
       >
         <div className={styles.cardCover}>
           {date.coverImageUrl ? (
-            <img src={date.coverImageUrl} alt={date.title} className={styles.cardCoverImage} />
+            <img src={date.coverImageUrl} alt={date.title} className={styles.cardCoverImage} loading="lazy" />
           ) : (
             <div className={styles.cardCoverGradient} style={{ background: `linear-gradient(155deg, ${tint} 0%, #1F1F1F 130%)` }}>
               <span className={styles.cardCoverEmoji}>{emojiForCategory(date.categoryName)}</span>

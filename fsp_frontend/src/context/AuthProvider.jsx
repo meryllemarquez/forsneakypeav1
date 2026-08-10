@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { AuthContext } from './AuthContext';
+import { notificationService } from '../services/notificationService';
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(() => {
@@ -29,6 +30,7 @@ export function AuthProvider({ children }) {
     localStorage.removeItem('fsp_user');
     localStorage.removeItem('token');
     localStorage.removeItem('user');
+    notificationService.clearCache();
     setUser(null);
   };
 

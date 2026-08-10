@@ -26,6 +26,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.OffsetDateTime;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -90,7 +92,23 @@ public class DateService {
         }
 
         Set<UUID> favoriteIds = favoriteDateIds(currentUserId);
-        return dates.stream().map(d -> mapToDTO(d, favoriteIds)).collect(Collectors.toList());
+
+        // Batch the per-row lookups that mapToDTO would otherwise repeat once per
+        // date (checklist counts, creator name) into two queries total for the
+        // whole list, instead of 2N queries.
+        List<UUID> dateIds = dates.stream().map(DateEntry::getId).collect(Collectors.toList());
+        Map<UUID, ChecklistItemRepository.ChecklistCountRow> checklistCounts = dateIds.isEmpty()
+                ? Map.of()
+                : checklistItemRepository.countByDateIds(dateIds).stream()
+                        .collect(Collectors.toMap(ChecklistItemRepository.ChecklistCountRow::getDateId, r -> r));
+
+        List<Long> creatorIds = dates.stream().map(DateEntry::getCreatedBy).filter(Objects::nonNull).distinct().collect(Collectors.toList());
+        Map<Long, String> creatorNames = creatorIds.isEmpty()
+                ? Map.of()
+                : userRepository.findAllById(creatorIds).stream()
+                        .collect(Collectors.toMap(User::getId, User::getName));
+
+        return dates.stream().map(d -> mapToDTOBulk(d, favoriteIds, checklistCounts, creatorNames)).collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
@@ -267,8 +285,41 @@ public class DateService {
         return mapToDTO(date, favoriteIds, includeChecklist);
     }
 
-    private DateEntryDTO mapToDTO(DateEntry date, Set<UUID> favoriteIds) {
-        return mapToDTO(date, favoriteIds, false);
+    // List-endpoint variant: takes pre-batched checklist counts and creator names
+    // instead of querying per row (see getDates()).
+    private DateEntryDTO mapToDTOBulk(DateEntry date, Set<UUID> favoriteIds,
+                                       Map<UUID, ChecklistItemRepository.ChecklistCountRow> checklistCounts,
+                                       Map<Long, String> creatorNames) {
+        ChecklistItemRepository.ChecklistCountRow counts = checklistCounts.get(date.getId());
+
+        return DateEntryDTO.builder()
+                .id(date.getId())
+                .categoryId(date.getCategory() != null ? date.getCategory().getId() : null)
+                .categoryName(date.getCategory() != null ? date.getCategory().getName() : null)
+                .categoryColorHex(date.getCategory() != null ? date.getCategory().getColorHex() : null)
+                .title(date.getTitle())
+                .description(date.getDescription())
+                .location(date.getLocation())
+                .plannedDate(date.getPlannedDate())
+                .plannedTime(date.getPlannedTime())
+                .durationMinutes(date.getDurationMinutes())
+                .activityType(date.getActivityType())
+                .travelMethod(date.getTravelMethod())
+                .specialOccasion(date.getSpecialOccasion())
+                .status(date.getStatus())
+                .priority(date.getPriority())
+                .reservationStatus(date.getReservationStatus())
+                .estimatedCost(date.getEstimatedCost())
+                .coverImageUrl(date.getCoverImageUrl())
+                .isArchived(date.getIsArchived())
+                .isFavorite(favoriteIds.contains(date.getId()))
+                .createdBy(date.getCreatedBy())
+                .createdByName(date.getCreatedBy() != null ? creatorNames.get(date.getCreatedBy()) : null)
+                .checklistCompletedCount(counts != null ? (int) counts.getCompleted() : 0)
+                .checklistTotalCount(counts != null ? (int) counts.getTotal() : 0)
+                .createdAt(date.getCreatedAt())
+                .updatedAt(date.getUpdatedAt())
+                .build();
     }
 
     private DateEntryDTO mapToDTO(DateEntry date, Set<UUID> favoriteIds, boolean includeChecklist) {

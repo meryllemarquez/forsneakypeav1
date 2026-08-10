@@ -17,7 +17,7 @@ import java.time.OffsetDateTime;
 import java.util.UUID;
 
 @RestController
-@RequestMapping({"/api/activity-logs", "/api/v1/activity-logs"})
+@RequestMapping({"/api/activity-logs", "/api/v1/activity-logs", "/activity-logs"})
 @RequiredArgsConstructor
 @PreAuthorize("hasAuthority('ROLE_ADMIN')")
 public class ActivityLogController {

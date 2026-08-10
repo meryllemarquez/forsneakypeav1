@@ -1,13 +1,16 @@
 package com.forsneakypea.fspbackend.repository;
 
+import com.forsneakypea.fspbackend.entity.Role;
 import com.forsneakypea.fspbackend.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> { // ✅ Long
     Optional<User> findByUsername(String username);
     boolean existsByUsername(String username);
+    List<User> findAllByRoleAndIdNot(Role role, Long id);
 }

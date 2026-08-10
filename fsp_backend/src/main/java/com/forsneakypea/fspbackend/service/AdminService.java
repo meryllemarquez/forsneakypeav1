@@ -46,9 +46,12 @@ public class AdminService {
     public DashboardStatsDTO getDashboardStats() {
         List<MemoryFolder> folders = memoryFolderRepository.findAllByOrderByCreatedAtDesc();
         List<LoveNote> notes = loveNoteRepository.findAllByOrderByUpdatedAtDesc();
+        // Fetched once and reused below (createDashboardStats used to call this
+        // same query 3 separate times).
+        List<DateEntry> allDates = dateEntryRepository.findAllByDeletedAtIsNullOrderByCreatedAtDesc();
         long archivedFolders = folders.stream().filter(f -> Boolean.TRUE.equals(f.getIsArchived())).count();
         long archivedNotes = notes.stream().filter(n -> Boolean.TRUE.equals(n.getIsArchived())).count();
-        long archivedDates = dateEntryRepository.findAllByDeletedAtIsNullOrderByCreatedAtDesc().stream()
+        long archivedDates = allDates.stream()
                 .filter(d -> Boolean.TRUE.equals(d.getIsArchived())).count();
 
         long unread = notificationRepository.countByIsReadAndDeletedAtIsNull(false);
@@ -80,7 +83,6 @@ public class AdminService {
                 .findAll(PageRequest.of(0, 6, Sort.by(Sort.Direction.DESC, "createdAt")))
                 .getContent();
 
-        List<DateEntry> allDates = dateEntryRepository.findAllByDeletedAtIsNullOrderByCreatedAtDesc();
         Map<String, Long> statusBreakdown = allDates.stream()
                 .collect(Collectors.groupingBy(d -> d.getStatus().name(), Collectors.counting()));
 
@@ -100,7 +102,7 @@ public class AdminService {
                 .totalUsers(userRepository.count())
                 .totalMemories(folders.size())
                 .totalLoveLetters(notes.size())
-                .totalDatePlans(dateEntryRepository.findAllByDeletedAtIsNullOrderByCreatedAtDesc().size())
+                .totalDatePlans(allDates.size())
                 .pendingNotifications(unread)
                 .unreadNotifications(unread)
                 .archivedContent(archivedFolders + archivedNotes + archivedDates)

@@ -17,7 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -56,10 +55,7 @@ public class NotificationService {
         String actorName = userRepository.findById(actorUserId).map(User::getName).orElse("Your partner");
         String[] titleAndMessage = personalize(actorName, type, entityLabel);
 
-        List<User> recipients = userRepository.findAll().stream()
-                .filter(u -> u.getRole() == Role.ROLE_USER)
-                .filter(u -> !u.getId().equals(actorUserId))
-                .collect(Collectors.toList());
+        List<User> recipients = userRepository.findAllByRoleAndIdNot(Role.ROLE_USER, actorUserId);
         for (User recipient : recipients) {
             create(recipient.getId(), type, titleAndMessage[0], titleAndMessage[1], relatedEntityType, relatedEntityId);
         }

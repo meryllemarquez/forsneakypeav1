@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -34,11 +35,24 @@ public class MemoryService {
 
     @Transactional(readOnly = true)
     public List<FolderDTO> getAllFolders(boolean includeArchived) {
-        List<MemoryFolder> folders = includeArchived ? 
-                folderRepository.findAllByOrderByCreatedAtDesc() : 
+        List<MemoryFolder> folders = includeArchived ?
+                folderRepository.findAllByOrderByCreatedAtDesc() :
                 folderRepository.findAllByIsArchivedOrderByCreatedAtDesc(false);
 
-        return folders.stream().map(this::mapFolderToDTO).collect(Collectors.toList());
+        // List view only ever needs each folder's photo COUNT (the grid shows
+        // "N Photos" badges, never the photo array itself — see FolderDTO usage
+        // in MemoriesPage.jsx). Batch-count instead of lazy-initializing every
+        // folder's full photos collection (which was both an N+1 and a payload-
+        // bloat problem: every photo's full row was being serialized into every
+        // folder in the list).
+        List<UUID> folderIds = folders.stream().map(MemoryFolder::getId).collect(Collectors.toList());
+        Map<UUID, Long> photoCounts = folderIds.isEmpty()
+                ? Map.of()
+                : photoRepository.countByFolderIds(folderIds).stream()
+                        .collect(Collectors.toMap(MemoryPhotoRepository.FolderPhotoCountRow::getFolderId,
+                                MemoryPhotoRepository.FolderPhotoCountRow::getTotal));
+
+        return folders.stream().map(folder -> mapFolderToListDTO(folder, photoCounts)).collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
@@ -289,6 +303,29 @@ public class MemoryService {
         return photoRepository.findByIsFavoriteTrueOrderByCreatedAtDesc().stream()
                 .map(this::mapPhotoToDTO)
                 .collect(Collectors.toList());
+    }
+
+    // List-endpoint variant: uses a pre-batched photo count instead of touching
+    // the lazy `photos` collection, and omits the photo array entirely (the
+    // grid view never reads it — see getAllFolders()).
+    private FolderDTO mapFolderToListDTO(MemoryFolder folder, Map<UUID, Long> photoCounts) {
+        return FolderDTO.builder()
+                .id(folder.getId())
+                .name(folder.getName())
+                .description(folder.getDescription())
+                .accentColor(folder.getAccentColor())
+                .iconStyle(folder.getIconStyle())
+                .coverImageUrl(folder.getCoverImageUrl())
+                .isArchived(folder.getIsArchived())
+                .photoCount(photoCounts.getOrDefault(folder.getId(), 0L).intValue())
+                .createdAt(folder.getCreatedAt())
+                .eventDate(folder.getEventDate())
+                .isCalendarHighlight(folder.getIsCalendarHighlight())
+                .highlightPhotoId(folder.getHighlightPhotoId())
+                .highlightPhotoPositionX(folder.getHighlightPhotoPositionX())
+                .highlightPhotoPositionY(folder.getHighlightPhotoPositionY())
+                .photos(List.of())
+                .build();
     }
 
     private FolderDTO mapFolderToDTO(MemoryFolder folder) {

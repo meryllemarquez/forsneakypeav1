@@ -61,6 +61,18 @@ export default function AuthPage() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isModalOpen, closeModal]);
 
+  // A 401 from any authenticated request redirects here and flags this so we
+  // can surface *why* the login modal is open instead of silently landing
+  // on the marketing page (see axiosConfig.js's response interceptor).
+  useEffect(() => {
+    if (sessionStorage.getItem('fsp_session_expired')) {
+      sessionStorage.removeItem('fsp_session_expired');
+      setMode('LOGIN');
+      setError('Your session expired — please log in again. 💕');
+      setIsModalOpen(true);
+    }
+  }, []);
+
   // 1. Handle Standard Login with Cute Error Phrase
   const handleLoginSubmit = async (e) => {
     e.preventDefault();

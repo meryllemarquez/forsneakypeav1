@@ -114,6 +114,9 @@ export default function ProfilePage() {
   const [avatarBusy, setAvatarBusy] = useState(false);
   const [pendingCropFile, setPendingCropFile] = useState(null);
 
+  // A 401 here is handled globally by the axios response interceptor (clears
+  // stored credentials and redirects to /auth), so this only needs to cover
+  // the "still logged in but the request failed" case.
   const loadProfile = async () => {
     setLoading(true);
     setLoadError('');
@@ -122,12 +125,9 @@ export default function ProfilePage() {
       setProfile(data);
       setForm(toFormState(data));
     } catch (err) {
-      if (err?.response?.status === 401) {
-        addToast('Your session expired — please log in again.', 'error');
-        navigate('/auth');
-        return;
+      if (err?.response?.status !== 401) {
+        setLoadError(friendlyErrorMessage(err, 'Could not load your profile. Please try again.'));
       }
-      setLoadError(friendlyErrorMessage(err, 'Could not load your profile. Please try again.'));
     } finally {
       setLoading(false);
     }
@@ -145,12 +145,9 @@ export default function ProfilePage() {
         }
       } catch (err) {
         if (!isMounted) return;
-        if (err?.response?.status === 401) {
-          addToast('Your session expired — please log in again.', 'error');
-          navigate('/auth');
-          return;
+        if (err?.response?.status !== 401) {
+          setLoadError(friendlyErrorMessage(err, 'Could not load your profile. Please try again.'));
         }
-        setLoadError(friendlyErrorMessage(err, 'Could not load your profile. Please try again.'));
       } finally {
         if (isMounted) setLoading(false);
       }

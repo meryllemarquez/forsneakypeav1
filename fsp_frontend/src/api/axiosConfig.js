@@ -47,7 +47,7 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Response Interceptor: Detailed Debugging
+// Response Interceptor: Detailed Debugging + centralized session-expiry handling.
 api.interceptors.response.use(
   (response) => response,
   (error) => {
@@ -59,6 +59,22 @@ api.interceptors.response.use(
       data: error.response?.data,
       message: error.message,
     });
+
+    // A 401 on any authenticated call means the JWT is missing/expired/invalid.
+    // Previously each page had to detect this and redirect on its own (most
+    // didn't), leaving the app stuck showing a generic load error while
+    // silently unauthenticated. Handle it once, centrally: drop the stale
+    // credentials and send the user back to login with an explanation.
+    const isAuthRoute = error.config?.url?.includes('/auth/login') || error.config?.url?.includes('/auth/register');
+    if (error.response?.status === 401 && !isAuthRoute && !window.location.pathname.startsWith('/auth')) {
+      localStorage.removeItem('fsp_token');
+      localStorage.removeItem('fsp_user');
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      sessionStorage.setItem('fsp_session_expired', '1');
+      window.location.href = '/auth';
+    }
+
     return Promise.reject(error);
   }
 );
