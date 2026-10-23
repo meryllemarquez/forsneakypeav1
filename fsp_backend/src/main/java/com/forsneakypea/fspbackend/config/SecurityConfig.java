@@ -54,7 +54,8 @@ public class SecurityConfig {
                     AntPathRequestMatcher.antMatcher("/api/auth/**"),
                     AntPathRequestMatcher.antMatcher("/**/auth/**"),
                     AntPathRequestMatcher.antMatcher("/error"),
-                    AntPathRequestMatcher.antMatcher("/error/**")
+                    AntPathRequestMatcher.antMatcher("/error/**"),
+                    AntPathRequestMatcher.antMatcher(HttpMethod.GET, "/actuator/health")
                 ).permitAll()
                 // Authenticated endpoints
                 .requestMatchers(
