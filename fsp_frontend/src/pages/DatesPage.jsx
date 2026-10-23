@@ -2,8 +2,9 @@ import { useState, useEffect, useMemo, useCallback, useRef, memo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence, Reorder, useDragControls } from 'framer-motion';
 import { dateService } from '../services/dateService';
-import { checklistService } from '../services/checklistService';
-import api from '../api/axiosConfig';
+import { useDates, useDateCategories, useCacheSetter } from '../queries/queries';
+import { useDateMutations, useChecklistMutations } from '../queries/mutations';
+import { queryKeys } from '../queries/queryKeys';
 import styles from './DatesPage.module.css';
 
 /* ================================================================
@@ -462,9 +463,16 @@ export default function DatesPage() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const [dates, setDates] = useState([]);
-  const [categories, setCategories] = useState([]);
-  const [loading, setLoading] = useState(true);
+  // Dates and categories come from the shared query cache. `setDates` keeps the optimistic
+  // updates below working by writing straight into that cache.
+  const datesQuery = useDates(true);
+  const dates = useMemo(() => datesQuery.data ?? [], [datesQuery.data]);
+  const setDates = useCacheSetter(queryKeys.dates(true));
+  const loading = datesQuery.isPending;
+  const loadError = datesQuery.isError ? 'Unable to load your bucket list. Please check the backend connection.' : '';
+  const { data: categories = [] } = useDateCategories();
+  const dateMutations = useDateMutations();
+  const checklistMutations = useChecklistMutations();
   const [errorMessage, setErrorMessage] = useState('');
 
   const [statusFilter, setStatusFilter] = useState('ALL');
@@ -480,33 +488,6 @@ export default function DatesPage() {
 
   const [confirmState, setConfirmState] = useState(null);
   const [confirmBusy, setConfirmBusy] = useState(false);
-
-  const loadDates = useCallback(async () => {
-    try {
-      setErrorMessage('');
-      const data = await dateService.getDates({ includeArchived: true });
-      setDates(data);
-    } catch (err) {
-      console.error('Failed to load dates', err);
-      setErrorMessage('Unable to load your bucket list. Please check the backend connection.');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  const loadCategories = useCallback(async () => {
-    try {
-      const res = await api.get('/date-categories');
-      setCategories(res.data?.data ?? []);
-    } catch (err) {
-      console.error('Failed to load categories', err);
-    }
-  }, []);
-
-  useEffect(() => {
-    loadDates();
-    loadCategories();
-  }, [loadDates, loadCategories]);
 
   /* ---------------------------------------------------------------
      DERIVED: filters + stats (computed client-side from one fetch)
@@ -567,7 +548,7 @@ export default function DatesPage() {
     const nextFavorite = !date.isFavorite;
     setDates((prev) => prev.map((d) => (d.id === date.id ? { ...d, isFavorite: nextFavorite } : d)));
     try {
-      await dateService.setFavorite(date.id, nextFavorite);
+      await dateMutations.setFavorite(date.id, nextFavorite);
     } catch (err) {
       console.error('Failed to toggle favorite', err);
       setDates((prev) => prev.map((d) => (d.id === date.id ? { ...d, isFavorite: date.isFavorite } : d)));
@@ -578,11 +559,10 @@ export default function DatesPage() {
     e?.stopPropagation();
     try {
       if (date.isArchived) {
-        await dateService.unarchiveDate(date.id);
+        await dateMutations.unarchiveDate(date.id);
       } else {
-        await dateService.archiveDate(date.id);
+        await dateMutations.archiveDate(date.id);
       }
-      await loadDates();
       if (drawerDate?.id === date.id) await refreshDrawer(date.id);
     } catch (err) {
       console.error('Failed to toggle archive state', err);
@@ -593,8 +573,7 @@ export default function DatesPage() {
   const handleDuplicate = async (date, e) => {
     e?.stopPropagation();
     try {
-      await dateService.duplicateDate(date.id);
-      await loadDates();
+      await dateMutations.duplicateDate(date.id);
     } catch (err) {
       console.error('Failed to duplicate date', err);
       setErrorMessage('Could not duplicate that date. Please try again.');
@@ -608,9 +587,8 @@ export default function DatesPage() {
       message: `"${date.title}" will be removed from your bucket list, love. This one can't be undone from here.`,
       confirmLabel: 'Delete Date',
       onConfirm: async () => {
-        await dateService.deleteDate(date.id);
+        await dateMutations.deleteDate(date.id);
         if (drawerDate?.id === date.id) setDrawerDate(null);
-        await loadDates();
       },
     });
   };
@@ -710,7 +688,7 @@ export default function DatesPage() {
     setChecklistDraft('');
 
     try {
-      const created = await checklistService.createItem(drawerDate.id, { title });
+      const created = await checklistMutations.createItem(drawerDate.id, { title });
       setDrawerDate((prev) => (prev ? { ...prev, checklistItems: [...(prev.checklistItems || []), created] } : prev));
       patchDateInList(drawerDate.id, { checklistTotalCount: (drawerDate.checklistTotalCount || 0) + 1 });
     } catch (err) {
@@ -734,7 +712,7 @@ export default function DatesPage() {
     });
 
     try {
-      await checklistService.toggleItem(drawerDate.id, item.id, nextCompleted);
+      await checklistMutations.toggleItem(drawerDate.id, item.id, nextCompleted);
     } catch (err) {
       console.error('Failed to update checklist item', err);
       rollbackChecklist(snapshot, 'Could not update that step. Please try again.');
@@ -758,7 +736,7 @@ export default function DatesPage() {
     });
 
     try {
-      await checklistService.deleteItem(drawerDate.id, item.id);
+      await checklistMutations.deleteItem(drawerDate.id, item.id);
     } catch (err) {
       console.error('Failed to delete checklist item', err);
       rollbackChecklist(snapshot, 'Could not remove that step. Please try again.');
@@ -775,7 +753,7 @@ export default function DatesPage() {
     } : prev);
 
     try {
-      await checklistService.updateItem(drawerDate.id, itemId, { title });
+      await checklistMutations.updateItem(drawerDate.id, itemId, { title });
     } catch (err) {
       console.error('Failed to rename checklist item', err);
       rollbackChecklist(snapshot, 'Could not save that title. Please try again.');
@@ -792,7 +770,7 @@ export default function DatesPage() {
     } : prev);
 
     try {
-      await checklistService.updateItem(drawerDate.id, itemId, details);
+      await checklistMutations.updateItem(drawerDate.id, itemId, details);
     } catch (err) {
       console.error('Failed to update checklist item details', err);
       rollbackChecklist(snapshot, 'Could not save those details. Please try again.');
@@ -812,7 +790,7 @@ export default function DatesPage() {
     const orderedIds = checklistOrderRef.current.map((i) => i.id);
     if (orderedIds.length === 0) return;
     try {
-      await checklistService.reorderItems(drawerDate.id, orderedIds);
+      await checklistMutations.reorderItems(drawerDate.id, orderedIds);
     } catch (err) {
       console.error('Failed to save new checklist order', err);
       setErrorMessage('Could not save the new order. Please try again.');
@@ -886,12 +864,11 @@ export default function DatesPage() {
     setFormState((prev) => ({ ...prev, submitting: true, error: '' }));
     try {
       if (formState.mode === 'create') {
-        await dateService.createDate(buildPayload(formState.values));
+        await dateMutations.createDate(buildPayload(formState.values));
       } else {
-        await dateService.updateDate(formState.editingId, buildPayload(formState.values));
+        await dateMutations.updateDate(formState.editingId, buildPayload(formState.values));
         if (drawerDate?.id === formState.editingId) await refreshDrawer(formState.editingId);
       }
-      await loadDates();
       setFormState((prev) => ({ ...prev, open: false, submitting: false }));
     } catch (err) {
       console.error('Failed to save date', err);
@@ -1035,7 +1012,7 @@ export default function DatesPage() {
       </header>
 
       <main className={styles.contentWrapper}>
-        {errorMessage && <div className={styles.errorBanner}>{errorMessage}</div>}
+        {(errorMessage || loadError) && <div className={styles.errorBanner}>{errorMessage || loadError}</div>}
 
         {/* HERO */}
         <motion.section className={styles.heroSection} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}>

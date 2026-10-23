@@ -2,11 +2,16 @@ import { Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import AuthPage from './pages/AuthPage';
 import HomePage from './pages/HomePage';
-import MemoriesPage from './pages/MemoriesPage';
-import DatesPage from './pages/DatesPage';
-import LoveLettersPage from './pages/LoveLettersPage';
 import ProfilePage from './pages/ProfilePage';
 import ProtectedRoute from './components/ProtectedRoute';
+import PageLoader from './components/common/PageLoader/PageLoader';
+
+// Code-split the three heavy feature pages (Memories, Dates, Love Letters). Home and Auth stay in
+// the main bundle because they are the entry points; the others download on first visit, and a
+// cached copy makes later visits instant.
+const MemoriesPage = lazy(() => import('./pages/MemoriesPage'));
+const DatesPage = lazy(() => import('./pages/DatesPage'));
+const LoveLettersPage = lazy(() => import('./pages/LoveLettersPage'));
 
 // Code-split: the whole admin control center is only ever reached by
 // ROLE_ADMIN accounts (gated below by ProtectedRoute), so it shouldn't be
@@ -52,7 +57,9 @@ export default function App() {
             path="/memories" 
             element={
               <ProtectedRoute>
-                <MemoriesPage />
+                <Suspense fallback={<PageLoader />}>
+                  <MemoriesPage />
+                </Suspense>
               </ProtectedRoute>
             } 
           />
@@ -62,7 +69,9 @@ export default function App() {
             path="/dates"
             element={
               <ProtectedRoute>
-                <DatesPage />
+                <Suspense fallback={<PageLoader />}>
+                  <DatesPage />
+                </Suspense>
               </ProtectedRoute>
             }
           />
@@ -72,7 +81,9 @@ export default function App() {
             path="/letters"
             element={
               <ProtectedRoute>
-                <LoveLettersPage />
+                <Suspense fallback={<PageLoader />}>
+                  <LoveLettersPage />
+                </Suspense>
               </ProtectedRoute>
             }
           />

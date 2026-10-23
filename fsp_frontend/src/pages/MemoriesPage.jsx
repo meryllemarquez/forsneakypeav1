@@ -2,6 +2,8 @@ import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { memoryService } from '../services/memoryService';
+import { useFolders } from '../queries/queries';
+import { useMemoryMutations } from '../queries/mutations';
 import { uploadToSupabaseStorage } from '../api/supabaseClient';
 import Navbar from '../components/layout/Navbar/Navbar';
 import Footer from '../components/layout/Footer/Footer';
@@ -142,10 +144,14 @@ const SWIPE_VELOCITY_THRESHOLD = 450;
 export default function MemoriesPage() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const [folders, setFolders] = useState([]);
+  // Album list from the shared query cache (fresh for 45s, re-validated in the background).
+  const foldersQuery = useFolders(false);
+  const folders = useMemo(() => foldersQuery.data ?? [], [foldersQuery.data]);
+  const loading = foldersQuery.isPending;
+  const loadError = foldersQuery.isError ? 'Unable to load albums. Please check backend connection.' : '';
+  const memoryMutations = useMemoryMutations();
   const [selectedFolder, setSelectedFolder] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
@@ -196,41 +202,6 @@ export default function MemoriesPage() {
   const photos = useMemo(() => selectedFolder?.photos || [], [selectedFolder]);
   const activePhoto = lightbox.index >= 0 ? photos[lightbox.index] : null;
   const isLandscape = activePhoto ? orientations[activePhoto.id] === 'landscape' : false;
-
-  useEffect(() => {
-    let isMounted = true;
-
-    const fetchInitialFolders = async () => {
-      try {
-        const data = await memoryService.getFolders(false);
-        if (isMounted) setFolders(data);
-      } catch (err) {
-        console.error('Failed to load memory folders', err);
-      } finally {
-        if (isMounted) setLoading(false);
-      }
-    };
-
-    fetchInitialFolders();
-
-    return () => {
-      isMounted = false;
-    };
-  }, []);
-
-  const loadFolders = async () => {
-    try {
-      setLoading(true);
-      setErrorMessage('');
-      const data = await memoryService.getFolders(false);
-      setFolders(data || []);
-    } catch (err) {
-      console.error('Failed to load memory folders', err);
-      setErrorMessage('Unable to load albums. Please check backend connection.');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const loadFolderDetails = async (folderId) => {
     try {
@@ -438,13 +409,12 @@ export default function MemoriesPage() {
       };
 
       if (editingFolder) {
-        await memoryService.updateFolder(editingFolder.id, payload, force);
+        await memoryMutations.updateFolder(editingFolder.id, payload, force);
       } else {
-        await memoryService.createFolder(payload);
+        await memoryMutations.createFolder(payload);
       }
 
       setIsFolderModalOpen(false);
-      await loadFolders();
 
       if (selectedFolder && editingFolder?.id === selectedFolder.id) {
         await loadFolderDetails(selectedFolder.id);
@@ -480,12 +450,11 @@ export default function MemoriesPage() {
       message: `“${folder.name}” and every memory tucked inside it will be gone, love. This one can’t be undone.`,
       confirmLabel: 'Delete Album',
       onConfirm: async () => {
-        await memoryService.deleteFolder(folder.id);
+        await memoryMutations.deleteFolder(folder.id);
         if (selectedFolder?.id === folder.id) {
           closeLightbox();
           setSelectedFolder(null);
         }
-        await loadFolders();
       },
     });
   };
@@ -522,7 +491,7 @@ export default function MemoriesPage() {
       );
 
       // Save Metadata to Backend
-      await memoryService.addPhotoToFolder(selectedFolder.id, {
+      await memoryMutations.addPhotoToFolder(selectedFolder.id, {
         photoUrl,
         storagePath,
         caption: uploadState.caption,
@@ -538,7 +507,6 @@ export default function MemoriesPage() {
       });
       setIsUploadModalOpen(false);
       await loadFolderDetails(selectedFolder.id);
-      await loadFolders();
     } catch (err) {
       console.error('Photo upload failed', err);
       setUploadState((prev) => ({ ...prev, uploading: false }));
@@ -550,7 +518,7 @@ export default function MemoriesPage() {
   const handleToggleFavorite = async (photo, e) => {
     e?.stopPropagation();
     try {
-      await memoryService.updatePhoto(photo.id, {
+      await memoryMutations.updatePhoto(photo.id, {
         isFavorite: !photo.isFavorite,
       });
       if (selectedFolder) {
@@ -567,9 +535,9 @@ export default function MemoriesPage() {
     if (!selectedFolder) return;
     try {
       if (photo.id === selectedFolder.highlightPhotoId) {
-        await memoryService.clearCalendarHighlight(selectedFolder.id);
+        await memoryMutations.clearCalendarHighlight(selectedFolder.id);
       } else {
-        await memoryService.setCalendarHighlight(selectedFolder.id, photo.id, force);
+        await memoryMutations.setCalendarHighlight(selectedFolder.id, photo.id, force);
       }
       await loadFolderDetails(selectedFolder.id);
     } catch (err) {
@@ -592,7 +560,7 @@ export default function MemoriesPage() {
         'Are you sure you want to remove this memory, love? Once it leaves the archive, we can’t bring it back.',
       confirmLabel: 'Remove Memory',
       onConfirm: async () => {
-        await memoryService.deletePhoto(photo.id);
+        await memoryMutations.deletePhoto(photo.id);
 
         if (remainingAfterDelete <= 0) {
           closeLightbox();
@@ -606,7 +574,6 @@ export default function MemoriesPage() {
         if (selectedFolder) {
           await loadFolderDetails(selectedFolder.id);
         }
-        await loadFolders();
       },
     });
   };
@@ -672,8 +639,8 @@ export default function MemoriesPage() {
 
       {/* MAIN CONTENT */}
       <main className={`${styles.contentWrapper} ${viewMode === 'calendar' ? styles.contentWrapperWide : ''}`}>
-        {errorMessage && (
-          <div className={styles.errorBanner}>{errorMessage}</div>
+        {(errorMessage || loadError) && (
+          <div className={styles.errorBanner}>{errorMessage || loadError}</div>
         )}
 
         {/* VIEW: CALENDAR DUMP */}

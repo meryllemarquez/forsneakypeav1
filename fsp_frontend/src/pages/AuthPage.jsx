@@ -27,8 +27,21 @@ const ArrowRightIcon = ({ className }) => (
   </svg>
 );
 
+// A 401 from any authenticated request redirects here and sets this flag (see axiosConfig.js's
+// response interceptor) so we can say *why* the login modal is open instead of silently landing
+// on the marketing page. Read lazily, as the initial state, so the modal is already open on the
+// first render; the flag itself is cleared in an effect below.
+function readSessionExpiredFlag() {
+  try {
+    return Boolean(sessionStorage.getItem('fsp_session_expired'));
+  } catch {
+    return false;
+  }
+}
+
 export default function AuthPage() {
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [sessionExpired] = useState(readSessionExpiredFlag);
+  const [isModalOpen, setIsModalOpen] = useState(sessionExpired);
   const [mode, setMode] = useState('LOGIN'); // 'LOGIN' | 'MASTER_CHECK' | 'REGISTER'
 
   // Form Inputs
@@ -38,7 +51,7 @@ export default function AuthPage() {
   const [masterKey, setMasterKey] = useState('');
 
   // Feedback State
-  const [error, setError] = useState('');
+  const [error, setError] = useState(sessionExpired ? 'Your session expired — please log in again. 💕' : '');
   const [loading, setLoading] = useState(false);
 
   const { login } = useAuth();
@@ -60,17 +73,15 @@ export default function AuthPage() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isModalOpen, closeModal]);
 
-  // A 401 from any authenticated request redirects here and flags this so we
-  // can surface *why* the login modal is open instead of silently landing
-  // on the marketing page (see axiosConfig.js's response interceptor).
   useEffect(() => {
-    if (sessionStorage.getItem('fsp_session_expired')) {
-      sessionStorage.removeItem('fsp_session_expired');
-      setMode('LOGIN');
-      setError('Your session expired — please log in again. 💕');
-      setIsModalOpen(true);
+    if (sessionExpired) {
+      try {
+        sessionStorage.removeItem('fsp_session_expired');
+      } catch {
+        // storage unavailable: nothing to clear
+      }
     }
-  }, []);
+  }, [sessionExpired]);
 
   // 1. Handle Standard Login with Cute Error Phrase
   const handleLoginSubmit = async (e) => {

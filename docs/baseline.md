@@ -88,6 +88,63 @@ SQL statements Hibernate prepared per request (includes the auth user lookup), m
 | Drag a note (PATCH position) | 4 | 2 |
 | GET admin dashboard | 18 (loaded whole tables) | 8 |
 
+## Frontend data layer and bundle (Step C)
+
+Measured with a production build served by `vite preview`, driven by headless Chrome against the real backend (local Postgres).
+
+**API calls on page load** (first load of the page; `GET` unless noted)
+
+| Page | Before | After |
+|---|---|---|
+| Home | notifications, folders, dates, love-board notes (4) | notifications, `home/summary` (2) |
+| Memories | notifications, folders (2) | notifications, folders (2) |
+| Dates | dates, date-categories (2) | dates, date-categories (2) |
+| Love Letters | notes, stickers (2) | notes, stickers (2) |
+
+Navigating between pages without reloading (Home, Memories, Dates, Letters, Home, Memories, Dates): before, every visit re-fetched (3 calls going back to Home, 1-2 for the others); after, revisiting a page within its freshness window (30-60 s, notifications 15 s) makes **0 calls** and shows cached data instantly, then re-validates in the background once stale.
+
+`GET /home/summary` returns 1.2 KB in 4 SQL queries; the three list calls it replaces returned 34 KB in 8 SQL queries (same seed data).
+
+**JS + CSS loaded per route** (raw / gzip)
+
+| Route | Before | After |
+|---|---|---|
+| /home | 998 KB / 270 KB | 748 KB / 220 KB |
+| /memories | 998 KB / 270 KB | 826 KB / 238 KB |
+| /dates | 998 KB / 270 KB | 832 KB / 240 KB |
+| /letters | 998 KB / 270 KB | 876 KB / 250 KB |
+
+**Build chunks**
+
+| Chunk | Before | After |
+|---|---|---|
+| main `index-*.js` | 860.4 kB (gzip 247.5) | 668.7 kB (gzip 197.4) |
+| main `index-*.css` | 151.5 kB (gzip 26.8) | 42.6 kB (gzip 9.1) |
+| MemoriesPage (lazy) | in main | 45.5 kB (gzip 11.5) + 34.0 kB css |
+| DatesPage (lazy) | in main | 55.1 kB (gzip 14.1) + 31.0 kB css |
+| LoveLettersPage (lazy) | in main | 84.7 kB (gzip 21.7) + 44.6 kB css |
+| html2canvas (already lazy) | 199.6 kB | 199.6 kB |
+| shared `axiosConfig` chunk | in main | 46.0 kB (gzip 17.4) |
+
+The main chunk is still large (React, router, framer-motion, supabase-js, TanStack Query). The Supabase client is only needed for photo/avatar uploads and could be split out next.
+
+**Mutations and the queries they refresh** (see `fsp_frontend/src/queries/mutations.js`)
+
+| Mutation | Refreshes |
+|---|---|
+| Create/edit/delete album, add/edit/delete photo, set/clear calendar highlight | folders, calendar, home |
+| Reposition calendar highlight | folders (calendar view is updated optimistically) |
+| Create/edit/delete/archive/unarchive/duplicate date | dates, home |
+| Favorite a date | dates (marked stale; the heart is flipped optimistically) |
+| Checklist add/toggle/edit/delete/reorder | dates (marked stale; counts are patched optimistically) |
+| Create/edit/delete love note | home (the board writes the returned note into its cache) |
+| Drag a note (position PATCH, 204) | nothing on success (optimistic); resyncs love-notes if it fails |
+| Create/edit/delete sticker | nothing on success (board updates its cache); resyncs stickers if an edit fails |
+| Save profile / avatar | profile (cache set to the saved profile) |
+| Mark read / mark all read / delete notification | notifications (optimistic, resynced when settled) |
+
+Login and logout both clear the whole query cache. Checked with a negative control: with the clear removed, a second user signing in on the same browser saw the first user's profile and notifications; with it, they do not.
+
 ## Deferred schema items (found while building the Flyway baseline)
 
 Nothing here has been changed in the live database.

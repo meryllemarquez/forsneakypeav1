@@ -1,6 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { memoryService } from '../../../services/memoryService';
+import { useQueryClient } from '@tanstack/react-query';
+import { useCalendarMonth } from '../../../queries/queries';
+import { useMemoryMutations } from '../../../queries/mutations';
+import { queryKeys } from '../../../queries/queryKeys';
 import MemoryPreviewModal from './MemoryPreviewModal';
 import styles from './CalendarView.module.css';
 
@@ -313,31 +316,18 @@ function CalendarSheet({ cursor, cells, isCurrentMonth, today, entries, loading,
 export default function CalendarView({ onOpenAlbum }) {
   const today = useMemo(() => todayParts(), []);
   const [cursor, setCursor] = useState({ year: today.year, month: today.month });
-  const [entries, setEntries] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
+  const { updateHighlightPosition } = useMemoryMutations();
+  // The visible month comes from the query cache; memory mutations invalidate it, so a changed
+  // highlight shows up here without a manual reload.
+  const calendarQuery = useCalendarMonth(cursor.year, cursor.month);
+  const entries = useMemo(() => calendarQuery.data ?? [], [calendarQuery.data]);
+  // Loading on first paint and while a not-yet-cached month is fetched (cached months are instant).
+  const loading = calendarQuery.isPending || calendarQuery.isPlaceholderData;
   const [previewEntry, setPreviewEntry] = useState(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [exporting, setExporting] = useState(false);
   const sheetRef = useRef(null);
-
-  useEffect(() => {
-    let cancelled = false;
-    memoryService
-      .getCalendarMonth(cursor.year, cursor.month)
-      .then((data) => {
-        if (!cancelled) setEntries(data || []);
-      })
-      .catch((err) => {
-        console.error('Failed to load calendar month', err);
-        if (!cancelled) setEntries([]);
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [cursor.year, cursor.month]);
 
   const entriesByDay = useMemo(() => {
     const map = new Map();
@@ -359,7 +349,6 @@ export default function CalendarView({ onOpenAlbum }) {
   }, [cursor, entriesByDay]);
 
   const goToMonth = (delta) => {
-    setLoading(true);
     setCursor((prev) => {
       let month = prev.month + delta;
       let year = prev.year;
@@ -370,12 +359,10 @@ export default function CalendarView({ onOpenAlbum }) {
   };
 
   const jumpToToday = () => {
-    setLoading(true);
     setCursor({ year: today.year, month: today.month });
   };
 
   const handlePickMonth = (year, month) => {
-    setLoading(true);
     setCursor({ year, month });
   };
 
@@ -415,15 +402,15 @@ export default function CalendarView({ onOpenAlbum }) {
   const handleRepositionSave = useCallback(async (folderId, x, y) => {
     // Reflect the drag immediately; the request itself is fire-and-forget
     // from the user's perspective since the live drag already showed it.
-    setEntries((prev) => prev.map((e) => (
+    queryClient.setQueryData(queryKeys.calendar(cursor.year, cursor.month), (prev = []) => prev.map((e) => (
       e.folderId === folderId ? { ...e, highlightPhotoPositionX: x, highlightPhotoPositionY: y } : e
     )));
     try {
-      await memoryService.updateHighlightPosition(folderId, x, y);
+      await updateHighlightPosition(folderId, x, y);
     } catch (err) {
       console.error('Failed to save highlight position', err);
     }
-  }, []);
+  }, [queryClient, cursor.year, cursor.month, updateHighlightPosition]);
 
   const sheetProps = { cursor, cells, isCurrentMonth, today, entries, loading, onDayClick: setPreviewEntry, onRepositionSave: handleRepositionSave };
 

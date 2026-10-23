@@ -15,7 +15,9 @@ import NoteReaderModal from '../components/loveBoard/Note/NoteReaderModal';
 import ConfirmDialog from '../components/loveBoard/common/ConfirmDialog';
 
 import { useLoveBoardAssets } from '../hooks/useLoveBoardAssets';
-import { loveBoardService } from '../services/loveBoardService';
+import { useLoveNotes, useLoveStickers, useCacheSetter } from '../queries/queries';
+import { useLoveBoardMutations } from '../queries/mutations';
+import { queryKeys } from '../queries/queryKeys';
 import { randomBoardPosition, randomNoteRotation, randomStickerRotation } from '../constants/loveBoardConstants';
 
 function byFilename(list = []) {
@@ -29,10 +31,21 @@ export default function LoveLettersPage() {
   const boardRef = useRef(null);
   const stickerDebounceRef = useRef({});
 
-  const [notes, setNotes] = useState([]);
-  const [stickers, setStickers] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  // Notes and stickers live in the query cache. `setNotes` / `setStickers` take a value or an
+  // updater like useState's setters but write into that cache, so every optimistic update below
+  // (drag, edit, archive...) is also what the next visit to this page shows.
+  const notesQuery = useLoveNotes();
+  const stickersQuery = useLoveStickers();
+  const notes = useMemo(() => notesQuery.data ?? [], [notesQuery.data]);
+  const stickers = useMemo(() => stickersQuery.data ?? [], [stickersQuery.data]);
+  const setNotes = useCacheSetter(queryKeys.loveNotes());
+  const setStickers = useCacheSetter(queryKeys.loveStickers());
+  const loading = notesQuery.isPending || stickersQuery.isPending;
+  const error = notesQuery.isError || stickersQuery.isError ? 'Unable to load the board. Please check your connection.' : '';
+  const {
+    createNote, updateNote, deleteNote, updateNotePosition,
+    createSticker, updateSticker, deleteSticker,
+  } = useLoveBoardMutations();
 
   const [decorateMode, setDecorateMode] = useState(false);
   const [selectedStickerId, setSelectedStickerId] = useState(null);
@@ -65,31 +78,6 @@ export default function LoveLettersPage() {
   const transformSnapshotRef = useRef(null);
   const [canUndo, setCanUndo] = useState(false);
   const [canRedo, setCanRedo] = useState(false);
-
-  useEffect(() => {
-    let mounted = true;
-    (async () => {
-      try {
-        setLoading(true);
-        const [notesData, stickersData] = await Promise.all([
-          loveBoardService.getNotes(),
-          loveBoardService.getStickers(),
-        ]);
-        if (mounted) {
-          setNotes(notesData || []);
-          setStickers(stickersData || []);
-        }
-      } catch (err) {
-        console.error('Failed to load love board', err);
-        if (mounted) setError('Unable to load the board. Please check your connection.');
-      } finally {
-        if (mounted) setLoading(false);
-      }
-    })();
-    return () => {
-      mounted = false;
-    };
-  }, []);
 
   // Deep-link from a notification ("?noteId=...") — open that note's reader
   // once notes have loaded, then strip the param so it doesn't re-trigger.
@@ -147,22 +135,22 @@ export default function LoveLettersPage() {
 
   const applyStickerPatch = useCallback((id, patch) => {
     setStickers((prev) => prev.map((s) => (s.id === id ? { ...s, ...patch } : s)));
-    loveBoardService.updateSticker(id, patch).catch((err) => console.error('Failed to persist sticker patch', err));
-  }, []);
+    updateSticker(id, patch).catch((err) => console.error('Failed to persist sticker patch', err));
+  }, [setStickers, updateSticker]);
 
   const applyNotePatch = useCallback((id, patch) => {
     setNotes((prev) => prev.map((n) => (n.id === id ? { ...n, ...patch } : n)));
     const positionKeys = ['positionX', 'positionY', 'rotation', 'zIndex'];
     const isPositionOnly = Object.keys(patch).every((k) => positionKeys.includes(k));
     if (isPositionOnly) {
-      loveBoardService.updateNotePosition(id, patch).catch((err) => console.error('Failed to persist note patch', err));
+      // Optimistic: the note already moved in the cache above; a failure resyncs the board.
+      updateNotePosition(id, patch).catch((err) => console.error('Failed to persist note patch', err));
     } else {
-      loveBoardService
-        .updateNote(id, patch)
+      updateNote(id, patch)
         .then((updated) => setNotes((prev) => prev.map((n) => (n.id === updated.id ? updated : n))))
         .catch((err) => console.error('Failed to persist note patch', err));
     }
-  }, []);
+  }, [setNotes, updateNote, updateNotePosition]);
 
   const applyPatch = useCallback(
     (type, id, patch) => (type === 'sticker' ? applyStickerPatch(id, patch) : applyNotePatch(id, patch)),
@@ -256,7 +244,7 @@ export default function LoveLettersPage() {
     try {
       setCreating(true);
       const { x, y } = randomBoardPosition();
-      const created = await loveBoardService.createNote({
+      const created = await createNote({
         ...form,
         positionX: x,
         positionY: y,
@@ -304,7 +292,7 @@ export default function LoveLettersPage() {
     if (!readerNote) return;
     try {
       setReaderSaving(true);
-      const updated = await loveBoardService.updateNote(readerNote.id, patch);
+      const updated = await updateNote(readerNote.id, patch);
       setNotes((prev) => prev.map((n) => (n.id === updated.id ? updated : n)));
     } catch (err) {
       console.error('Failed to save note', err);
@@ -338,7 +326,7 @@ export default function LoveLettersPage() {
   };
 
   const handleRestoreFromArchive = async (note) => {
-    const updated = await loveBoardService.updateNote(note.id, { isArchived: false });
+    const updated = await updateNote(note.id, { isArchived: false });
     setNotes((prev) => prev.map((n) => (n.id === updated.id ? updated : n)));
   };
 
@@ -349,7 +337,7 @@ export default function LoveLettersPage() {
       confirmLabel: 'Delete Letter',
       onConfirm: async () => {
         setNoteExitReasons((prev) => ({ ...prev, [note.id]: 'delete' }));
-        await loveBoardService.deleteNote(note.id);
+        await deleteNote(note.id);
         setNotes((prev) => prev.filter((n) => n.id !== note.id));
         setReaderNoteId((current) => (current === note.id ? null : current));
       },
@@ -363,7 +351,7 @@ export default function LoveLettersPage() {
   const handleAddSticker = async (filename) => {
     try {
       const { x, y } = randomBoardPosition();
-      const created = await loveBoardService.createSticker({
+      const created = await createSticker({
         image: filename,
         positionX: x,
         positionY: y,
@@ -412,7 +400,7 @@ export default function LoveLettersPage() {
     setStickers((prev) => prev.map((s) => (s.id === id ? { ...s, ...patch } : s)));
     clearTimeout(stickerDebounceRef.current[id]);
     stickerDebounceRef.current[id] = setTimeout(() => {
-      loveBoardService.updateSticker(id, patch).catch((err) => console.error(err));
+      updateSticker(id, patch).catch((err) => console.error(err));
     }, 250);
   };
 
@@ -434,7 +422,7 @@ export default function LoveLettersPage() {
   };
 
   const handleDuplicateSticker = async (sticker) => {
-    const created = await loveBoardService.createSticker({
+    const created = await createSticker({
       image: sticker.image,
       positionX: sticker.positionX + 24,
       positionY: sticker.positionY + 24,
@@ -462,7 +450,7 @@ export default function LoveLettersPage() {
       confirmLabel: 'Remove Sticker',
       onConfirm: async () => {
         setSelectedStickerId(null);
-        await loveBoardService.deleteSticker(sticker.id);
+        await deleteSticker(sticker.id);
         setStickers((prev) => prev.filter((s) => s.id !== sticker.id));
       },
     });

@@ -1,63 +1,23 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import { Bell, CheckCheck } from 'lucide-react';
 import NotificationCard from '../../components/admin/NotificationCard';
 import FilterBar from '../../components/admin/common/FilterBar';
 import EmptyState from '../../components/admin/common/EmptyState';
 import { SkeletonRows } from '../../components/admin/common/LoadingSkeleton';
-import { notificationService } from '../../services/notificationService';
+import { useNotifications } from '../../queries/useNotifications';
 
 export default function NotificationsPage() {
-  const [notifications, setNotifications] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { notifications, loading, markRead: handleMarkRead, markAllRead: handleMarkAllRead, remove: handleDelete } =
+    useNotifications();
   const [query, setQuery] = useState('');
   const [readFilter, setReadFilter] = useState(null);
-
-  // Reusable refetch for error-recovery in the action handlers below (not
-  // called from an effect, so it's fine for it to set state synchronously).
-  const load = () => {
-    setLoading(true);
-    notificationService
-      .getNotifications()
-      .then((data) => setNotifications(Array.isArray(data) ? data : []))
-      .finally(() => setLoading(false));
-  };
-
-  useEffect(() => {
-    let mounted = true;
-    (async () => {
-      try {
-        const data = await notificationService.getNotifications();
-        if (mounted) setNotifications(Array.isArray(data) ? data : []);
-      } finally {
-        if (mounted) setLoading(false);
-      }
-    })();
-    return () => {
-      mounted = false;
-    };
-  }, []);
 
   const filtered = useMemo(() => {
     return notifications
       .filter((n) => (readFilter === 'unread' ? !n.isRead : readFilter === 'read' ? n.isRead : true))
       .filter((n) => !query || n.title.toLowerCase().includes(query.toLowerCase()));
   }, [notifications, readFilter, query]);
-
-  const handleMarkRead = async (id) => {
-    setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, isRead: true } : n)));
-    await notificationService.markRead(id).catch(load);
-  };
-
-  const handleMarkAllRead = async () => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
-    await notificationService.markAllRead().catch(load);
-  };
-
-  const handleDelete = async (id) => {
-    setNotifications((prev) => prev.filter((n) => n.id !== id));
-    await notificationService.deleteNotification(id).catch(load);
-  };
 
   const unreadCount = notifications.filter((n) => !n.isRead).length;
 
