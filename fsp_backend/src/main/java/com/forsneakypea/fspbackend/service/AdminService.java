@@ -3,16 +3,14 @@ package com.forsneakypea.fspbackend.service;
 import com.forsneakypea.fspbackend.dto.AdminUserDTO;
 import com.forsneakypea.fspbackend.dto.DashboardStatsDTO;
 import com.forsneakypea.fspbackend.entity.ActivityLog;
-import com.forsneakypea.fspbackend.entity.DateEntry;
-import com.forsneakypea.fspbackend.entity.LoveNote;
 import com.forsneakypea.fspbackend.entity.MemoryFolder;
 import com.forsneakypea.fspbackend.entity.MemoryPhoto;
 import com.forsneakypea.fspbackend.entity.Notification;
 import com.forsneakypea.fspbackend.entity.User;
 import com.forsneakypea.fspbackend.exception.ResourceNotFoundException;
 import com.forsneakypea.fspbackend.repository.ActivityLogRepository;
+import com.forsneakypea.fspbackend.repository.DashboardCountsRepository;
 import com.forsneakypea.fspbackend.repository.DateEntryRepository;
-import com.forsneakypea.fspbackend.repository.LoveNoteRepository;
 import com.forsneakypea.fspbackend.repository.MemoryFolderRepository;
 import com.forsneakypea.fspbackend.repository.MemoryPhotoRepository;
 import com.forsneakypea.fspbackend.repository.NotificationRepository;
@@ -26,6 +24,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -35,77 +35,58 @@ public class AdminService {
     private final UserRepository userRepository;
     private final MemoryFolderRepository memoryFolderRepository;
     private final MemoryPhotoRepository memoryPhotoRepository;
-    private final LoveNoteRepository loveNoteRepository;
     private final DateEntryRepository dateEntryRepository;
     private final NotificationRepository notificationRepository;
     private final ActivityLogRepository activityLogRepository;
     private final AuditTrailService auditTrailService;
     private final NotificationService notificationService;
+    private final DashboardCountsRepository dashboardCountsRepository;
 
     @Transactional(readOnly = true)
     public DashboardStatsDTO getDashboardStats() {
-        List<MemoryFolder> folders = memoryFolderRepository.findAllByOrderByCreatedAtDesc();
-        List<LoveNote> notes = loveNoteRepository.findAllByOrderByUpdatedAtDesc();
-        // Fetched once and reused below (createDashboardStats used to call this
-        // same query 3 separate times).
-        List<DateEntry> allDates = dateEntryRepository.findAllByDeletedAtIsNullOrderByCreatedAtDesc();
-        long archivedFolders = folders.stream().filter(f -> Boolean.TRUE.equals(f.getIsArchived())).count();
-        long archivedNotes = notes.stream().filter(n -> Boolean.TRUE.equals(n.getIsArchived())).count();
-        long archivedDates = allDates.stream()
-                .filter(d -> Boolean.TRUE.equals(d.getIsArchived())).count();
+        OffsetDateTime weekAgo = OffsetDateTime.now().minusDays(7);
 
-        long unread = notificationRepository.countByIsReadAndDeletedAtIsNull(false);
+        // All headline numbers (totals, archived, unread, this-week trend) in one query.
+        DashboardCountsRepository.DashboardCounts counts = dashboardCountsRepository.loadCounts(weekAgo);
 
         List<ActivityLog> recentLogs = activityLogRepository
-                .findAll(PageRequest.of(0, 8, Sort.by(Sort.Direction.DESC, "createdAt")))
+                .findAllBy(PageRequest.of(0, 8, Sort.by(Sort.Direction.DESC, "createdAt")))
                 .getContent();
-        Map<Long, String> userNames = userRepository.findAll().stream()
-                .collect(Collectors.toMap(User::getId, User::getName));
+        ActivityLog latestLogin = activityLogRepository.findFirstByActionOrderByCreatedAtDesc("USER_LOGIN").orElse(null);
 
-        ActivityLog latestLogin = activityLogRepository
-                .findAll(PageRequest.of(0, 1, Sort.by(Sort.Direction.DESC, "createdAt")))
-                .getContent().stream()
-                .filter(l -> "USER_LOGIN".equals(l.getAction()))
-                .findFirst()
-                .orElse(null);
-        // The single most-recent page might not contain a login row; fall back
-        // to a small scan if needed (dataset is tiny for this app).
-        if (latestLogin == null) {
-            latestLogin = activityLogRepository
-                    .findAll(PageRequest.of(0, 50, Sort.by(Sort.Direction.DESC, "createdAt")))
-                    .getContent().stream()
-                    .filter(l -> "USER_LOGIN".equals(l.getAction()))
-                    .findFirst()
-                    .orElse(null);
-        }
+        // Only the users that appear in the activity feed / latest login, not the whole table.
+        Set<Long> userIds = recentLogs.stream().map(ActivityLog::getUserId).filter(Objects::nonNull).collect(Collectors.toSet());
+        if (latestLogin != null && latestLogin.getUserId() != null) userIds.add(latestLogin.getUserId());
+        Map<Long, String> userNames = userIds.isEmpty()
+                ? Map.of()
+                : userRepository.findAllById(userIds).stream()
+                        .collect(Collectors.toMap(User::getId, User::getName));
 
         List<MemoryPhoto> recentPhotos = memoryPhotoRepository
-                .findAll(PageRequest.of(0, 6, Sort.by(Sort.Direction.DESC, "createdAt")))
+                .findAllBy(PageRequest.of(0, 6, Sort.by(Sort.Direction.DESC, "createdAt")))
+                .getContent();
+        List<MemoryFolder> recentFolders = memoryFolderRepository
+                .findAllBy(PageRequest.of(0, 6, Sort.by(Sort.Direction.DESC, "createdAt")))
                 .getContent();
 
-        Map<String, Long> statusBreakdown = allDates.stream()
-                .collect(Collectors.groupingBy(d -> d.getStatus().name(), Collectors.counting()));
+        Map<String, Long> statusBreakdown = dateEntryRepository.countByStatus().stream()
+                .collect(Collectors.toMap(r -> r.getStatus().name(), DateEntryRepository.StatusCountRow::getTotal));
 
         List<Notification> recentNotifications = notificationService.listRecentAcrossAllUsers(6);
 
-        OffsetDateTime weekAgo = OffsetDateTime.now().minusDays(7);
-        List<ActivityLog> recentWeekLogs = activityLogRepository
-                .findAll(PageRequest.of(0, 500, Sort.by(Sort.Direction.DESC, "createdAt")))
-                .getContent().stream()
-                .filter(l -> l.getCreatedAt() != null && l.getCreatedAt().isAfter(weekAgo))
-                .collect(Collectors.toList());
-        long lettersThisWeek = recentWeekLogs.stream().filter(l -> "LOVE_NOTE_CREATED".equals(l.getAction())).count();
-        long memoriesThisWeek = recentWeekLogs.stream().filter(l -> "MEMORY_FOLDER_CREATED".equals(l.getAction())).count();
-        long datesThisWeek = recentWeekLogs.stream().filter(l -> "DATE_CREATED".equals(l.getAction())).count();
+        long unread = counts.getUnreadNotifications();
+        long lettersThisWeek = counts.getLettersThisWeek();
+        long memoriesThisWeek = counts.getMemoriesThisWeek();
+        long datesThisWeek = counts.getDatesThisWeek();
 
         return DashboardStatsDTO.builder()
-                .totalUsers(userRepository.count())
-                .totalMemories(folders.size())
-                .totalLoveLetters(notes.size())
-                .totalDatePlans(allDates.size())
+                .totalUsers(counts.getTotalUsers())
+                .totalMemories(counts.getTotalFolders())
+                .totalLoveLetters(counts.getTotalNotes())
+                .totalDatePlans(counts.getTotalDates())
                 .pendingNotifications(unread)
                 .unreadNotifications(unread)
-                .archivedContent(archivedFolders + archivedNotes + archivedDates)
+                .archivedContent(counts.getArchivedFolders() + counts.getArchivedNotes() + counts.getArchivedDates())
                 .latestLoginUser(latestLogin != null ? userNames.get(latestLogin.getUserId()) : null)
                 .latestLoginAt(latestLogin != null ? latestLogin.getCreatedAt() : null)
                 .storageUsageBytes(null)
@@ -121,7 +102,7 @@ public class AdminService {
                         .caption(p.getCaption())
                         .createdAt(p.getCreatedAt())
                         .build()).collect(Collectors.toList()))
-                .recentMemories(folders.stream().limit(6).map(f -> DashboardStatsDTO.RecentMemoryDTO.builder()
+                .recentMemories(recentFolders.stream().map(f -> DashboardStatsDTO.RecentMemoryDTO.builder()
                         .name(f.getName())
                         .coverImageUrl(f.getCoverImageUrl())
                         .createdAt(f.getCreatedAt())

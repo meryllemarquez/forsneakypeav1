@@ -22,6 +22,8 @@ import java.util.UUID;
 @PreAuthorize("hasAuthority('ROLE_ADMIN')")
 public class ActivityLogController {
 
+    static final int MAX_PAGE_SIZE = 100;
+
     private final ActivityLogService activityLogService;
     private final ActivityLogRepository activityLogRepository;
 
@@ -37,7 +39,9 @@ public class ActivityLogController {
             @RequestParam(defaultValue = "25") int size,
             @RequestParam(defaultValue = "desc") String sort) {
         Sort.Direction direction = "asc".equalsIgnoreCase(sort) ? Sort.Direction.ASC : Sort.Direction.DESC;
-        PageRequest pageRequest = PageRequest.of(page, size, Sort.by(direction, "createdAt"));
+        // Cap the page size so one request cannot pull the whole log table.
+        PageRequest pageRequest = PageRequest.of(Math.max(page, 0), Math.min(Math.max(size, 1), MAX_PAGE_SIZE),
+                Sort.by(direction, "createdAt"));
         return ResponseEntity.ok(activityLogService.search(userId, module, status, action, from, to, pageRequest));
     }
 

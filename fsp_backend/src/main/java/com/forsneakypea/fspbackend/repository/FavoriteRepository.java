@@ -14,4 +14,6 @@ public interface FavoriteRepository extends JpaRepository<Favorite, UUID> {
     List<Favorite> findAllByUserIdAndDeletedAtIsNullOrderByCreatedAtDesc(Long userId);
     Optional<Favorite> findByUserIdAndFavorableTypeAndFavorableIdAndDeletedAtIsNull(
             Long userId, FavorableType favorableType, UUID favorableId);
+    boolean existsByUserIdAndFavorableTypeAndFavorableIdAndDeletedAtIsNull(
+            Long userId, FavorableType favorableType, UUID favorableId);
 }

@@ -19,6 +19,7 @@ import com.forsneakypea.fspbackend.repository.DateCategoryRepository;
 import com.forsneakypea.fspbackend.repository.DateEntryRepository;
 import com.forsneakypea.fspbackend.repository.FavoriteRepository;
 import com.forsneakypea.fspbackend.repository.UserRepository;
+import com.forsneakypea.fspbackend.security.CurrentUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -74,7 +75,8 @@ public class DateService {
         notificationService.notifyOthers(userId, NotificationType.DATE_CREATED, date.getTitle(),
                 RelatedEntityType.DATE, date.getId());
 
-        return mapToDTO(date, userId, false);
+        // Brand new: not favorited and no checklist items yet, so nothing needs to be queried.
+        return mapToDTO(date, false, false, List.of());
     }
 
     @Transactional(readOnly = true)
@@ -226,10 +228,11 @@ public class DateService {
                         .createdBy(currentUserId)
                         .build())
                 .collect(Collectors.toList());
-        checklistItemRepository.saveAll(clonedItems);
+        List<ChecklistItem> savedItems = checklistItemRepository.saveAll(clonedItems);
 
         logActivity("DATE_DUPLICATED", copy.getId(), currentUserId);
-        return mapToDTO(copy, currentUserId, false);
+        // The copy is new (not favorited) and its items were just saved, so reuse them.
+        return mapToDTO(copy, false, false, savedItems);
     }
 
     @Transactional
@@ -254,7 +257,8 @@ public class DateService {
             logActivity("DATE_UNFAVORITED", id, currentUserId);
         }
 
-        return mapToDTO(date, currentUserId, false);
+        // After the branches above the favorite state is exactly what was requested.
+        return mapToDTO(date, favorite, false, null);
     }
 
     private DateEntry findActiveOrThrow(UUID id) {
@@ -281,8 +285,17 @@ public class DateService {
     }
 
     private DateEntryDTO mapToDTO(DateEntry date, Long currentUserId, boolean includeChecklist) {
-        Set<UUID> favoriteIds = favoriteDateIds(currentUserId);
-        return mapToDTO(date, favoriteIds, includeChecklist);
+        boolean favorite = currentUserId != null
+                && favoriteRepository.existsByUserIdAndFavorableTypeAndFavorableIdAndDeletedAtIsNull(
+                        currentUserId, FavorableType.DATE, date.getId());
+        return mapToDTO(date, favorite, includeChecklist, null);
+    }
+
+    // The creator is usually the authenticated user already loaded by the JWT filter.
+    private String creatorName(Long createdBy) {
+        if (createdBy == null) return null;
+        return CurrentUser.nameIfId(createdBy)
+                .orElseGet(() -> userRepository.findById(createdBy).map(User::getName).orElse(null));
     }
 
     // List-endpoint variant: takes pre-batched checklist counts and creator names
@@ -322,16 +335,15 @@ public class DateService {
                 .build();
     }
 
-    private DateEntryDTO mapToDTO(DateEntry date, Set<UUID> favoriteIds, boolean includeChecklist) {
-        List<ChecklistItem> items = checklistItemRepository
-                .findAllByDateIdAndDeletedAtIsNullOrderBySortOrderAsc(date.getId());
+    // `knownItems` lets callers that already hold the checklist items (new/duplicated dates)
+    // skip the query; null means "load them".
+    private DateEntryDTO mapToDTO(DateEntry date, boolean favorite, boolean includeChecklist,
+                                  List<ChecklistItem> knownItems) {
+        List<ChecklistItem> items = knownItems != null
+                ? knownItems
+                : checklistItemRepository.findAllByDateIdAndDeletedAtIsNullOrderBySortOrderAsc(date.getId());
 
-        String createdByName = null;
-        if (date.getCreatedBy() != null) {
-            createdByName = userRepository.findById(date.getCreatedBy())
-                    .map(User::getName)
-                    .orElse(null);
-        }
+        String createdByName = creatorName(date.getCreatedBy());
 
         var builder = DateEntryDTO.builder()
                 .id(date.getId())
@@ -353,7 +365,7 @@ public class DateService {
                 .estimatedCost(date.getEstimatedCost())
                 .coverImageUrl(date.getCoverImageUrl())
                 .isArchived(date.getIsArchived())
-                .isFavorite(favoriteIds.contains(date.getId()))
+                .isFavorite(favorite)
                 .createdBy(date.getCreatedBy())
                 .createdByName(createdByName)
                 .checklistCompletedCount((int) items.stream().filter(ChecklistItem::getIsCompleted).count())

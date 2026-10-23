@@ -54,10 +54,12 @@ public class LoveBoardController {
 
     @PatchMapping("/notes/{id}/position")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<LoveNoteDTO> updateNotePosition(
+    public ResponseEntity<Void> updateNotePosition(
             @PathVariable UUID id,
             @RequestBody LoveNoteRequestDTO.PositionUpdate request) {
-        return ResponseEntity.ok(loveBoardService.updateNotePosition(id, request, getCurrentUserId()));
+        // 204: the frontend applies the position locally and ignores the response body.
+        loveBoardService.updateNotePosition(id, request);
+        return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/notes/{id}")

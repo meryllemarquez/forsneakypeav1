@@ -8,19 +8,26 @@ import com.forsneakypea.fspbackend.entity.User;
 import com.forsneakypea.fspbackend.exception.ResourceNotFoundException;
 import com.forsneakypea.fspbackend.repository.NotificationRepository;
 import com.forsneakypea.fspbackend.repository.UserRepository;
+import com.forsneakypea.fspbackend.security.CurrentUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 public class NotificationService {
+
+    // A note that is edited repeatedly (autosave, tweaking) should notify the partner once,
+    // not once per save.
+    static final Duration EDIT_NOTIFICATION_WINDOW = Duration.ofMinutes(10);
 
     private final NotificationRepository notificationRepository;
     private final UserRepository userRepository;
@@ -52,13 +59,35 @@ public class NotificationService {
     @Transactional
     public void notifyOthers(Long actorUserId, NotificationType type, String entityLabel,
                               RelatedEntityType relatedEntityType, UUID relatedEntityId) {
-        String actorName = userRepository.findById(actorUserId).map(User::getName).orElse("Your partner");
+        List<User> recipients = userRepository.findAllByRoleAndIdNot(Role.ROLE_USER, actorUserId);
+        if (type == NotificationType.LOVE_NOTE_UPDATED && relatedEntityId != null && !recipients.isEmpty()) {
+            Set<Long> alreadyNotified = notificationRepository.findRecipientsNotifiedSince(
+                    recipients.stream().map(User::getId).toList(),
+                    relatedEntityType, relatedEntityId,
+                    List.of(NotificationType.LOVE_NOTE_CREATED, NotificationType.LOVE_NOTE_UPDATED),
+                    OffsetDateTime.now().minus(EDIT_NOTIFICATION_WINDOW));
+            recipients = recipients.stream().filter(r -> !alreadyNotified.contains(r.getId())).toList();
+        }
+        if (recipients.isEmpty()) return;
+
+        // The actor is normally the authenticated user the JWT filter already loaded, so
+        // their name needs no extra query.
+        String actorName = CurrentUser.nameIfId(actorUserId)
+                .orElseGet(() -> userRepository.findById(actorUserId).map(User::getName).orElse("Your partner"));
         String[] titleAndMessage = personalize(actorName, type, entityLabel);
 
-        List<User> recipients = userRepository.findAllByRoleAndIdNot(Role.ROLE_USER, actorUserId);
-        for (User recipient : recipients) {
-            create(recipient.getId(), type, titleAndMessage[0], titleAndMessage[1], relatedEntityType, relatedEntityId);
-        }
+        List<Notification> notifications = recipients.stream()
+                .map(recipient -> Notification.builder()
+                        .userId(recipient.getId())
+                        .type(type)
+                        .title(titleAndMessage[0])
+                        .message(titleAndMessage[1])
+                        .relatedEntityType(relatedEntityType)
+                        .relatedEntityId(relatedEntityId)
+                        .isRead(false)
+                        .build())
+                .toList();
+        notificationRepository.saveAll(notifications);
     }
 
     private String[] personalize(String actor, NotificationType type, String label) {
@@ -82,9 +111,9 @@ public class NotificationService {
     @Transactional(readOnly = true)
     public List<Notification> listForUser(Long userId, Boolean unreadOnly) {
         if (Boolean.TRUE.equals(unreadOnly)) {
-            return notificationRepository.findAllByUserIdAndIsReadAndDeletedAtIsNullOrderByCreatedAtDesc(userId, false);
+            return notificationRepository.findTop50ByUserIdAndIsReadAndDeletedAtIsNullOrderByCreatedAtDesc(userId, false);
         }
-        return notificationRepository.findAllByUserIdAndDeletedAtIsNullOrderByCreatedAtDesc(userId);
+        return notificationRepository.findTop50ByUserIdAndDeletedAtIsNullOrderByCreatedAtDesc(userId);
     }
 
     // Admin oversight — most recent notifications across every user, not
@@ -92,7 +121,7 @@ public class NotificationService {
     // Notifications" section.
     @Transactional(readOnly = true)
     public List<Notification> listRecentAcrossAllUsers(int limit) {
-        return notificationRepository.findAll(PageRequest.of(0, limit, Sort.by(Sort.Direction.DESC, "createdAt"))).getContent();
+        return notificationRepository.findAllBy(PageRequest.of(0, limit, Sort.by(Sort.Direction.DESC, "createdAt"))).getContent();
     }
 
     @Transactional

@@ -16,12 +16,14 @@ import com.forsneakypea.fspbackend.entity.User;
 import com.forsneakypea.fspbackend.repository.LoveNoteRepository;
 import com.forsneakypea.fspbackend.repository.LoveStickerRepository;
 import com.forsneakypea.fspbackend.repository.UserRepository;
+import com.forsneakypea.fspbackend.security.CurrentUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -41,15 +43,24 @@ public class LoveBoardService {
 
     @Transactional(readOnly = true)
     public List<LoveNoteDTO> getVisibleNotes(Long currentUserId) {
-        // Author names are batch-loaded once instead of once per note (see
-        // mapNoteToDTO's authorNames-map overload).
-        Map<Long, String> authorNames = userRepository.findAll().stream()
-                .collect(Collectors.toMap(User::getId, User::getName));
-
-        return noteRepository.findAllByOrderByUpdatedAtDesc().stream()
+        List<LoveNote> visible = noteRepository.findAllByOrderByUpdatedAtDesc().stream()
                 .filter(note -> !Boolean.TRUE.equals(note.getIsPrivate())
                         || note.getCreatedBy() == null
                         || note.getCreatedBy().equals(currentUserId))
+                .collect(Collectors.toList());
+
+        // Author names are batch-loaded once, and only for the authors that actually appear
+        // (see mapNoteToDTO's authorNames-map overload).
+        Set<Long> authorIds = visible.stream()
+                .map(LoveNote::getCreatedBy)
+                .filter(java.util.Objects::nonNull)
+                .collect(Collectors.toSet());
+        Map<Long, String> authorNames = authorIds.isEmpty()
+                ? Map.of()
+                : userRepository.findAllById(authorIds).stream()
+                        .collect(Collectors.toMap(User::getId, User::getName));
+
+        return visible.stream()
                 .map(note -> mapNoteToDTO(note, currentUserId, authorNames))
                 .collect(Collectors.toList());
     }
@@ -136,7 +147,7 @@ public class LoveBoardService {
     }
 
     @Transactional
-    public LoveNoteDTO updateNotePosition(UUID id, LoveNoteRequestDTO.PositionUpdate request, Long currentUserId) {
+    public void updateNotePosition(UUID id, LoveNoteRequestDTO.PositionUpdate request) {
         LoveNote note = findNoteOrThrow(id);
 
         if (request.getPositionX() != null) note.setPositionX(request.getPositionX());
@@ -144,7 +155,8 @@ public class LoveBoardService {
         if (request.getRotation() != null) note.setRotation(request.getRotation());
         if (request.getZIndex() != null) note.setZIndex(request.getZIndex());
 
-        return mapNoteToDTO(noteRepository.saveAndFlush(note), currentUserId);
+        // Nothing is read back: the endpoint answers 204 and the board already holds the new position.
+        noteRepository.save(note);
     }
 
     @Transactional
@@ -245,9 +257,11 @@ public class LoveBoardService {
     private LoveNoteDTO mapNoteToDTO(LoveNote note, Long currentUserId) {
         String authorName = null;
         if (note.getCreatedBy() != null) {
-            authorName = userRepository.findById(note.getCreatedBy())
-                    .map(User::getName)
-                    .orElse("Unknown");
+            // The author is usually the authenticated user the JWT filter already loaded.
+            authorName = CurrentUser.nameIfId(note.getCreatedBy())
+                    .orElseGet(() -> userRepository.findById(note.getCreatedBy())
+                            .map(User::getName)
+                            .orElse("Unknown"));
         }
         return mapNoteToDTO(note, currentUserId, authorName);
     }

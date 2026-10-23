@@ -84,7 +84,7 @@ public class MemoryService {
         notificationService.notifyOthers(userId, NotificationType.MEMORY_CREATED, folder.getName(),
                 RelatedEntityType.MEMORY_FOLDER, folder.getId());
 
-        return mapFolderToDTO(folder);
+        return mapNewFolderToDTO(folder);
     }
 
     @Transactional
@@ -217,10 +217,16 @@ public class MemoryService {
         List<MemoryFolder> folders = folderRepository
                 .findByEventDateBetweenAndIsCalendarHighlightTrueAndHighlightPhotoIdIsNotNull(start, end);
 
+        // One IN query for every highlight photo URL instead of a findById per folder.
+        List<UUID> photoIds = folders.stream().map(MemoryFolder::getHighlightPhotoId).distinct().collect(Collectors.toList());
+        Map<UUID, String> photoUrls = photoIds.isEmpty()
+                ? Map.of()
+                : photoRepository.findPhotoUrlsByIds(photoIds).stream()
+                        .collect(Collectors.toMap(MemoryPhotoRepository.PhotoUrlRow::getId,
+                                MemoryPhotoRepository.PhotoUrlRow::getPhotoUrl));
+
         return folders.stream().map(folder -> {
-            String photoUrl = photoRepository.findById(folder.getHighlightPhotoId())
-                    .map(MemoryPhoto::getPhotoUrl)
-                    .orElse(null);
+            String photoUrl = photoUrls.get(folder.getHighlightPhotoId());
             return CalendarEntryDTO.builder()
                     .folderId(folder.getId())
                     .folderName(folder.getName())
@@ -319,6 +325,28 @@ public class MemoryService {
                 .coverImageUrl(folder.getCoverImageUrl())
                 .isArchived(folder.getIsArchived())
                 .photoCount(photoCounts.getOrDefault(folder.getId(), 0L).intValue())
+                .createdAt(folder.getCreatedAt())
+                .eventDate(folder.getEventDate())
+                .isCalendarHighlight(folder.getIsCalendarHighlight())
+                .highlightPhotoId(folder.getHighlightPhotoId())
+                .highlightPhotoPositionX(folder.getHighlightPhotoPositionX())
+                .highlightPhotoPositionY(folder.getHighlightPhotoPositionY())
+                .photos(List.of())
+                .build();
+    }
+
+    // A folder that was just created has no photos, so there is nothing to load: building the
+    // DTO from folder.getPhotos() would trigger a lazy SELECT just to find that out.
+    private FolderDTO mapNewFolderToDTO(MemoryFolder folder) {
+        return FolderDTO.builder()
+                .id(folder.getId())
+                .name(folder.getName())
+                .description(folder.getDescription())
+                .accentColor(folder.getAccentColor())
+                .iconStyle(folder.getIconStyle())
+                .coverImageUrl(folder.getCoverImageUrl())
+                .isArchived(folder.getIsArchived())
+                .photoCount(0)
                 .createdAt(folder.getCreatedAt())
                 .eventDate(folder.getEventDate())
                 .isCalendarHighlight(folder.getIsCalendarHighlight())

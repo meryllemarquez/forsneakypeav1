@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Entity
+@EntityListeners(com.forsneakypea.fspbackend.security.UserCacheEvictionListener.class)
 @Table(name = "users")
 @Getter
 @Setter

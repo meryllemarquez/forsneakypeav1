@@ -70,6 +70,24 @@ Free-plan Render service, Supabase in Seoul. Figures are as reported by the owne
 
 Render Free (140.8 s measured) has less CPU than any of these, so expect a smaller absolute number but a similar ratio. Note: "after" against live Supabase ran with Flyway disabled so no DDL touched the live DB; the Flyway baseline step itself was measured on local Postgres (included in the "after" local numbers).
 
+## Database round trips per request (Step B)
+
+SQL statements Hibernate prepared per request (includes the auth user lookup), measured with Hibernate statistics against a local Postgres restored from the backup, so the writes had no effect on live. 5 notification recipients in that data set; with the real two accounts there is 1 recipient, so write paths are cheaper both before and after. "After" is steady state (user cache warm); a cold cache adds 1 query on the first request per user.
+
+| Request | Before | After |
+|---|---|---|
+| GET folders | 3 | 2 |
+| GET dates | 5 | 4 |
+| GET love-board notes | 3 | 2 |
+| GET notifications | 2 | 1 |
+| GET memories/calendar (4 highlighted folders) | 6 | 2 |
+| Favorite a date | 8 | 6 |
+| Create a folder | 10 | 4 |
+| Edit a note (notifies partner) | 10 | 5 |
+| Edit the same note again within 10 min | 10 | 4 (no new notification) |
+| Drag a note (PATCH position) | 4 | 2 |
+| GET admin dashboard | 18 (loaded whole tables) | 8 |
+
 ## Deferred schema items (found while building the Flyway baseline)
 
 Nothing here has been changed in the live database.
