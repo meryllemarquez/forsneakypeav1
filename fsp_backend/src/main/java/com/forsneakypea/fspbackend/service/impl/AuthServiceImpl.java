@@ -48,8 +48,11 @@ public class AuthServiceImpl implements AuthService {
         User user = userRepository.findByUsername(request.getUsername())
                 .orElseThrow(() -> new BadCredentialsException("Oops! Incorrect username or password, love. 💕"));
 
-        // 2. Verify raw password against BCrypt password hash stored in database
-        if (!passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
+        // 2. Verify raw password against BCrypt password hash stored in database. A disabled
+        // account gets the exact same error as a wrong password, so the response does not
+        // reveal that the account exists.
+        if (!passwordEncoder.matches(request.getPassword(), user.getPasswordHash())
+                || !Boolean.TRUE.equals(user.getActive())) {
             throw new BadCredentialsException("Oops! Incorrect username or password, love. 💕");
         }
 
