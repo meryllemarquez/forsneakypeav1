@@ -6,11 +6,11 @@ Measured 2026-10-23, before any optimization. Branch: `perf-improvements`.
 
 | Item | Value |
 |---|---|
-| Supabase region | `ap-northeast-2` (Seoul) - from pooler host `aws-1-ap-northeast-2.pooler.supabase.com:6543` (transaction pooler) |
+| Supabase region | Seoul (`ap-northeast-2`) - from pooler host `aws-1-ap-northeast-2.pooler.supabase.com:6543` (transaction pooler) |
 | DB pool (Hikari) | max 5, min idle 2, `prepareThreshold=0` |
 | Frontend | Vercel - https://forsneakypea.vercel.app |
-| Render region | _(fill in)_ |
-| Render plan | _(fill in)_ |
+| Render region | Singapore (service `forsneakypeav1`; moved from Virginia) |
+| Render plan | Free |
 
 ## Lighthouse (mobile, performance only, Lighthouse 12.8.2, 3 runs)
 
@@ -40,6 +40,23 @@ Medians are per metric. LCP varies a lot (3.7 s vs ~18.8 s); runs 2 and 3 likely
 | `GET /love-board/notes` (median of 5) | _(fill in)_ | _(fill in)_ | _(fill in)_ | |
 
 Home page calls these three endpoints in parallel on mount (`HomePage.jsx`).
+
+## Region comparison (warm, ms)
+
+Free-plan Render service, Supabase in Seoul. Figures are as reported by the owner; the exact script run (median of 5, total time) was not recorded here.
+
+| Endpoint | Virginia | Singapore |
+|---|---|---|
+| `GET /memories/folders` | 1235 | 649 |
+| `GET /dates` | 1437 | 609 |
+| `GET /love-board/notes` | 1159 | 497 |
+| Network floor | ~310 | ~150 |
+
+## Boot time
+
+| Region | Boot time |
+|---|---|
+| Singapore (Free plan) | 140.8 s |
 
 ## How to run
 
