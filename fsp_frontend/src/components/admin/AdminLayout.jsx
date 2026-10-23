@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import '../../styles/admin-tailwind.css';
@@ -7,7 +7,7 @@ import Sidebar from './Sidebar';
 import TopBar from './TopBar';
 import NotificationDrawer from './NotificationDrawer';
 import { useAuth } from '../../hooks/useAuth';
-import { notificationService } from '../../services/notificationService';
+import { useNotifications } from '../../queries/useNotifications';
 
 const TITLES = {
   '/admin': 'Dashboard',
@@ -30,63 +30,15 @@ export default function AdminLayout() {
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
-  const [notifications, setNotifications] = useState([]);
-  const [notifLoading, setNotifLoading] = useState(true);
-
-  const refetchNotifications = async () => {
-    try {
-      const data = await notificationService.getNotifications();
-      setNotifications(Array.isArray(data) ? data : []);
-    } catch {
-      // Non-fatal — the admin shell should still render if notifications fail to load.
-    }
-  };
-
-  useEffect(() => {
-    let mounted = true;
-    (async () => {
-      try {
-        const data = await notificationService.getNotifications();
-        if (mounted) setNotifications(Array.isArray(data) ? data : []);
-      } catch {
-        // Non-fatal — the admin shell should still render if notifications fail to load.
-      } finally {
-        if (mounted) setNotifLoading(false);
-      }
-    })();
-    return () => {
-      mounted = false;
-    };
-  }, []);
+  const {
+    notifications,
+    loading: notifLoading,
+    markRead: handleMarkRead,
+    markAllRead: handleMarkAllRead,
+    remove: handleDelete,
+  } = useNotifications();
 
   const unreadCount = notifications.filter((n) => !n.isRead).length;
-
-  const handleMarkRead = async (id) => {
-    setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, isRead: true } : n)));
-    try {
-      await notificationService.markRead(id);
-    } catch {
-      refetchNotifications();
-    }
-  };
-
-  const handleMarkAllRead = async () => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
-    try {
-      await notificationService.markAllRead();
-    } catch {
-      refetchNotifications();
-    }
-  };
-
-  const handleDelete = async (id) => {
-    setNotifications((prev) => prev.filter((n) => n.id !== id));
-    try {
-      await notificationService.deleteNotification(id);
-    } catch {
-      refetchNotifications();
-    }
-  };
 
   const handleLogout = () => {
     logout();

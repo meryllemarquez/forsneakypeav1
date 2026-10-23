@@ -1,0 +1,30 @@
+.wrap {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.9rem;
+  background: var(--color-bg-main, #FBF3EA);
+  color: var(--color-coral-deep, #D97785);
+}
+
+.heart {
+  animation: pulse 1.3s ease-in-out infinite;
+}
+
+.label {
+  margin: 0;
+  font-family: var(--font-serif, Georgia, serif);
+  font-size: 1.05rem;
+  color: var(--color-text-secondary, #8A7568);
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); opacity: 0.75; }
+  50% { transform: scale(1.18); opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .heart { animation: none; }
+}

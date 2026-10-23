@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { AuthContext } from './AuthContext';
-import { notificationService } from '../services/notificationService';
+import { queryClient } from '../queries/queryClient';
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(() => {
@@ -20,6 +20,8 @@ export function AuthProvider({ children }) {
   const [loading] = useState(false);
 
   const login = (authData) => {
+    // Start every session with an empty cache so nothing from a previous account can show.
+    queryClient.clear();
     localStorage.setItem('fsp_token', authData.token);
     localStorage.setItem('fsp_user', JSON.stringify(authData));
     setUser(authData);
@@ -30,7 +32,9 @@ export function AuthProvider({ children }) {
     localStorage.removeItem('fsp_user');
     localStorage.removeItem('token');
     localStorage.removeItem('user');
-    notificationService.clearCache();
+    // Drop every cached query (folders, dates, notes, notifications, profile...) so the next
+    // person to sign in on this browser never sees the previous user's data.
+    queryClient.clear();
     setUser(null);
   };
 

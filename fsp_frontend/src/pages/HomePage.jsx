@@ -1,10 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth } from '../hooks/useAuth';
-import { memoryService } from '../services/memoryService';
-import { dateService } from '../services/dateService';
-import { loveBoardService } from '../services/loveBoardService';
+import { useHomeSummary } from '../queries/queries';
 import { getDaysTogether, ANNIVERSARY_LABEL } from '../constants/relationship';
 import Navbar from '../components/layout/Navbar/Navbar';
 import Footer from '../components/layout/Footer/Footer';
@@ -48,6 +46,12 @@ const COLLAGE_GRADIENTS = [
   'linear-gradient(150deg, #f0d8b8, var(--color-blush, #F4A9B8))',
 ];
 
+// 'YYYY-MM-DD' in the viewer's local time zone (toISOString would give the UTC date).
+function localDateString(date = new Date()) {
+  const pad = (n) => String(n).padStart(2, '0');
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+}
+
 function formatDate(dateStr) {
   if (!dateStr) return '';
   const d = new Date(dateStr);
@@ -70,60 +74,17 @@ export default function HomePage() {
   const navigate = useNavigate();
   const daysTogether = getDaysTogether();
 
-  const [featuredFolders, setFeaturedFolders] = useState([]);
-  const [upcomingDates, setUpcomingDates] = useState([]);
-  const [latestNote, setLatestNote] = useState(null);
-  const [loadingContent, setLoadingContent] = useState(true);
-  const [contentError, setContentError] = useState('');
+  // One small request (GET /home/summary) replaces the three list fetches this page used to
+  // make. `today` is the viewer's local date so "upcoming" matches their calendar.
+  const today = useMemo(() => localDateString(), []);
+  const { data: summary, isPending: loadingContent, isError } = useHomeSummary(today);
 
-  useEffect(() => {
-    let isMounted = true;
-
-    const loadHomeContent = async () => {
-      const [foldersResult, datesResult, notesResult] = await Promise.allSettled([
-        memoryService.getFolders(false),
-        dateService.getDates({ includeArchived: false }),
-        loveBoardService.getNotes(),
-      ]);
-
-      if (!isMounted) return;
-
-      if (foldersResult.status === 'fulfilled') {
-        setFeaturedFolders((foldersResult.value || []).slice(0, 3));
-      }
-
-      if (datesResult.status === 'fulfilled') {
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        const upcoming = (datesResult.value || [])
-          .filter((d) => d.plannedDate && new Date(d.plannedDate) >= today)
-          .sort((a, b) => new Date(a.plannedDate) - new Date(b.plannedDate))
-          .slice(0, 2);
-        setUpcomingDates(upcoming);
-      }
-
-      if (notesResult.status === 'fulfilled') {
-        const notes = Array.isArray(notesResult.value) ? notesResult.value : [];
-        const visible = notes
-          .filter((n) => !n.isArchived)
-          .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-        setLatestNote(visible[0] || null);
-      }
-
-      // All three independent sections failed at once — almost certainly the
-      // backend is unreachable rather than one section being empty, so say so
-      // instead of silently showing the "nothing here yet" placeholders.
-      const allFailed = [foldersResult, datesResult, notesResult].every((r) => r.status === 'rejected');
-      setContentError(allFailed ? "We couldn't reach the server just now. Pull-to-refresh or try again in a moment." : '');
-
-      setLoadingContent(false);
-    };
-
-    loadHomeContent();
-    return () => {
-      isMounted = false;
-    };
-  }, []);
+  const featuredFolders = summary?.folders ?? [];
+  const upcomingDates = summary?.upcomingDates ?? [];
+  const latestNote = summary?.latestNote ?? null;
+  // The single request failing means the backend is almost certainly unreachable, so say so
+  // instead of silently showing the "nothing here yet" placeholders.
+  const contentError = isError ? "We couldn't reach the server just now. Pull-to-refresh or try again in a moment." : '';
 
   return (
     <div className={styles.pageContainer}>

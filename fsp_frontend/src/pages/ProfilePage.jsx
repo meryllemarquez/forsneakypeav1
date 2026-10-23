@@ -1,9 +1,10 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../hooks/useAuth';
 import { useNotification } from '../hooks/useNotification';
-import { profileService } from '../services/profileService';
+import { useProfile } from '../queries/queries';
+import { useProfileMutations } from '../queries/mutations';
 import { uploadProfileAvatar, deleteProfileAvatar } from '../api/supabaseClient';
 import { ACCENT_COLORS, EMOJI_OPTIONS, DEFAULT_ACCENT_COLOR, getAccentHex } from '../constants/profileOptions';
 import AvatarCropModal from '../components/profile/AvatarCropModal';
@@ -102,10 +103,21 @@ export default function ProfilePage() {
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
 
-  const [profile, setProfile] = useState(null);
-  const [form, setForm] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [loadError, setLoadError] = useState('');
+  // The saved profile lives in the query cache (fresh for 60s); `form` is the editable draft.
+  const profileQuery = useProfile();
+  const profileMutations = useProfileMutations();
+  const profile = profileQuery.data ?? null;
+  // `draft` holds the user's unsaved edits; until they type, the form simply mirrors the saved
+  // profile, so there is no effect or setState-during-render needed to seed it.
+  const [draft, setDraft] = useState(null);
+  const form = draft ?? (profile ? toFormState(profile) : null);
+  const setForm = (next) =>
+    setDraft(typeof next === 'function' ? (prev) => next(prev ?? (profile ? toFormState(profile) : null)) : next);
+  const loading = profileQuery.isPending;
+  const loadError =
+    profileQuery.isError && profileQuery.error?.response?.status !== 401
+      ? friendlyErrorMessage(profileQuery.error, 'Could not load your profile. Please try again.')
+      : '';
   const [fieldErrors, setFieldErrors] = useState({});
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
@@ -114,51 +126,13 @@ export default function ProfilePage() {
   const [avatarBusy, setAvatarBusy] = useState(false);
   const [pendingCropFile, setPendingCropFile] = useState(null);
 
-  // A 401 here is handled globally by the axios response interceptor (clears
-  // stored credentials and redirects to /auth), so this only needs to cover
-  // the "still logged in but the request failed" case.
+  // A 401 here is handled globally by the axios response interceptor (clears stored
+  // credentials and redirects to /auth), so loadError only covers "still logged in but the
+  // request failed". Retry refetches and re-seeds the draft.
   const loadProfile = async () => {
-    setLoading(true);
-    setLoadError('');
-    try {
-      const data = await profileService.getProfile();
-      setProfile(data);
-      setForm(toFormState(data));
-    } catch (err) {
-      if (err?.response?.status !== 401) {
-        setLoadError(friendlyErrorMessage(err, 'Could not load your profile. Please try again.'));
-      }
-    } finally {
-      setLoading(false);
-    }
+    await profileQuery.refetch();
+    setDraft(null);
   };
-
-  useEffect(() => {
-    let isMounted = true;
-
-    const fetchInitialProfile = async () => {
-      try {
-        const data = await profileService.getProfile();
-        if (isMounted) {
-          setProfile(data);
-          setForm(toFormState(data));
-        }
-      } catch (err) {
-        if (!isMounted) return;
-        if (err?.response?.status !== 401) {
-          setLoadError(friendlyErrorMessage(err, 'Could not load your profile. Please try again.'));
-        }
-      } finally {
-        if (isMounted) setLoading(false);
-      }
-    };
-
-    fetchInitialProfile();
-    return () => {
-      isMounted = false;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   const isDirty = useMemo(() => {
     if (!profile || !form) return false;
@@ -206,8 +180,7 @@ export default function ProfilePage() {
         favoriteEmoji: form.favoriteEmoji || null,
         accentColor: form.accentColor,
       };
-      const updated = await profileService.updateProfile(payload);
-      setProfile(updated);
+      const updated = await profileMutations.updateProfile(payload);
       setForm(toFormState(updated));
       updateUser({
         name: updated.name,
@@ -262,8 +235,7 @@ export default function ProfilePage() {
     try {
       const previousStoragePath = profile?.avatarStoragePath;
       const { avatarUrl, storagePath } = await uploadProfileAvatar(blob, user?.id);
-      const updated = await profileService.updateAvatar({ avatarUrl, storagePath });
-      setProfile(updated);
+      const updated = await profileMutations.updateAvatar({ avatarUrl, storagePath });
       updateUser({ avatarUrl: updated.avatarUrl });
       if (previousStoragePath) {
         deleteProfileAvatar(previousStoragePath).catch(() => {});
@@ -286,8 +258,7 @@ export default function ProfilePage() {
     setAvatarBusy(true);
     try {
       const previousStoragePath = profile?.avatarStoragePath;
-      const updated = await profileService.removeAvatar();
-      setProfile(updated);
+      await profileMutations.removeAvatar();
       updateUser({ avatarUrl: null });
       if (previousStoragePath) {
         deleteProfileAvatar(previousStoragePath).catch(() => {});
