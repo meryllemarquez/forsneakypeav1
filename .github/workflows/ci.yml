@@ -1,0 +1,37 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  backend:
+    name: Backend (mvn clean test)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: fsp_backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+      - run: mvn --batch-mode clean test
+
+  frontend:
+    name: Frontend (npm ci && npm run build)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: fsp_frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: fsp_frontend/package-lock.json
+      - run: npm ci
+      - run: npm run build

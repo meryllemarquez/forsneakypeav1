@@ -58,6 +58,18 @@ Free-plan Render service, Supabase in Seoul. Figures are as reported by the owne
 |---|---|
 | Singapore (Free plan) | 140.8 s |
 
+## Startup time, local Docker (Step A: Flyway/validate, JVM flags, AppCDS)
+
+"Started FspBackendApplication in X seconds", same machine, same Docker Desktop. Before = `ddl-auto=update`, `-XX:MaxRAMPercentage=75`, no CDS. After = `validate` + Flyway baseline, C1-only JIT, SerialGC, 60% heap, AppCDS archive.
+
+| Scenario | Before | After |
+|---|---|---|
+| Local Postgres, unconstrained (2 runs) | 17.7 s / 12.6 s | 5.3 s / 5.9 s |
+| Live Supabase, unconstrained (2 runs; Flyway off for "after", see note) | 16.6 s / 15.5 s | 8.7 s / 6.3 s |
+| Local Postgres, `--cpus=0.25 --memory=512m` | 75.5 s | 24.4 s |
+
+Render Free (140.8 s measured) has less CPU than any of these, so expect a smaller absolute number but a similar ratio. Note: "after" against live Supabase ran with Flyway disabled so no DDL touched the live DB; the Flyway baseline step itself was measured on local Postgres (included in the "after" local numbers).
+
 ## How to run
 
 ```bash
