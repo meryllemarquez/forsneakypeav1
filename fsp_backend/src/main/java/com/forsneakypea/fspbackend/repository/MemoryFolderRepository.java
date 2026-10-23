@@ -16,6 +16,9 @@ public interface MemoryFolderRepository extends JpaRepository<MemoryFolder, UUID
     List<MemoryFolder> findAllByIsArchivedOrderByCreatedAtDesc(Boolean isArchived);
     List<MemoryFolder> findAllByOrderByCreatedAtDesc();
 
+    // Newest N unarchived albums (Home page) without loading the whole table.
+    Slice<MemoryFolder> findByIsArchivedOrderByCreatedAtDesc(Boolean isArchived, Pageable pageable);
+
     // Slice = no extra COUNT query (Page would run one whenever the page is full).
     Slice<MemoryFolder> findAllBy(Pageable pageable);
 
