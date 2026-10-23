@@ -11,7 +11,6 @@ export default function AuthModal({ isOpen, onClose }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [displayName, setDisplayName] = useState('');
-  const [role, setRole] = useState('ROLE_USER');
   const [masterKey, setMasterKey] = useState('');
 
   // UI Feedback
@@ -61,7 +60,6 @@ export default function AuthModal({ isOpen, onClose }) {
         name: displayName,          // Backend expects 'name'
         username,
         password,
-        role,                       // ROLE_USER or ROLE_ADMIN
       });
 
       login(response);
@@ -170,14 +168,6 @@ export default function AuthModal({ isOpen, onClose }) {
             <p className={styles.subtitle}>Master Key Unlocked</p>
 
             {error && <div className={styles.error}>{error}</div>}
-
-            <div className={styles.inputGroup}>
-              <label>Account Role</label>
-              <select value={role} onChange={(e) => setRole(e.target.value)}>
-                <option value="ROLE_USER">User (Merylle / Cj) 💕</option>
-                <option value="ROLE_ADMIN">Admin 👑</option>
-              </select>
-            </div>
 
             <div className={styles.inputGroup}>
               <label>Display Name</label>

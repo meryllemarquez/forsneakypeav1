@@ -35,7 +35,6 @@ export default function AuthPage() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [displayName, setDisplayName] = useState('');
-  const [role, setRole] = useState('ROLE_USER');
   const [masterKey, setMasterKey] = useState('');
 
   // Feedback State
@@ -122,7 +121,6 @@ export default function AuthPage() {
         name: displayName,
         username,
         password,
-        role,
       });
 
       login(response);
@@ -299,18 +297,6 @@ export default function AuthPage() {
                   </div>
 
                   {error && <div className={styles.errorMessage}>{error}</div>}
-
-                  <div className={styles.fieldGroup}>
-                    <label className={styles.inputLabel} htmlFor="role">Role Type</label>
-                    <select
-                      id="role"
-                      value={role}
-                      onChange={(e) => setRole(e.target.value)}
-                    >
-                      <option value="ROLE_USER">User (Merylle / Cj)</option>
-                      <option value="ROLE_ADMIN">Admin (Elevated)</option>
-                    </select>
-                  </div>
 
                   <div className={styles.fieldGroup}>
                     <input

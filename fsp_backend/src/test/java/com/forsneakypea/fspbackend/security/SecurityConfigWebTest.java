@@ -77,8 +77,8 @@ class SecurityConfigWebTest {
     @ParameterizedTest
     @ValueSource(strings = {
             "https://forsneakypea.vercel.app",
-            "https://forsneakypea-git-perf-improvements-someteam.vercel.app",
-            "https://forsneakypeav1-abc123-someteam.vercel.app",
+            "https://forsneakypeav1-abc123-meryllemarquezs-projects.vercel.app",
+            "https://forsneakypeav1-git-perf-improvements-meryllemarquezs-projects.vercel.app",
             "http://localhost:5173",
             "http://127.0.0.1:3000"
     })
@@ -95,6 +95,10 @@ class SecurityConfigWebTest {
     @ValueSource(strings = {
             "https://evil.vercel.app",
             "https://someone-elses-app.vercel.app",
+            "https://forsneakypeav1-abc.vercel.app",
+            "https://forsneakypea-abc123-meryllemarquezs-projects.vercel.app",
+            "https://forsneakypeav1-abc123-otherteam.vercel.app",
+            "https://forsneakypeav1-abc-meryllemarquezs-projects.vercel.app.evil.com",
             "https://forsneakypea.vercel.app.evil.com",
             "https://evil.com",
             "http://forsneakypea.vercel.app"
