@@ -1,37 +1,46 @@
 package com.forsneakypea.fspbackend.security;
 
 import com.forsneakypea.fspbackend.exception.RateLimitExceededException;
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.Ticker;
 import org.springframework.stereotype.Component;
 
-import java.util.Deque;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedDeque;
+import java.time.Duration;
+import java.util.concurrent.atomic.AtomicInteger;
 
-// Simple in-memory fixed-window limiter for /api/auth/login and /api/auth/register.
+// Fixed-window limiter for /api/auth/login and /api/auth/register.
 // This app has exactly two legitimate user accounts and runs as a single instance,
 // so an in-memory counter (rather than Redis/Bucket4j) is enough to blunt brute-force
 // attempts against the login form and the static master-password registration gate.
+// Entries expire WINDOW after the first attempt (and the cache is size-bounded), so
+// keys from one-off clients don't accumulate forever.
 @Component
 public class AuthRateLimiter {
 
     private static final int MAX_ATTEMPTS = 10;
-    private static final long WINDOW_MS = 15 * 60 * 1000L; // 15 minutes
+    private static final Duration WINDOW = Duration.ofMinutes(15);
+    private static final long MAX_TRACKED_KEYS = 10_000;
 
-    private final Map<String, Deque<Long>> attemptsByKey = new ConcurrentHashMap<>();
+    private final Cache<String, AtomicInteger> attemptsByKey;
+
+    public AuthRateLimiter() {
+        this(Ticker.systemTicker());
+    }
+
+    // Visible for tests, which drive expiry with a fake ticker.
+    AuthRateLimiter(Ticker ticker) {
+        this.attemptsByKey = Caffeine.newBuilder()
+                .expireAfterWrite(WINDOW)
+                .maximumSize(MAX_TRACKED_KEYS)
+                .ticker(ticker)
+                .build();
+    }
 
     public void checkAllowed(String key) {
-        long now = System.currentTimeMillis();
-        Deque<Long> timestamps = attemptsByKey.computeIfAbsent(key, k -> new ConcurrentLinkedDeque<>());
-
-        synchronized (timestamps) {
-            while (!timestamps.isEmpty() && now - timestamps.peekFirst() > WINDOW_MS) {
-                timestamps.pollFirst();
-            }
-            if (timestamps.size() >= MAX_ATTEMPTS) {
-                throw new RateLimitExceededException("Too many attempts. Please wait a few minutes and try again.");
-            }
-            timestamps.addLast(now);
+        AtomicInteger attempts = attemptsByKey.get(key, k -> new AtomicInteger());
+        if (attempts.incrementAndGet() > MAX_ATTEMPTS) {
+            throw new RateLimitExceededException("Too many attempts. Please wait a few minutes and try again.");
         }
     }
 }

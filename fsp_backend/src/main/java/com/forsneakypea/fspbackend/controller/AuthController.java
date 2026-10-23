@@ -34,13 +34,11 @@ public class AuthController {
         return ResponseEntity.ok(ApiResponse.success(response, "Account created successfully"));
     }
 
-    // Render (and most hosts) sit behind a proxy, so the real client IP arrives via
-    // X-Forwarded-For rather than the raw socket address.
+    // Behind Render's proxy, server.forward-headers-strategy=native makes Tomcat
+    // resolve the real client address from X-Forwarded-For (only when the request
+    // comes from a trusted proxy), so getRemoteAddr() is safe to use here. Never
+    // read the raw header: clients can put anything in it.
     private String clientIp(HttpServletRequest request) {
-        String forwardedFor = request.getHeader("X-Forwarded-For");
-        if (forwardedFor != null && !forwardedFor.isBlank()) {
-            return forwardedFor.split(",")[0].trim();
-        }
         return request.getRemoteAddr();
     }
 }

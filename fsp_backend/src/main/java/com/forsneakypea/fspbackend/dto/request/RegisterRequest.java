@@ -1,6 +1,5 @@
 package com.forsneakypea.fspbackend.dto.request;
 
-import com.forsneakypea.fspbackend.entity.Role;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -23,6 +22,4 @@ public class RegisterRequest {
     @NotBlank(message = "Password is required")
     @Size(min = 8, message = "Password must be at least 8 characters")
     private String password;
-
-    private Role role = Role.ROLE_USER;
 }

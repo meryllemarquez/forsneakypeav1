@@ -35,7 +35,12 @@ public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthFilter;
     private final AuthenticationProvider authenticationProvider;
 
-    @Value("${app.allowed-origins:${ALLOWED_ORIGINS:}}")
+    // Comma-separated origin patterns (override with CORS_ALLOWED_ORIGINS). See application.properties for defaults.
+    @Value("${app.cors.allowed-origin-patterns}")
+    private String allowedOriginPatternsProperty;
+
+    // Additional exact origins, appended to the above (legacy ALLOWED_ORIGINS env var).
+    @Value("${app.allowed-origins:}")
     private String extraAllowedOrigins;
 
     @Bean
@@ -52,7 +57,6 @@ public class SecurityConfig {
                 .requestMatchers(
                     AntPathRequestMatcher.antMatcher("/api/v1/auth/**"),
                     AntPathRequestMatcher.antMatcher("/api/auth/**"),
-                    AntPathRequestMatcher.antMatcher("/**/auth/**"),
                     AntPathRequestMatcher.antMatcher("/error"),
                     AntPathRequestMatcher.antMatcher("/error/**"),
                     AntPathRequestMatcher.antMatcher(HttpMethod.GET, "/actuator/health")
@@ -98,18 +102,9 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        List<String> allowedOriginPatterns = new ArrayList<>(List.of(
-            "http://localhost:*",
-            "http://127.0.0.1:*",
-            "https://*.vercel.app"
-        ));
+        List<String> allowedOriginPatterns = new ArrayList<>(splitCsv(allowedOriginPatternsProperty));
 
-        if (extraAllowedOrigins != null && !extraAllowedOrigins.isBlank()) {
-            Arrays.stream(extraAllowedOrigins.split(","))
-                    .map(String::trim)
-                    .filter(origin -> !origin.isEmpty())
-                    .forEach(allowedOriginPatterns::add);
-        }
+        allowedOriginPatterns.addAll(splitCsv(extraAllowedOrigins));
 
         configuration.setAllowedOriginPatterns(allowedOriginPatterns);
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
@@ -121,5 +116,13 @@ public class SecurityConfig {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
+    }
+
+    private static List<String> splitCsv(String value) {
+        if (value == null || value.isBlank()) return List.of();
+        return Arrays.stream(value.split(","))
+                .map(String::trim)
+                .filter(s -> !s.isEmpty())
+                .toList();
     }
 }

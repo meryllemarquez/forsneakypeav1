@@ -99,12 +99,14 @@ public class AuthServiceImpl implements AuthService {
             throw new IllegalArgumentException("Username is already taken.");
         }
 
-        // 3. Encrypt password using BCrypt encoder and persist user entity
+        // 3. Encrypt password using BCrypt encoder and persist user entity.
+        // The role is never taken from the request: self-registration always
+        // yields a regular user (admins are created via the admin API).
         User user = User.builder()
                 .name(request.getName())
                 .username(request.getUsername())
                 .passwordHash(passwordEncoder.encode(request.getPassword()))
-                .role(request.getRole() != null ? request.getRole() : Role.ROLE_USER)
+                .role(Role.ROLE_USER)
                 .active(true)
                 .build();
 
