@@ -1,5 +1,7 @@
 package com.forsneakypea.fspbackend.service;
 
+import com.forsneakypea.fspbackend.exception.BadRequestException;
+import com.forsneakypea.fspbackend.exception.NotFoundException;
 import com.forsneakypea.fspbackend.dto.LoveNoteDTO;
 import com.forsneakypea.fspbackend.dto.LoveNoteRequestDTO;
 import com.forsneakypea.fspbackend.dto.LoveStickerDTO;
@@ -62,7 +64,7 @@ public class LoveBoardService {
                 && note.getCreatedBy() != null
                 && !note.getCreatedBy().equals(currentUserId);
         if (isPrivateToSomeoneElse) {
-            throw new RuntimeException("Note not found");
+            throw new NotFoundException("Note not found");
         }
         return mapNoteToDTO(note, currentUserId);
     }
@@ -148,7 +150,7 @@ public class LoveBoardService {
     @Transactional
     public void deleteNote(UUID id, Long userId) {
         LoveNote note = noteRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Note not found"));
+                .orElseThrow(() -> new NotFoundException("Note not found"));
         String title = note.getTitle();
         boolean wasPrivate = Boolean.TRUE.equals(note.getIsPrivate());
 
@@ -192,7 +194,7 @@ public class LoveBoardService {
     @Transactional
     public LoveStickerDTO updateSticker(UUID id, LoveStickerRequestDTO.StickerUpdate request) {
         LoveSticker sticker = stickerRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Sticker not found"));
+                .orElseThrow(() -> new NotFoundException("Sticker not found"));
 
         if (request.getPositionX() != null) sticker.setPositionX(request.getPositionX());
         if (request.getPositionY() != null) sticker.setPositionY(request.getPositionY());
@@ -207,7 +209,7 @@ public class LoveBoardService {
     @Transactional
     public void deleteSticker(UUID id, Long userId) {
         if (!stickerRepository.existsById(id)) {
-            throw new RuntimeException("Sticker not found");
+            throw new NotFoundException("Sticker not found");
         }
         stickerRepository.deleteById(id);
         activityLogService.log(userId, "LOVE_STICKER_DELETED", RelatedEntityType.LOVE_STICKER, id);
@@ -219,17 +221,25 @@ public class LoveBoardService {
 
     private LoveNote findNoteOrThrow(UUID id) {
         return noteRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Note not found"));
+                .orElseThrow(() -> new NotFoundException("Note not found"));
     }
 
     private AttachmentType parseAttachmentType(String value) {
         if (value == null || value.isBlank()) return AttachmentType.NONE;
-        return AttachmentType.valueOf(value.trim().toUpperCase());
+        try {
+            return AttachmentType.valueOf(value.trim().toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new BadRequestException("Invalid attachment type: " + value);
+        }
     }
 
     private NoteMood parseMood(String value) {
         if (value == null || value.isBlank()) return null;
-        return NoteMood.valueOf(value.trim().toUpperCase());
+        try {
+            return NoteMood.valueOf(value.trim().toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new BadRequestException("Invalid mood: " + value);
+        }
     }
 
     private LoveNoteDTO mapNoteToDTO(LoveNote note, Long currentUserId) {

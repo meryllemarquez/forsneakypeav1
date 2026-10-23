@@ -13,6 +13,7 @@ import com.forsneakypea.fspbackend.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -45,11 +46,11 @@ public class AuthServiceImpl implements AuthService {
     public AuthResponse login(LoginRequest request) {
         // 1. Fetch user by username or throw a friendly authentication error
         User user = userRepository.findByUsername(request.getUsername())
-                .orElseThrow(() -> new IllegalArgumentException("Oops! Incorrect username or password, love. 💕"));
+                .orElseThrow(() -> new BadCredentialsException("Oops! Incorrect username or password, love. 💕"));
 
         // 2. Verify raw password against BCrypt password hash stored in database
         if (!passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
-            throw new IllegalArgumentException("Oops! Incorrect username or password, love. 💕");
+            throw new BadCredentialsException("Oops! Incorrect username or password, love. 💕");
         }
 
         // 3. Update last login timestamp safely

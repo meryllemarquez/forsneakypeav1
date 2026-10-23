@@ -86,10 +86,12 @@ export default function AuthPage() {
       navigate(response.role === 'ROLE_ADMIN' ? '/admin' : '/');
     } catch (err) {
       // Custom romantic & clear error phrase for wrong password/username
+      // axios's own err.message is "Request failed with status code 401", so
+      // read the backend's message / status instead.
       setError(
-        err.message?.includes('Invalid') || err.message?.includes('password')
+        err.response?.status === 401
           ? '✨ Oops! Incorrect username or password, love. Please try again! 💕'
-          : err.message || 'Unable to sign in. Please check your credentials 💕'
+          : err.response?.data?.message || 'Unable to sign in. Please check your credentials 💕'
       );
     } finally {
       setLoading(false);
@@ -127,7 +129,7 @@ export default function AuthPage() {
       closeModal();
       navigate(response.role === 'ROLE_ADMIN' ? '/admin' : '/');
     } catch (err) {
-      setError(err.message || 'Failed to create account 💕');
+      setError(err.response?.data?.message || 'Failed to create account 💕');
     } finally {
       setLoading(false);
     }

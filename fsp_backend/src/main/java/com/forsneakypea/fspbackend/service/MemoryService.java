@@ -1,6 +1,7 @@
 package com.forsneakypea.fspbackend.service;
 
 
+import com.forsneakypea.fspbackend.exception.NotFoundException;
 import com.forsneakypea.fspbackend.dto.CalendarConflictDTO;
 import com.forsneakypea.fspbackend.dto.CalendarEntryDTO;
 import com.forsneakypea.fspbackend.dto.FolderDTO;
@@ -58,7 +59,7 @@ public class MemoryService {
     @Transactional(readOnly = true)
     public FolderDTO getFolderById(UUID id) {
         MemoryFolder folder = folderRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Folder not found"));
+                .orElseThrow(() -> new NotFoundException("Folder not found"));
         return mapFolderToDTO(folder);
     }
 
@@ -89,7 +90,7 @@ public class MemoryService {
     @Transactional
     public FolderDTO updateFolder(UUID id, FolderRequestDTO.CreateOrUpdateFolder request, boolean force, Long userId) {
         MemoryFolder folder = folderRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Folder not found"));
+                .orElseThrow(() -> new NotFoundException("Folder not found"));
 
         folder.setName(request.getName());
         folder.setDescription(request.getDescription());
@@ -149,9 +150,9 @@ public class MemoryService {
     @Transactional
     public FolderDTO setCalendarHighlight(UUID folderId, UUID photoId, boolean force, Long userId) {
         MemoryFolder folder = folderRepository.findById(folderId)
-                .orElseThrow(() -> new RuntimeException("Folder not found"));
+                .orElseThrow(() -> new NotFoundException("Folder not found"));
         MemoryPhoto photo = photoRepository.findById(photoId)
-                .orElseThrow(() -> new RuntimeException("Photo not found"));
+                .orElseThrow(() -> new NotFoundException("Photo not found"));
 
         if (!photo.getFolder().getId().equals(folderId)) {
             throw new IllegalArgumentException("That photo doesn't belong to this album.");
@@ -179,7 +180,7 @@ public class MemoryService {
     @Transactional
     public FolderDTO clearCalendarHighlight(UUID folderId, Long userId) {
         MemoryFolder folder = folderRepository.findById(folderId)
-                .orElseThrow(() -> new RuntimeException("Folder not found"));
+                .orElseThrow(() -> new NotFoundException("Folder not found"));
         folder.setHighlightPhotoId(null);
         folder.setHighlightPhotoPositionX(50.0);
         folder.setHighlightPhotoPositionY(50.0);
@@ -191,7 +192,7 @@ public class MemoryService {
     @Transactional
     public FolderDTO updateHighlightPosition(UUID folderId, double positionX, double positionY, Long userId) {
         MemoryFolder folder = folderRepository.findById(folderId)
-                .orElseThrow(() -> new RuntimeException("Folder not found"));
+                .orElseThrow(() -> new NotFoundException("Folder not found"));
         if (folder.getHighlightPhotoId() == null) {
             throw new IllegalArgumentException("This album has no calendar highlight to reposition.");
         }
@@ -235,7 +236,7 @@ public class MemoryService {
     @Transactional
     public void deleteFolder(UUID id, Long userId) {
         MemoryFolder folder = folderRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Folder not found"));
+                .orElseThrow(() -> new NotFoundException("Folder not found"));
         String name = folder.getName();
         folderRepository.deleteById(id);
         activityLogService.log(userId, "MEMORY_FOLDER_DELETED", RelatedEntityType.MEMORY_FOLDER, id);
@@ -246,7 +247,7 @@ public class MemoryService {
     @Transactional
     public PhotoDTO addPhotoToFolder(UUID folderId, String photoUrl, String storagePath, String caption, String location, Long userId) { // ✅ Long userId
         MemoryFolder folder = folderRepository.findById(folderId)
-                .orElseThrow(() -> new RuntimeException("Folder not found"));
+                .orElseThrow(() -> new NotFoundException("Folder not found"));
 
         MemoryPhoto photo = MemoryPhoto.builder()
                 .folder(folder)
@@ -274,7 +275,7 @@ public class MemoryService {
     @Transactional
     public PhotoDTO updatePhoto(UUID photoId, FolderRequestDTO.PhotoUpdate request) {
         MemoryPhoto photo = photoRepository.findById(photoId)
-                .orElseThrow(() -> new RuntimeException("Photo not found"));
+                .orElseThrow(() -> new NotFoundException("Photo not found"));
 
         if (request.getCaption() != null) photo.setCaption(request.getCaption());
         if (request.getLocation() != null) photo.setLocation(request.getLocation());
@@ -286,7 +287,7 @@ public class MemoryService {
     @Transactional
     public void deletePhoto(UUID photoId, Long userId) {
         MemoryPhoto photo = photoRepository.findById(photoId)
-                .orElseThrow(() -> new RuntimeException("Photo not found"));
+                .orElseThrow(() -> new NotFoundException("Photo not found"));
 
         MemoryFolder folder = photo.getFolder();
         if (folder != null && photoId.equals(folder.getHighlightPhotoId())) {
