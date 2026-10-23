@@ -1,8 +1,6 @@
--- V2: indexes that are defined in db/*.sql but do NOT exist in the live database.
+-- V2: indexes that are defined in db/*.sql but did NOT exist in the live database.
 --
--- The five indexes below are APPROVED (2026-10-23) but NOT yet applied. This file is deliberately outside db/migration, so Flyway does not
--- see it and nothing runs against the live database. To apply it after approval, move it to
--- src/main/resources/db/migration/ (same file name) and deploy; Flyway will run it once.
+-- Approved 2026-10-23. Applied by Flyway on the next deploy.
 --
 -- All statements are idempotent (IF NOT EXISTS). Plain CREATE INDEX takes a short write lock
 -- on the table; the tables involved are tiny, so this is not a concern here.

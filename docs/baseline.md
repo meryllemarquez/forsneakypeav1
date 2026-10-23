@@ -74,7 +74,7 @@ Render Free (140.8 s measured) has less CPU than any of these, so expect a small
 
 Nothing here has been changed in the live database.
 
-- **V2 indexes (approved, not applied):** `fsp_backend/src/main/resources/db/pending/V2__add_missing_indexes.sql` holds five indexes from `db/*.sql` that are missing in live (`idx_love_notes_is_archived`, `_is_favorite`, `_created_by`, `_updated_at`, `idx_love_stickers_created_by`). Move the file to `db/migration/` to apply it on the next deploy.
+- **V2 indexes (approved, moved to `db/migration/`):** `V2__add_missing_indexes.sql` adds five indexes from `db/*.sql` that are missing in live (`idx_love_notes_is_archived`, `_is_favorite`, `_created_by`, `_updated_at`, `idx_love_stickers_created_by`).
 - **Duplicate indexes to drop later:** `idx_memory_folders_archived` / `idx_memory_folders_is_archived` (both on `is_archived`) and `idx_memory_photos_folder` / `idx_memory_photos_folder_id` (both on `folder_id`). Kept in V1 so it matches live.
 - **`users.created_at` / `updated_at`:** live columns are `timestamp` (no time zone) but the entity maps them as `OffsetDateTime`. Hibernate validate accepts it; worth aligning (column to `timestamptz`, or entity to `LocalDateTime`).
 - **`activity_logs.status` nullability:** `NOT NULL DEFAULT 'SUCCESS'` in live, but the entity has no `nullable = false`.
