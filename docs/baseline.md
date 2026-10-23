@@ -70,6 +70,26 @@ Free-plan Render service, Supabase in Seoul. Figures are as reported by the owne
 
 Render Free (140.8 s measured) has less CPU than any of these, so expect a smaller absolute number but a similar ratio. Note: "after" against live Supabase ran with Flyway disabled so no DDL touched the live DB; the Flyway baseline step itself was measured on local Postgres (included in the "after" local numbers).
 
+## Deferred schema items (found while building the Flyway baseline)
+
+Nothing here has been changed in the live database.
+
+- **V2 indexes (approved, not applied):** `fsp_backend/src/main/resources/db/pending/V2__add_missing_indexes.sql` holds five indexes from `db/*.sql` that are missing in live (`idx_love_notes_is_archived`, `_is_favorite`, `_created_by`, `_updated_at`, `idx_love_stickers_created_by`). Move the file to `db/migration/` to apply it on the next deploy.
+- **Duplicate indexes to drop later:** `idx_memory_folders_archived` / `idx_memory_folders_is_archived` (both on `is_archived`) and `idx_memory_photos_folder` / `idx_memory_photos_folder_id` (both on `folder_id`). Kept in V1 so it matches live.
+- **`users.created_at` / `updated_at`:** live columns are `timestamp` (no time zone) but the entity maps them as `OffsetDateTime`. Hibernate validate accepts it; worth aligning (column to `timestamptz`, or entity to `LocalDateTime`).
+- **`activity_logs.status` nullability:** `NOT NULL DEFAULT 'SUCCESS'` in live, but the entity has no `nullable = false`.
+- **`users_accent_color_check` missing in live:** defined in `profile_customization_migration.sql` (`accent_color` limited to the six palette values) but never applied. The service layer validates the palette; adding the constraint is a decision for later.
+- **`memory_folders_calendar_date_unique` (needs a decision):** a UNIQUE partial index on `memory_folders(event_date)` where `is_calendar_highlight = true AND highlight_photo_id IS NOT NULL` ("one calendar-highlight album per date"). Not in live; adding it changes behaviour and fails if existing rows violate it. Left commented out in V2.
+- **Also noted:** `users.created_by` exists in live but not in the entity.
+
+## Migrations connection
+
+Flyway migrates through Supabase's session pooler (`:5432`, same host and credentials) while the app keeps the transaction pooler (`:6543`); see `FlywayConfig`. Checked read-only against live: connects, advisory locks work, `flyway info` does not create the history table.
+
+## Backup
+
+A schema+data `pg_dump` of the `public` schema was taken before the Flyway rollout and stored outside the repo (`C:\Users\Merylle\Desktop\backups\forsneakypea-2026-10-23.sql`). It contains private data and must never be committed.
+
 ## How to run
 
 ```bash

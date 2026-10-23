@@ -1,6 +1,6 @@
 -- V2: indexes that are defined in db/*.sql but do NOT exist in the live database.
 --
--- PENDING APPROVAL: this file is deliberately outside db/migration, so Flyway does not
+-- The five indexes below are APPROVED (2026-10-23) but NOT yet applied. This file is deliberately outside db/migration, so Flyway does not
 -- see it and nothing runs against the live database. To apply it after approval, move it to
 -- src/main/resources/db/migration/ (same file name) and deploy; Flyway will run it once.
 --
