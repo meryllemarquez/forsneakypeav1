@@ -47,12 +47,6 @@ export const memoryService = {
     await api.delete(`/memories/photos/${photoId}`);
   },
 
-  // GET /api/memories/photos/favorites
-  getFavorites: async () => {
-    const res = await api.get('/memories/photos/favorites');
-    return res.data;
-  },
-
   // GET /api/memories/calendar?year=&month=
   getCalendarMonth: async (year, month) => {
     const res = await api.get(`/memories/calendar?year=${year}&month=${month}`);

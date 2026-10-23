@@ -305,13 +305,6 @@ public class MemoryService {
         activityLogService.log(userId, "MEMORY_PHOTO_DELETED", RelatedEntityType.MEMORY_PHOTO, photoId);
     }
 
-    @Transactional(readOnly = true)
-    public List<PhotoDTO> getFavorites() {
-        return photoRepository.findByIsFavoriteTrueOrderByCreatedAtDesc().stream()
-                .map(this::mapPhotoToDTO)
-                .collect(Collectors.toList());
-    }
-
     // List-endpoint variant: uses a pre-batched photo count instead of touching
     // the lazy `photos` collection, and omits the photo array entirely (the
     // grid view never reads it — see getAllFolders()).

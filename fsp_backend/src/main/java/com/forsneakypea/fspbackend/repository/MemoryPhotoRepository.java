@@ -15,8 +15,6 @@ import java.util.UUID;
 @Repository
 public interface MemoryPhotoRepository extends JpaRepository<MemoryPhoto, UUID> {
     List<MemoryPhoto> findByFolderIdOrderByCreatedAtDesc(UUID folderId);
-    List<MemoryPhoto> findByIsFavoriteTrueOrderByCreatedAtDesc();
-
     // Slice = no extra COUNT query (Page would run one whenever the page is full).
     Slice<MemoryPhoto> findAllBy(Pageable pageable);
 

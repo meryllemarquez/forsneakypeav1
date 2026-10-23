@@ -91,11 +91,6 @@ public class MemoryController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/photos/favorites")
-    public ResponseEntity<List<PhotoDTO>> getFavorites() {
-        return ResponseEntity.ok(memoryService.getFavorites());
-    }
-
     @PostMapping("/folders/{folderId}/calendar-highlight/{photoId}")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<FolderDTO> setCalendarHighlight(
