@@ -42,10 +42,13 @@ const RULES = [
   [/photo|camera/i, 'camera'],
 ];
 
-function pick(text, fallback) {
+// The doodle for some text, or null when no keyword matches.
+export function findDoodle(text) {
   const hit = RULES.find(([pattern]) => pattern.test(text || ''));
-  return hit ? hit[1] : fallback;
+  return hit ? hit[1] : null;
 }
+
+const pick = (text, fallback) => findDoodle(text) || fallback;
 
 export const albumIcon = (name) => pick(name, 'camera');
 export const dateIcon = (title, location) => pick(`${title || ''} ${location || ''}`, 'ticket');

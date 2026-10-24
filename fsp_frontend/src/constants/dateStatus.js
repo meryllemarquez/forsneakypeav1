@@ -7,3 +7,5 @@ export const DATE_STATUS_LABELS = {
   COMPLETED: 'Completed',
   CANCELLED: 'Cancelled',
 };
+
+export const DATE_STATUS_ORDER = ['DREAMING', 'PLANNING', 'BOOKED', 'READY', 'COMPLETED', 'CANCELLED'];

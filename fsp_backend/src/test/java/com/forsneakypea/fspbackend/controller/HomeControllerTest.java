@@ -54,7 +54,7 @@ class HomeControllerTest {
         UUID folderId = UUID.randomUUID();
         when(homeService.getSummary(eq(1L), eq(LocalDate.of(2026, 10, 23)))).thenReturn(HomeSummaryDTO.builder()
                 .folders(List.of(HomeSummaryDTO.FolderCard.builder().id(folderId).name("Beach").description("Sun")
-                        .coverImageUrl("https://img/a.jpg").photoCount(4).build()))
+                        .coverImageUrl("https://img/a.jpg").iconStyle("doodle:plane").photoCount(4).build()))
                 .upcomingDates(List.of(HomeSummaryDTO.DateCard.builder().id(UUID.randomUUID()).title("Picnic")
                         .plannedDate(LocalDate.of(2026, 11, 2)).location("Park").status(DateStatus.PLANNING).build()))
                 .latestNote(HomeSummaryDTO.NoteCard.builder().content("hello").authorName("CJ")
@@ -68,7 +68,8 @@ class HomeControllerTest {
                 .andExpect(jsonPath("$.folders[0].id").value(folderId.toString()))
                 .andExpect(jsonPath("$.folders[0].name").value("Beach"))
                 .andExpect(jsonPath("$.folders[0].photoCount").value(4))
-                .andExpect(jsonPath("$.folders[0].length()").value(5))      // id, name, description, coverImageUrl, photoCount
+                .andExpect(jsonPath("$.folders[0].iconStyle").value("doodle:plane"))
+                .andExpect(jsonPath("$.folders[0].length()").value(6))      // id, name, description, coverImageUrl, iconStyle, photoCount
                 .andExpect(jsonPath("$.upcomingDates[0].title").value("Picnic"))
                 .andExpect(jsonPath("$.upcomingDates[0].plannedDate").value("2026-11-02"))
                 .andExpect(jsonPath("$.upcomingDates[0].status").value("PLANNING"))

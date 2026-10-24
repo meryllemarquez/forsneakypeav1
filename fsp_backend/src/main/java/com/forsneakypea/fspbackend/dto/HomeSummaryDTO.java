@@ -30,6 +30,8 @@ public class HomeSummaryDTO {
         private String name;
         private String description;
         private String coverImageUrl;
+        /** Doodle picked for the album ("doodle:<name>"), or the legacy default "camera" for automatic. */
+        private String iconStyle;
         private int photoCount;
     }
 

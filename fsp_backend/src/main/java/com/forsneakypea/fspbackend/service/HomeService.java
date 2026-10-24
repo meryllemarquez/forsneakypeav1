@@ -57,6 +57,7 @@ public class HomeService {
                         .name(f.getName())
                         .description(f.getDescription())
                         .coverImageUrl(f.getCoverImageUrl())
+                        .iconStyle(f.getIconStyle())
                         .photoCount(photoCounts.getOrDefault(f.getId(), 0L).intValue())
                         .build())
                 .collect(Collectors.toList());

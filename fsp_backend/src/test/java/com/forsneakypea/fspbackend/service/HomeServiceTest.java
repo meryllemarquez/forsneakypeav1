@@ -86,7 +86,7 @@ class HomeServiceTest {
         UUID a = UUID.randomUUID();
         UUID b = UUID.randomUUID();
         when(folderRepository.findByIsArchivedOrderByCreatedAtDesc(anyBoolean(), any(Pageable.class))).thenReturn(new SliceImpl<>(List.of(
-                MemoryFolder.builder().id(a).name("Beach").description("Sun").coverImageUrl("https://img/a.jpg").build(),
+                MemoryFolder.builder().id(a).name("Beach").description("Sun").coverImageUrl("https://img/a.jpg").iconStyle("doodle:plane").build(),
                 MemoryFolder.builder().id(b).name("Hike").build())));
         when(photoRepository.countByFolderIds(anyCollection())).thenReturn(List.of(count(a, 7)));
 
@@ -98,6 +98,8 @@ class HomeServiceTest {
         assertEquals(2, summary.getFolders().size());
         assertEquals("Beach", summary.getFolders().get(0).getName());
         assertEquals(7, summary.getFolders().get(0).getPhotoCount());
+        assertEquals("doodle:plane", summary.getFolders().get(0).getIconStyle()); // the picked doodle reaches Home
+        assertEquals("camera", summary.getFolders().get(1).getIconStyle());      // entity default (automatic)
         assertEquals(0, summary.getFolders().get(1).getPhotoCount()); // no photos row -> 0
         verify(photoRepository).countByFolderIds(anyCollection());
     }

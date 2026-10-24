@@ -5,7 +5,7 @@ import { useAuth } from '../hooks/useAuth';
 import { useHomeSummary } from '../queries/queries';
 import { getDaysTogether, ANNIVERSARY_LABEL } from '../constants/relationship';
 import { HOME_GREETINGS } from '../constants/homeGreetings';
-import { albumIcon, dateIcon } from '../utils/doodleFor';
+import { dateIcon, resolveAlbumIcon } from '../utils/doodleFor';
 import Icon from '../components/Icon';
 import Navbar from '../components/layout/Navbar/Navbar';
 import Footer from '../components/layout/Footer/Footer';
@@ -194,7 +194,7 @@ export default function HomePage() {
                     {folder.coverImageUrl ? (
                       <img src={folder.coverImageUrl} alt="" className={styles.coverImg} loading="lazy" decoding="async" />
                     ) : (
-                      <Icon name={albumIcon(folder.name)} size={108} className={styles.coverIcon} />
+                      <Icon name={resolveAlbumIcon(folder)} size={108} className={styles.coverIcon} />
                     )}
                     <span className={styles.photoChip}>
                       {folder.photoCount ?? 0} {folder.photoCount === 1 ? 'photo' : 'photos'}

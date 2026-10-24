@@ -14,7 +14,8 @@ const stack = [];
  * The one dialog shell for the whole app: backdrop, Escape, focus trap + restore,
  * scroll lock, aria wiring and the bubbly card look.
  *
- * size    sm | md | lg | xl
+ * size       sm | md | lg | xl
+ * placement  'center' (default) or 'right' (a slide-over drawer)
  * locked  blocks Escape / backdrop / close button (for example while a request is running)
  * role    'dialog' (default) or 'alertdialog'
  * title   renders a heading and labels the dialog; omit it and pass `ariaLabel` instead
@@ -25,6 +26,7 @@ export default function Modal({
   title,
   ariaLabel,
   size = 'md',
+  placement = 'center',
   locked = false,
   role = 'dialog',
   hideClose = false,
@@ -92,6 +94,8 @@ export default function Modal({
     };
   }, [open]);
 
+  const isDrawer = placement === 'right';
+
   const tryClose = () => {
     if (!locked) onClose?.();
   };
@@ -100,7 +104,7 @@ export default function Modal({
     <AnimatePresence>
       {open && (
         <motion.div
-          className={styles.backdrop}
+          className={`${styles.backdrop} ${isDrawer ? styles.backdropRight : ''}`}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -111,16 +115,16 @@ export default function Modal({
         >
           <motion.div
             ref={panelRef}
-            className={`${styles.panel} ${styles[size]} ${className}`}
+            className={`${styles.panel} ${styles[size]} ${isDrawer ? styles.drawer : ''} ${className}`}
             role={role}
             aria-modal="true"
             aria-labelledby={title ? titleId : undefined}
             aria-label={title ? undefined : ariaLabel}
             tabIndex={-1}
-            initial={{ opacity: 0, y: 22, scale: 0.96 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 14, scale: 0.97 }}
-            transition={{ duration: 0.26, ease: [0.16, 1, 0.3, 1] }}
+            initial={isDrawer ? { x: '100%' } : { opacity: 0, y: 22, scale: 0.96 }}
+            animate={isDrawer ? { x: 0 } : { opacity: 1, y: 0, scale: 1 }}
+            exit={isDrawer ? { x: '100%' } : { opacity: 0, y: 14, scale: 0.97 }}
+            transition={{ duration: isDrawer ? 0.34 : 0.26, ease: [0.16, 1, 0.3, 1] }}
           >
             {(title || !hideClose) && (
               <div className={styles.header}>
