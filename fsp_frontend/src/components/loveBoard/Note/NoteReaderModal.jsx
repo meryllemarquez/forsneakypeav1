@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { Lock, Archive, ArchiveRestore, Pencil, Trash2, Image, Smile, EyeOff, Heart } from 'lucide-react';
 import Icon from '../../Icon';
 import Button from '../../ui/Button/Button';
@@ -11,10 +11,6 @@ import CollapsibleSection from '../common/CollapsibleSection';
 import { inputClass, labelClass } from '../common/lbUi';
 import { MOOD_OPTIONS } from '../../../constants/loveBoardConstants';
 import { getEffectiveTextBoxes, getEffectiveAttachments, deriveSearchableContent, stringifyJsonList } from '../../../utils/noteCanvas';
-
-function byFilename(list = []) {
-  return Object.fromEntries(list.map((item) => [item.filename, item.url]));
-}
 
 const formFromNote = (note) => ({
   title: note.title || '',
@@ -29,7 +25,7 @@ const formFromNote = (note) => ({
  * Reader / editor for one letter. `note` is null while closed. The last note is kept while the
  * dialog slides out, and the edit form starts fresh each time a different letter is opened.
  */
-export default function NoteReaderModal({ note, assets, onClose, onSave, onToggleFavorite, onToggleArchive, onDelete, saving }) {
+export default function NoteReaderModal({ note, onClose, onSave, onToggleFavorite, onToggleArchive, onDelete, saving }) {
   const [shown, setShown] = useState(note);
   const [trackedId, setTrackedId] = useState(note?.id ?? null);
   const [editMode, setEditMode] = useState(false);
@@ -46,9 +42,6 @@ export default function NoteReaderModal({ note, assets, onClose, onSave, onToggl
     setShown(note);
   }
 
-  const papers = useMemo(() => byFilename(assets?.papers), [assets]);
-  const pins = useMemo(() => byFilename(assets?.pins), [assets]);
-  const tapes = useMemo(() => byFilename(assets?.tapes), [assets]);
 
   const handleSave = async () => {
     await onSave({
@@ -124,9 +117,6 @@ export default function NoteReaderModal({ note, assets, onClose, onSave, onToggl
             <div className="flex flex-col items-center text-center">
               <NoteCanvasPreview
                 note={current}
-                paperUrl={papers[current.paperImage]}
-                pins={pins}
-                tapes={tapes}
                 className="drop-shadow-[4px_5px_0_rgba(23,43,112,0.22)]"
               />
               {moodInfo && (
@@ -152,8 +142,7 @@ export default function NoteReaderModal({ note, assets, onClose, onSave, onToggl
                 </div>
 
                 <NoteCanvasEditor
-                  paperUrl={papers[form.paperImage]}
-                  assets={assets}
+                  paper={form.paperImage}
                   textBoxes={form.textBoxes}
                   attachments={form.attachments}
                   onChangeTextBoxes={(textBoxes) => setForm((f) => ({ ...f, textBoxes }))}
@@ -162,7 +151,7 @@ export default function NoteReaderModal({ note, assets, onClose, onSave, onToggl
 
                 <div className="space-y-2.5 pt-1">
                   <CollapsibleSection title="Paper" icon={<Image size={18} strokeWidth={2.6} aria-hidden="true" />}>
-                    <PaperPicker papers={assets?.papers} value={form.paperImage} onChange={(paperImage) => setForm((f) => ({ ...f, paperImage }))} />
+                    <PaperPicker value={form.paperImage} onChange={(paperImage) => setForm((f) => ({ ...f, paperImage }))} />
                   </CollapsibleSection>
 
                   <CollapsibleSection title="Mood" icon={<Smile size={18} strokeWidth={2.6} aria-hidden="true" />}>

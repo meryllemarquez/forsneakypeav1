@@ -2,8 +2,9 @@ import { motion } from 'framer-motion';
 import { ArchiveRestore, Trash2 } from 'lucide-react';
 import Icon from '../../Icon';
 import { DrawerPanel, PillButton } from '../common/lbUi';
+import { LbPaperThumb } from '../common/lbGraphics';
 
-export default function ArchiveDrawer({ open, notes = [], papers = {}, onClose, onRestore, onDelete }) {
+export default function ArchiveDrawer({ open, notes = [], onClose, onRestore, onDelete }) {
   return (
     <DrawerPanel open={open} onClose={onClose} side="left" eyebrow="tucked away" title="Archived Letters">
       <div className="flex-1 overflow-y-auto p-4">
@@ -24,9 +25,9 @@ export default function ArchiveDrawer({ open, notes = [], papers = {}, onClose, 
               exit={{ opacity: 0, scale: 0.9 }}
               className="flex items-center gap-3 rounded-2xl border-2 border-solid border-(--ink) bg-(--paper) p-3"
             >
-              {papers[note.paperImage] && (
-                <img src={papers[note.paperImage]} alt="" className="size-12 shrink-0 rounded-lg border-2 border-solid border-(--ink) object-cover" />
-              )}
+              <span className="shrink-0 overflow-hidden rounded-lg border-2 border-solid border-(--ink) bg-white">
+                <LbPaperThumb value={note.paperImage} size={44} />
+              </span>
               <div className="min-w-0 flex-1">
                 <p className="m-0 truncate text-sm font-extrabold text-(--ink)">{note.title || 'Untitled letter'}</p>
                 <p className="m-0 truncate text-xs text-(--ink-soft)">{note.content}</p>

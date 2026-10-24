@@ -1,20 +1,18 @@
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import Button from '../../ui/Button/Button';
 import Modal from '../../ui/Modal/Modal';
 import PaperPicker from './PaperPicker';
 import MoodPicker from './MoodPicker';
 import NoteCanvasEditor from './NoteCanvasEditor';
 import { inputClass, labelClass } from '../common/lbUi';
+import { LbPaperThumb } from '../common/lbGraphics';
+import { PAPERS, paperValue } from '../../../constants/loveBoardCatalog';
 import { deriveSearchableContent, stringifyJsonList } from '../../../utils/noteCanvas';
 
 const STEPS = ['Choose paper', 'Design it'];
 
-function byFilename(list = []) {
-  return Object.fromEntries(list.map((item) => [item.filename, item.url]));
-}
-
-const emptyForm = (assets) => ({
-  paperImage: assets?.papers?.[0]?.filename || '',
+const emptyForm = () => ({
+  paperImage: paperValue(PAPERS[0].id),
   title: '',
   textBoxes: [],
   attachments: [],
@@ -22,9 +20,9 @@ const emptyForm = (assets) => ({
   isPrivate: false,
 });
 
-export default function NoteComposerModal({ open, assets, onClose, onCreate, creating }) {
+export default function NoteComposerModal({ open, onClose, onCreate, creating }) {
   const [step, setStep] = useState(0);
-  const [form, setForm] = useState(() => emptyForm(assets));
+  const [form, setForm] = useState(emptyForm);
 
   // Start every time the composer opens from a blank letter on step 1 (adjusted during render,
   // so there is no flash of the previous draft).
@@ -33,11 +31,10 @@ export default function NoteComposerModal({ open, assets, onClose, onCreate, cre
     setWasOpen(open);
     if (open) {
       setStep(0);
-      setForm(emptyForm(assets));
+      setForm(emptyForm());
     }
   }
 
-  const papers = useMemo(() => byFilename(assets?.papers), [assets]);
   const canAdvance = step === 0 ? !!form.paperImage : true;
 
   const handleSubmit = async () => {
@@ -78,15 +75,11 @@ export default function NoteComposerModal({ open, assets, onClose, onCreate, cre
       {step === 0 && (
         <div className="flex gap-5">
           <div className="hidden w-56 shrink-0 flex-col items-center justify-center gap-3 rounded-2xl border-2 border-solid border-(--ink) bg-(--gelato-tint) p-4 sm:flex">
-            <div className="relative h-52 w-44">
-              {papers[form.paperImage] && (
-                <img src={papers[form.paperImage]} alt="Chosen paper" className="absolute inset-0 h-full w-full object-contain drop-shadow-[3px_4px_0_rgba(23,43,112,0.25)]" />
-              )}
-            </div>
+            <LbPaperThumb value={form.paperImage} size={176} />
             <p className="m-0 text-center text-sm text-(--ink-soft)">Pick the paper, then design it on the next step.</p>
           </div>
           <div className="min-w-0 flex-1">
-            <PaperPicker papers={assets?.papers} value={form.paperImage} onChange={(paperImage) => setForm((f) => ({ ...f, paperImage }))} />
+            <PaperPicker value={form.paperImage} onChange={(paperImage) => setForm((f) => ({ ...f, paperImage }))} />
           </div>
         </div>
       )}
@@ -106,8 +99,7 @@ export default function NoteComposerModal({ open, assets, onClose, onCreate, cre
           </div>
 
           <NoteCanvasEditor
-            paperUrl={papers[form.paperImage]}
-            assets={assets}
+            paper={form.paperImage}
             textBoxes={form.textBoxes}
             attachments={form.attachments}
             onChangeTextBoxes={(textBoxes) => setForm((f) => ({ ...f, textBoxes }))}

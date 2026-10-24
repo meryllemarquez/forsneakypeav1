@@ -1,0 +1,104 @@
+/* Love Board papers, pins and tapes: CSS only. Sizes are relative to the note canvas, so they
+   scale with the board zoom exactly like the old images did. */
+
+.paper {
+  position: absolute;
+  box-sizing: border-box;
+  border: 2px solid var(--ink);
+  border-radius: 6px;
+  box-shadow: 4px 5px 0 rgb(23 43 112 / 0.18);
+  pointer-events: none;
+}
+
+/* Sticky notes: a soft colour with a darker sticky strip along the top. */
+.gelato {
+  background-color: var(--gelato);
+  background-image: linear-gradient(to bottom, rgb(255 159 28 / 0.28) 0 14%, transparent 14%);
+}
+
+.sea {
+  background-color: var(--sea-tint);
+  background-image: linear-gradient(to bottom, rgb(92 179 255 / 0.4) 0 14%, transparent 14%);
+}
+
+.citrus {
+  background-color: var(--citrus-tint);
+  background-image: linear-gradient(to bottom, rgb(255 159 28 / 0.4) 0 14%, transparent 14%);
+}
+
+.lined {
+  background-color: var(--white);
+  background-image: repeating-linear-gradient(to bottom, transparent 0, transparent 16px, rgb(92 179 255 / 0.55) 16px, rgb(92 179 255 / 0.55) 18px);
+}
+
+.grid {
+  background-color: var(--white);
+  background-image:
+    linear-gradient(rgb(92 179 255 / 0.4) 1.5px, transparent 1.5px),
+    linear-gradient(90deg, rgb(92 179 255 / 0.4) 1.5px, transparent 1.5px);
+  background-size: 18px 18px;
+}
+
+.outline {
+  position: absolute;
+  filter:
+    drop-shadow(2px 0 0 var(--ink)) drop-shadow(-2px 0 0 var(--ink)) drop-shadow(0 2px 0 var(--ink)) drop-shadow(0 -2px 0 var(--ink))
+    drop-shadow(4px 5px 0 rgb(23 43 112 / 0.18));
+  pointer-events: none;
+}
+
+.torn {
+  position: absolute;
+  inset: 0;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  background-color: #fffdf6;
+  background-image:
+    linear-gradient(to right, transparent 13%, rgb(224 48 26 / 0.45) 13%, rgb(224 48 26 / 0.45) 14.5%, transparent 14.5%),
+    repeating-linear-gradient(to bottom, transparent 0, transparent 16px, rgb(92 179 255 / 0.6) 16px, rgb(92 179 255 / 0.6) 18px);
+  clip-path: polygon(
+    0 0, 100% 0, 100% 93%, 95% 98%, 90% 92%, 85% 99%, 80% 93%, 75% 100%, 70% 94%, 65% 99%, 60% 92%,
+    55% 98%, 50% 93%, 45% 100%, 40% 94%, 35% 99%, 30% 92%, 25% 98%, 20% 93%, 15% 100%, 10% 94%, 5% 99%, 0 93%
+  );
+}
+
+/* Pins and tapes sit centred in a square box (34px in the design space, scaled by the user). */
+.attachment {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.pinHead {
+  width: 62%;
+  aspect-ratio: 1;
+  border: 2px solid var(--ink);
+  border-radius: 50%;
+  background-image: radial-gradient(circle at 34% 30%, rgb(255 255 255 / 0.75) 0 14%, transparent 15%);
+  box-shadow: 2px 3px 0 rgb(23 43 112 / 0.3);
+}
+
+.c_tomato { background-color: var(--tomato); }
+.c_citrus { background-color: var(--citrus); }
+.c_gelato { background-color: var(--gelato); }
+.c_sea { background-color: var(--sea); }
+.c_amalfi { background-color: var(--amalfi); }
+.c_ink { background-color: var(--ink); }
+
+.tape {
+  width: 92%;
+  height: 34%;
+  border-left: 2px dashed var(--white);
+  border-right: 2px dashed var(--white);
+  box-shadow: 0 1px 2px rgb(23 43 112 / 0.25);
+}
+
+.t_tomato { background-color: rgb(224 48 26 / 0.75); }
+.t_citrus { background-color: rgb(255 159 28 / 0.8); }
+.t_gelato { background-color: rgb(255 230 128 / 0.9); }
+.t_sea { background-color: rgb(92 179 255 / 0.8); }
+.t_amalfi { background-color: rgb(31 85 201 / 0.7); }

@@ -15,20 +15,17 @@ import NoteReaderModal from '../components/loveBoard/Note/NoteReaderModal';
 import ConfirmDialog from '../components/ui/ConfirmDialog/ConfirmDialog';
 
 import Icon from '../components/Icon';
-import { useLoveBoardAssets } from '../hooks/useLoveBoardAssets';
 import { useLoveNotes, useLoveStickers, useCacheSetter } from '../queries/queries';
 import { useLoveBoardMutations } from '../queries/mutations';
 import { queryKeys } from '../queries/queryKeys';
+import { PAPERS, paperValue, resolvePaperId, resolveStickerIcon, stickerLabel } from '../constants/loveBoardCatalog';
 import { randomBoardPosition, randomNoteRotation, randomStickerRotation } from '../constants/loveBoardConstants';
 
-function byFilename(list = []) {
-  return Object.fromEntries(list.map((item) => [item.filename, item.url]));
-}
+const PAPER_FILTER_OPTIONS = PAPERS.map((p) => ({ filename: paperValue(p.id), label: p.label }));
 
 export default function LoveLettersPage() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const assets = useLoveBoardAssets();
   const boardRef = useRef(null);
   const stickerDebounceRef = useRef({});
 
@@ -198,7 +195,7 @@ export default function LoveLettersPage() {
       if (favoritesOnly && !n.isFavorite) return false;
       if (authorFilter && n.authorName !== authorFilter) return false;
       if (moodFilter && n.mood !== moodFilter) return false;
-      if (paperFilter && n.paperImage !== paperFilter) return false;
+      if (paperFilter && resolvePaperId(n.paperImage) !== resolvePaperId(paperFilter)) return false;
       if (query) {
         const q = query.toLowerCase();
         const haystack = `${n.title || ''} ${n.content || ''}`.toLowerCase();
@@ -213,8 +210,6 @@ export default function LoveLettersPage() {
     () => [...new Set(notes.map((n) => n.authorName).filter(Boolean))],
     [notes]
   );
-  const papersByFilename = useMemo(() => byFilename(assets.papers), [assets]);
-  const stickerImagesByFilename = useMemo(() => byFilename(assets.stickers), [assets]);
 
   const layerItems = useMemo(() => {
     const noteItems = notes
@@ -224,18 +219,18 @@ export default function LoveLettersPage() {
         type: 'note',
         zIndex: n.zIndex || 1,
         label: n.title || 'Untitled letter',
-        thumbnail: papersByFilename[n.paperImage],
+        paper: n.paperImage,
       }));
     const stickerItems = stickers.map((s) => ({
       id: s.id,
       type: 'sticker',
       zIndex: s.zIndex || 1,
-      label: s.image.replace(/\.[^.]+$/, '').replace(/[-_]/g, ' '),
-      thumbnail: stickerImagesByFilename[s.image],
+      label: stickerLabel(s.image),
+      icon: resolveStickerIcon(s.image),
       locked: s.isLocked,
     }));
     return [...noteItems, ...stickerItems].sort((a, b) => b.zIndex - a.zIndex);
-  }, [notes, stickers, papersByFilename, stickerImagesByFilename]);
+  }, [notes, stickers]);
 
   /* ---------------------------------------------------------------
      NOTES
@@ -579,7 +574,6 @@ export default function LoveLettersPage() {
           ref={boardRef}
           notes={visibleNotes}
           stickers={stickers}
-          assets={assets}
           decorateMode={decorateMode}
           activeTool={activeTool}
           selectedStickerId={selectedStickerId}
@@ -610,7 +604,7 @@ export default function LoveLettersPage() {
           onAuthorFilterChange={setAuthorFilter}
           moodFilter={moodFilter}
           onMoodFilterChange={setMoodFilter}
-          paperOptions={assets.papers}
+          paperOptions={PAPER_FILTER_OPTIONS}
           paperFilter={paperFilter}
           onPaperFilterChange={setPaperFilter}
           onClear={clearFilters}
@@ -618,7 +612,6 @@ export default function LoveLettersPage() {
 
         <StickerLibrary
           open={stickerLibraryOpen}
-          stickers={assets.stickers}
           onAdd={handleAddSticker}
           onClose={() => setStickerLibraryOpen(false)}
         />
@@ -626,7 +619,6 @@ export default function LoveLettersPage() {
         <ArchiveDrawer
           open={archiveOpen}
           notes={archivedNotes}
-          papers={papersByFilename}
           onClose={() => setArchiveOpen(false)}
           onRestore={handleRestoreFromArchive}
           onDelete={requestDeleteNote}
@@ -665,7 +657,6 @@ export default function LoveLettersPage() {
 
       <NoteComposerModal
         open={composerOpen}
-        assets={assets}
         creating={creating}
         onClose={() => setComposerOpen(false)}
         onCreate={handleCreateNote}
@@ -673,7 +664,6 @@ export default function LoveLettersPage() {
 
       <NoteReaderModal
         note={readerNote || null}
-        assets={assets}
         saving={readerSaving}
         onClose={() => setReaderNoteId(null)}
         onSave={handleSaveNoteEdit}

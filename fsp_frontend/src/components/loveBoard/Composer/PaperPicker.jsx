@@ -1,23 +1,26 @@
-export default function PaperPicker({ papers = [], value, onChange }) {
-  if (papers.length === 0) {
-    return <p className="m-0 text-sm text-(--ink-muted)">No papers found in public/assets/love-board/papers.</p>;
-  }
+import { PAPERS, paperValue, resolvePaperId } from '../../../constants/loveBoardCatalog';
+import { LbPaperThumb } from '../common/lbGraphics';
+
+export default function PaperPicker({ value, onChange }) {
+  const current = resolvePaperId(value);
 
   return (
-    <div className="grid grid-cols-3 gap-3 sm:grid-cols-5" role="radiogroup" aria-label="Paper">
-      {papers.map((paper) => (
+    <div className="grid grid-cols-3 gap-3 sm:grid-cols-6" role="radiogroup" aria-label="Paper">
+      {PAPERS.map((paper) => (
         <button
-          key={paper.filename}
+          key={paper.id}
           type="button"
           role="radio"
-          aria-checked={value === paper.filename}
-          onClick={() => onChange(paper.filename)}
+          aria-checked={current === paper.id}
+          aria-label={paper.label}
+          onClick={() => onChange(paperValue(paper.id))}
           title={paper.label}
-          className={`lb-focus cursor-pointer appearance-none rounded-2xl border-2 border-solid border-(--ink) p-1 transition ${
-            value === paper.filename ? 'bg-(--citrus) shadow-[3px_3px_0_var(--ink)]' : 'bg-white hover:bg-(--sea-tint)'
+          className={`lb-focus flex cursor-pointer appearance-none flex-col items-center gap-1 rounded-2xl border-2 border-solid border-(--ink) p-1.5 text-xs font-extrabold text-(--ink) transition ${
+            current === paper.id ? 'bg-(--citrus) shadow-[3px_3px_0_var(--ink)]' : 'bg-white hover:bg-(--sea-tint)'
           }`}
         >
-          <img src={paper.url} alt={paper.label} className="aspect-square w-full rounded-xl object-contain" />
+          <LbPaperThumb value={paperValue(paper.id)} size={72} />
+          {paper.label}
         </button>
       ))}
     </div>

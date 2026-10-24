@@ -1,4 +1,4 @@
-import { forwardRef, useCallback, useEffect, useImperativeHandle, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useLayoutEffect, useRef, useState } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import Icon from '../../Icon';
 import Note from '../Note/Note';
@@ -9,15 +9,10 @@ const MIN_ZOOM = 0.15;
 const MAX_ZOOM = 2;
 const ZOOM_STEP = 0.15;
 
-function byFilename(list = []) {
-  return Object.fromEntries(list.map((item) => [item.filename, item.url]));
-}
-
 const CorkBoard = forwardRef(function CorkBoard(
   {
     notes,
     stickers,
-    assets,
     decorateMode,
     activeTool = 'select',
     selectedStickerId,
@@ -259,10 +254,6 @@ const CorkBoard = forwardRef(function CorkBoard(
     };
   }, [handlePanPointerMove, handlePanPointerUp]);
 
-  const papers = useMemo(() => byFilename(assets?.papers), [assets]);
-  const pins = useMemo(() => byFilename(assets?.pins), [assets]);
-  const tapes = useMemo(() => byFilename(assets?.tapes), [assets]);
-  const stickerImages = useMemo(() => byFilename(assets?.stickers), [assets]);
 
   return (
     <div
@@ -288,7 +279,6 @@ const CorkBoard = forwardRef(function CorkBoard(
             <Sticker
               key={sticker.id}
               sticker={sticker}
-              imageUrl={stickerImages[sticker.image]}
               decorateMode={decorateMode}
               panMode={panMode}
               isSelected={selectedStickerId === sticker.id}
@@ -312,9 +302,6 @@ const CorkBoard = forwardRef(function CorkBoard(
             <Note
               key={note.id}
               note={note}
-              paperUrl={papers[note.paperImage]}
-              pins={pins}
-              tapes={tapes}
               boardScale={scale}
               panMode={panMode}
               isTop={topNoteId === note.id}

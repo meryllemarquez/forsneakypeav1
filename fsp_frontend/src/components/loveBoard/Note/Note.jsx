@@ -11,7 +11,7 @@ const EXIT_VARIANTS = {
   archive: { x: 420, y: 320, scale: 0.15, opacity: 0, rotate: -15, transition: { duration: 0.5, ease: 'easeIn' } },
 };
 
-export default function Note({ note, paperUrl, pins, tapes, boardScale = 1, panMode = false, isTop, exitReason, onOpen, onDragEnd, onBringToFront }) {
+export default function Note({ note, boardScale = 1, panMode = false, isTop, exitReason, onOpen, onDragEnd, onBringToFront }) {
   const width = NOTE_CANVAS_WIDTH * NOTE_BOARD_SCALE;
   const height = NOTE_CANVAS_HEIGHT * NOTE_BOARD_SCALE;
   const [isDragging, setIsDragging] = useState(false);
@@ -74,7 +74,7 @@ export default function Note({ note, paperUrl, pins, tapes, boardScale = 1, panM
         className="relative h-full w-full drop-shadow-[0_10px_18px_rgba(23,43,112,0.3)]"
         style={{ zIndex: isTop ? 2 : 1 }}
       >
-        <NoteCanvasPreview note={note} paperUrl={paperUrl} pins={pins} tapes={tapes} scale={NOTE_BOARD_SCALE} />
+        <NoteCanvasPreview note={note} scale={NOTE_BOARD_SCALE} />
 
         {note.isFavorite && (
           <Heart size={16} aria-label="Favorite" className="absolute top-2 right-2 fill-(--tomato) text-(--tomato) drop-shadow" />

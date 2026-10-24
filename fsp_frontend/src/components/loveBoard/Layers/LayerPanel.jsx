@@ -1,6 +1,7 @@
 import { BringToFront, SendToBack, Lock } from 'lucide-react';
 import Icon from '../../Icon';
 import { DrawerPanel, RoundButton } from '../common/lbUi';
+import { LbPaperThumb } from '../common/lbGraphics';
 
 export default function LayerPanel({ open, items = [], onClose, onSelect, onBringToFront, onSendBackward }) {
   return (
@@ -29,11 +30,7 @@ export default function LayerPanel({ open, items = [], onClose, onSelect, onBrin
                 className="lb-focus flex min-h-11 min-w-0 flex-1 cursor-pointer appearance-none items-center gap-2.5 rounded-xl border-0 bg-transparent p-0 text-left text-(--ink)"
               >
                 <span className="flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-xl border-2 border-solid border-(--ink) bg-white">
-                  {item.thumbnail ? (
-                    <img src={item.thumbnail} alt="" className="h-full w-full object-cover" />
-                  ) : (
-                    <Icon name="envelope" size={26} />
-                  )}
+                  {item.icon ? <Icon name={item.icon} size={30} /> : <LbPaperThumb value={item.paper} size={40} />}
                 </span>
                 <span className="min-w-0 flex-1">
                   <span className="flex items-center gap-1 truncate text-sm font-extrabold capitalize">

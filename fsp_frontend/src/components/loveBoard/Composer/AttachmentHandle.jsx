@@ -2,12 +2,13 @@ import { useRef } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { RefreshCw, Trash2, RotateCw } from 'lucide-react';
 import { useCanvasDrag } from '../../../hooks/useCanvasDrag';
+import { LbAttachment } from '../common/lbGraphics';
 
 const MIN_SCALE = 0.5;
 const MAX_SCALE = 2;
 const BASE_SIZE = 34;
 
-export default function AttachmentHandle({ attachment, imageUrl, scale = 1, isSelected, onSelect, onChange, onReplace, onRemove }) {
+export default function AttachmentHandle({ attachment, scale = 1, isSelected, onSelect, onChange, onReplace, onRemove }) {
   const elRef = useRef(null);
   const interactionRef = useRef(null);
 
@@ -99,13 +100,7 @@ export default function AttachmentHandle({ attachment, imageUrl, scale = 1, isSe
       onPointerDown={onDragPointerDown}
       onClick={(e) => e.stopPropagation()}
     >
-      <img
-        src={imageUrl}
-        alt=""
-        className="pointer-events-none h-full w-full -translate-x-1/2 -translate-y-1/2 object-contain drop-shadow"
-        style={{ position: 'absolute', left: '50%', top: '50%' }}
-        draggable={false}
-      />
+      <LbAttachment type={attachment.type} value={attachment.image} />
 
       {isSelected && (
         <>

@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Lock, Unlock, Copy, Trash2, BringToFront, SendToBack, RotateCw } from 'lucide-react';
+import Icon from '../../Icon';
 import { useCanvasDrag } from '../../../hooks/useCanvasDrag';
+import { resolveStickerIcon } from '../../../constants/loveBoardCatalog';
 
 const MIN_SCALE = 0.35;
 const MAX_SCALE = 3;
@@ -12,7 +14,6 @@ const TOUCH_HIT_SIZE = 32;
 
 export default function Sticker({
   sticker,
-  imageUrl,
   decorateMode,
   panMode = false,
   isSelected,
@@ -161,12 +162,10 @@ export default function Sticker({
       exit={{ scale: 0, opacity: 0, rotate: (sticker.rotation || 0) + 40, transition: { duration: 0.3 } }}
     >
       <div className="relative h-full w-full">
-        <img
-          src={imageUrl}
-          alt=""
-          className="pointer-events-none h-full w-full object-contain drop-shadow-[0_6px_10px_rgba(40,25,10,0.3)]"
-          draggable={false}
-        />
+        {/* The doodle fills ~80% of the box, like the old patches did, so saved sizes keep their footprint. */}
+        <div className="pointer-events-none flex h-full w-full items-center justify-center">
+          <Icon name={resolveStickerIcon(sticker.image)} size={Math.round(renderedSize * 0.8)} sticker />
+        </div>
         {sticker.isLocked && (
           <span
             className="absolute -top-1 -right-1 rounded-full bg-white/90 p-0.5 text-(--ink) shadow"

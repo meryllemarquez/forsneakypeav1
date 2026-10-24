@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { Type, Pin as PinIcon, Trash2, AlignLeft, AlignCenter, AlignRight, Bold } from 'lucide-react';
 import TextBoxHandle from './TextBoxHandle';
 import AttachmentHandle from './AttachmentHandle';
@@ -6,18 +6,13 @@ import FontPicker from './FontPicker';
 import { Chip, PillButton, RoundButton } from '../common/lbUi';
 import { NOTE_CANVAS_WIDTH, NOTE_CANVAS_HEIGHT, createTextBox, createAttachment } from '../../../utils/noteCanvas';
 import { FONT_COLOR_SWATCHES } from '../../../constants/loveBoardConstants';
+import { PIN_COLORS, TAPE_COLORS, pinValue, tapeValue } from '../../../constants/loveBoardCatalog';
+import { LbPaper, LbAttachment } from '../common/lbGraphics';
 
-function byFilename(list = []) {
-  return Object.fromEntries(list.map((item) => [item.filename, item.url]));
-}
-
-export default function NoteCanvasEditor({ paperUrl, assets, textBoxes, attachments, onChangeTextBoxes, onChangeAttachments }) {
+export default function NoteCanvasEditor({ paper, textBoxes, attachments, onChangeTextBoxes, onChangeAttachments }) {
   const [selection, setSelection] = useState(null); // { type: 'text' | 'attachment', id } | null
   const [editingTextId, setEditingTextId] = useState(null);
   const [replacingId, setReplacingId] = useState(null);
-
-  const pins = useMemo(() => byFilename(assets?.pins), [assets]);
-  const tapes = useMemo(() => byFilename(assets?.tapes), [assets]);
 
   const selectedBlock = selection?.type === 'text' ? textBoxes.find((b) => b.id === selection.id) : null;
   const selectedAttachment = selection?.type === 'attachment' ? attachments.find((a) => a.id === selection.id) : null;
@@ -40,17 +35,19 @@ export default function NoteCanvasEditor({ paperUrl, assets, textBoxes, attachme
     setSelection((s) => (s?.type === 'attachment' && s.id === id ? null : s));
   };
   const addAttachment = (type) => {
-    const list = type === 'PIN' ? assets?.pins : assets?.tapes;
-    const image = list?.[0]?.filename;
-    if (!image) return;
+    const image = type === 'PIN' ? pinValue(PIN_COLORS[0].id) : tapeValue(TAPE_COLORS[0].id);
     const attachment = createAttachment(type, image, { zIndex: textBoxes.length + attachments.length + 1 });
     onChangeAttachments([...attachments, attachment]);
     setSelection({ type: 'attachment', id: attachment.id });
   };
 
-  const replaceOptions = replacingId
-    ? (attachments.find((a) => a.id === replacingId)?.type === 'PIN' ? assets?.pins : assets?.tapes) || []
-    : [];
+  const replacingType = replacingId ? attachments.find((a) => a.id === replacingId)?.type : null;
+  const replaceOptions =
+    replacingType === 'PIN'
+      ? PIN_COLORS.map((c) => ({ value: pinValue(c.id), label: `${c.label} pin` }))
+      : replacingType === 'TAPE'
+        ? TAPE_COLORS.map((c) => ({ value: tapeValue(c.id), label: `${c.label} tape` }))
+        : [];
 
   return (
     <div className="space-y-3">
@@ -73,7 +70,7 @@ export default function NoteCanvasEditor({ paperUrl, assets, textBoxes, attachme
         style={{ width: NOTE_CANVAS_WIDTH, height: NOTE_CANVAS_HEIGHT }}
         onClick={() => setSelection(null)}
       >
-        <img src={paperUrl} alt="" className="pointer-events-none absolute inset-0 h-full w-full object-fill" draggable={false} />
+        <LbPaper value={paper} />
 
         {textBoxes.map((block) => (
           <TextBoxHandle
@@ -96,7 +93,6 @@ export default function NoteCanvasEditor({ paperUrl, assets, textBoxes, attachme
           <AttachmentHandle
             key={attachment.id}
             attachment={attachment}
-            imageUrl={attachment.type === 'PIN' ? pins[attachment.image] : tapes[attachment.image]}
             scale={1}
             isSelected={selection?.type === 'attachment' && selection.id === attachment.id}
             onSelect={() => setSelection({ type: 'attachment', id: attachment.id })}
@@ -118,17 +114,19 @@ export default function NoteCanvasEditor({ paperUrl, assets, textBoxes, attachme
           <div className="grid grid-cols-4 gap-2 sm:grid-cols-6">
             {replaceOptions.map((opt) => (
               <button
-                key={opt.filename}
+                key={opt.value}
                 type="button"
                 onClick={() => {
-                  updateAttachment(replacingId, { image: opt.filename });
+                  updateAttachment(replacingId, { image: opt.value });
                   setReplacingId(null);
                 }}
                 className="lb-focus min-h-11 cursor-pointer appearance-none rounded-xl border-2 border-solid border-(--ink) bg-(--paper) p-1 hover:bg-(--gelato-tint)"
                 aria-label={`Use ${opt.label}`}
                 title={opt.label}
               >
-                <img src={opt.url} alt="" className="aspect-square w-full object-contain" />
+                <span className="relative block aspect-square w-full">
+                  <LbAttachment type={replacingType} value={opt.value} />
+                </span>
               </button>
             ))}
           </div>
