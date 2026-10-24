@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Bell } from 'lucide-react';
+import Icon from '../Icon';
 import styles from './Notifications.module.css';
 import NotificationPanel from './NotificationPanel';
 import { useNotifications } from '../../queries/useNotifications';
@@ -17,11 +17,16 @@ export default function NotificationBell() {
         type="button"
         className={`${styles.bellBtn} ${open ? styles.bellOpen : ''}`}
         onClick={() => setOpen(true)}
-        title="Notifications"
-        aria-label="Notifications"
+        aria-label={unreadCount > 0 ? `Notifications, ${unreadCount} unread` : 'Notifications'}
+        aria-haspopup="dialog"
+        aria-expanded={open}
       >
-        <Bell size={18} strokeWidth={1.8} />
-        {unreadCount > 0 && <span className={styles.badge}>{unreadCount > 9 ? '9+' : unreadCount}</span>}
+        <Icon name="bell" size={30} />
+        {unreadCount > 0 && (
+          <span className={styles.badge} aria-hidden="true">
+            {unreadCount > 9 ? '9+' : unreadCount}
+          </span>
+        )}
       </button>
 
       <NotificationPanel

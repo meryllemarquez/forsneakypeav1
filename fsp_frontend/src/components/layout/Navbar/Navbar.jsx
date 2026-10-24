@@ -1,140 +1,154 @@
-import { useState } from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useEffect, useRef, useState } from 'react';
+import { Link, NavLink, useNavigate } from 'react-router-dom';
+import { LogOut, ShieldCheck, UserRound } from 'lucide-react';
 import { useAuth } from '../../../hooks/useAuth';
+import { useMediaQuery } from '../../../hooks/useMediaQuery';
+import { NAV_ITEMS, PHONE_NAV_QUERY } from '../../../constants/nav';
+import { avatarDoodle } from '../../../utils/avatar';
+import Icon from '../../Icon';
+import Logo from '../Logo/Logo';
+import TabBar from '../TabBar/TabBar';
 import NotificationBell from '../../notifications/NotificationBell';
 import styles from './Navbar.module.css';
 
-const NAV_ITEMS = [
-  { path: '/home', label: 'Home' },
-  { path: '/memories', label: 'Memories' },
-  { path: '/dates', label: 'Dates' },
-  { path: '/letters', label: 'Letters' },
-];
+function Avatar({ user, size }) {
+  return (
+    <span className={styles.avatar} style={{ width: size, height: size }}>
+      {user?.avatarUrl ? (
+        <img src={user.avatarUrl} alt="" className={styles.avatarImg} />
+      ) : (
+        <Icon name={avatarDoodle(user)} size={size - 2} />
+      )}
+    </span>
+  );
+}
 
-const HeartIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-    <path d="M12 21s-7.2-4.6-10-9.3C.6 8.4 2 4.8 5.3 4.1c2-.4 3.9.5 5 2.2 1.1-1.7 3-2.6 5-2.2 3.3.7 4.7 4.3 3.3 7.6C19.2 16.4 12 21 12 21z" />
-  </svg>
-);
+// Phones: the avatar opens a small menu holding Profile / Admin / Sign out.
+function AvatarMenu({ user, isCouple, isAdmin, onLogout }) {
+  const [open, setOpen] = useState(false);
+  const rootRef = useRef(null);
+  const navigate = useNavigate();
 
-const ShieldIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-  </svg>
-);
+  useEffect(() => {
+    if (!open) return undefined;
+    const onDown = (e) => {
+      if (!rootRef.current?.contains(e.target)) setOpen(false);
+    };
+    const onKey = (e) => {
+      if (e.key === 'Escape') setOpen(false);
+    };
+    document.addEventListener('mousedown', onDown);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('mousedown', onDown);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [open]);
 
-const LogOutIcon = () => (
-  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-    <polyline points="16 17 21 12 16 7"></polyline>
-    <line x1="21" y1="12" x2="9" y2="12"></line>
-  </svg>
-);
+  const go = (path) => {
+    setOpen(false);
+    navigate(path);
+  };
+
+  return (
+    <div className={styles.menuRoot} ref={rootRef}>
+      <button
+        type="button"
+        className={styles.avatarButton}
+        onClick={() => setOpen((v) => !v)}
+        aria-haspopup="menu"
+        aria-expanded={open}
+        aria-label={`Account menu for ${user?.name || user?.username || 'you'}`}
+      >
+        <Avatar user={user} size={36} />
+      </button>
+      {open && (
+        <div className={styles.menu} role="menu">
+          <p className={styles.menuName}>{user?.name || user?.username}</p>
+          {isCouple && (
+            <button type="button" role="menuitem" className={styles.menuItem} onClick={() => go('/profile')}>
+              <UserRound size={18} strokeWidth={2.4} aria-hidden="true" /> Profile
+            </button>
+          )}
+          {isAdmin && (
+            <button type="button" role="menuitem" className={styles.menuItem} onClick={() => go('/admin')}>
+              <ShieldCheck size={18} strokeWidth={2.4} aria-hidden="true" /> Admin
+            </button>
+          )}
+          <button type="button" role="menuitem" className={styles.menuItem} onClick={onLogout}>
+            <LogOut size={18} strokeWidth={2.4} aria-hidden="true" /> Sign out
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function Navbar() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-  const [mobileOpen, setMobileOpen] = useState(false);
+  const isPhone = useMediaQuery(PHONE_NAV_QUERY);
 
-  const initial = (user?.name || user?.username || '?').trim().charAt(0).toUpperCase();
-  const isCoupleAccount = user?.role === 'ROLE_USER';
+  const isCouple = user?.role === 'ROLE_USER';
+  const isAdmin = user?.role === 'ROLE_ADMIN';
+  const displayName = user?.name || user?.username || (isAdmin ? 'Admin' : 'You');
 
-  const closeMobile = () => setMobileOpen(false);
+  // Leaves room above the bottom tab bar on phones (see reset.css).
+  useEffect(() => {
+    document.body.classList.toggle('has-tabbar', isPhone);
+    return () => document.body.classList.remove('has-tabbar');
+  }, [isPhone]);
 
   return (
     <>
-      <header className={styles.nav}>
-        <NavLink to="/home" className={styles.brand}>
-          <span className={styles.brandIcon}><HeartIcon /></span>
-          for sneakypea
-        </NavLink>
+      <header className={styles.header}>
+        <Logo />
 
-        <nav className={styles.navLinks} aria-label="Primary">
-          {NAV_ITEMS.map((item) => (
-            <NavLink
-              key={item.path}
-              to={item.path}
-              className={({ isActive }) => `${styles.navLink} ${isActive ? styles.active : ''}`}
-            >
-              {item.label}
-            </NavLink>
-          ))}
-        </nav>
+        {!isPhone && (
+          <nav className={styles.navPill} aria-label="Main">
+            {NAV_ITEMS.map((item) => (
+              <NavLink key={item.path} to={item.path} className={styles.navLink}>
+                <Icon name={item.icon} size={26} />
+                <span>{item.label}</span>
+              </NavLink>
+            ))}
+          </nav>
+        )}
 
-        <div className={styles.navRight}>
-          {user?.role === 'ROLE_ADMIN' && (
-            <button className={styles.adminBtn} onClick={() => navigate('/admin')}>
-              <ShieldIcon />
-              <span>Admin</span>
+        <div className={styles.right}>
+          {!isPhone && isAdmin && (
+            <button type="button" className={styles.adminBtn} onClick={() => navigate('/admin')}>
+              <ShieldCheck size={18} strokeWidth={2.4} aria-hidden="true" />
+              Admin
             </button>
           )}
 
           <NotificationBell />
 
-          {isCoupleAccount ? (
-            <button className={styles.avatarPill} onClick={() => navigate('/profile')} title="Edit your profile">
-              {user?.avatarUrl ? (
-                <img src={user.avatarUrl} alt={user?.name} className={styles.avatarImg} />
-              ) : (
-                <span className={styles.avatarFallback}>{initial}</span>
-              )}
-              <span className={styles.avatarName}>{user?.name || user?.username || 'You'}</span>
-            </button>
+          {isPhone ? (
+            <AvatarMenu user={user} isCouple={isCouple} isAdmin={isAdmin} onLogout={logout} />
           ) : (
-            <div className={styles.avatarPill}>
-              <span className={styles.avatarFallback}>{initial}</span>
-              <span className={styles.avatarName}>{user?.name || user?.username || 'Admin'}</span>
-            </div>
+            <>
+              {isCouple ? (
+                <Link to="/profile" className={styles.avatarChip} aria-label={`${displayName}, edit your profile`}>
+                  <Avatar user={user} size={36} />
+                  <span>{displayName}</span>
+                </Link>
+              ) : (
+                <div className={styles.avatarChip}>
+                  <Avatar user={user} size={36} />
+                  <span>{displayName}</span>
+                </div>
+              )}
+              <button type="button" className={styles.iconBtn} onClick={logout} aria-label="Sign out">
+                <LogOut size={20} strokeWidth={2.4} aria-hidden="true" />
+              </button>
+            </>
           )}
-
-          <button className={styles.logoutBtn} onClick={logout} title="Sign out" aria-label="Sign out">
-            <LogOutIcon />
-          </button>
-
-          <button
-            className={`${styles.hamburger} ${mobileOpen ? styles.hamburgerOpen : ''}`}
-            onClick={() => setMobileOpen((open) => !open)}
-            aria-label="Toggle menu"
-            aria-expanded={mobileOpen}
-          >
-            <span></span><span></span><span></span>
-          </button>
         </div>
       </header>
 
-      <AnimatePresence>
-        {mobileOpen && (
-          <motion.nav
-            className={styles.mobileDrawer}
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
-            aria-label="Mobile"
-          >
-            {NAV_ITEMS.map((item) => (
-              <NavLink
-                key={item.path}
-                to={item.path}
-                className={({ isActive }) => `${styles.mobileLink} ${isActive ? styles.active : ''}`}
-                onClick={closeMobile}
-              >
-                {item.label}
-              </NavLink>
-            ))}
-            {isCoupleAccount && (
-              <NavLink to="/profile" className={styles.mobileLink} onClick={closeMobile}>Profile</NavLink>
-            )}
-            {user?.role === 'ROLE_ADMIN' && (
-              <button className={styles.mobileLink} onClick={() => { closeMobile(); navigate('/admin'); }}>
-                Admin Panel
-              </button>
-            )}
-            <button className={styles.mobileLink} onClick={logout}>Sign Out</button>
-          </motion.nav>
-        )}
-      </AnimatePresence>
+      {isPhone && <TabBar />}
     </>
   );
 }

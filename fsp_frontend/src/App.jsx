@@ -13,6 +13,10 @@ const MemoriesPage = lazy(() => import('./pages/MemoriesPage'));
 const DatesPage = lazy(() => import('./pages/DatesPage'));
 const LoveLettersPage = lazy(() => import('./pages/LoveLettersPage'));
 
+// Dev-only icon kit preview. `import.meta.env.DEV` is replaced with `false` in production builds,
+// so the dynamic import (and the page) is dropped from the bundle.
+const IconCheck = import.meta.env.DEV ? lazy(() => import('./dev/IconCheck')) : null;
+
 // Code-split: the whole admin control center is only ever reached by
 // ROLE_ADMIN accounts (gated below by ProtectedRoute), so it shouldn't be
 // part of the JS bundle every couple-account user downloads just to see
@@ -120,6 +124,10 @@ export default function App() {
             <Route path="settings" element={<Suspense fallback={null}><SystemSettingsPage /></Suspense>} />
             <Route path="audit" element={<Suspense fallback={null}><AuditTrailPage /></Suspense>} />
           </Route>
+
+          {IconCheck && (
+            <Route path="/dev/icons" element={<Suspense fallback={null}><IconCheck /></Suspense>} />
+          )}
 
           {/* Default Redirect */}
           <Route path="*" element={<Navigate to="/home" replace />} />

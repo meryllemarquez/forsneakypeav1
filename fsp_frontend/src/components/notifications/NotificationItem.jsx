@@ -1,26 +1,26 @@
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { Mail, Book, Calendar, Image, Bell, Check, X, UserCog } from 'lucide-react';
+import { Check, X } from 'lucide-react';
+import Icon from '../Icon';
 import styles from './Notifications.module.css';
 import { notificationLink } from '../../utils/notificationLinks';
 
 const TYPE_ICON = {
-  LOVE_NOTE_CREATED: Mail,
-  LOVE_NOTE_UPDATED: Mail,
-  LOVE_NOTE_DELETED: Mail,
-  MEMORY_CREATED: Book,
-  MEMORY_UPDATED: Book,
-  MEMORY_DELETED: Book,
-  GALLERY_UPLOAD: Image,
-  DATE_CREATED: Calendar,
-  DATE_UPDATED: Calendar,
-  DATE_COMPLETED: Calendar,
-  PROFILE_CHANGED: UserCog,
+  LOVE_NOTE_CREATED: 'envelope',
+  LOVE_NOTE_UPDATED: 'envelope',
+  LOVE_NOTE_DELETED: 'envelope',
+  MEMORY_CREATED: 'camera',
+  MEMORY_UPDATED: 'camera',
+  MEMORY_DELETED: 'camera',
+  GALLERY_UPLOAD: 'camera',
+  DATE_CREATED: 'motmot',
+  DATE_UPDATED: 'motmot',
+  DATE_COMPLETED: 'motmot',
+  PROFILE_CHANGED: 'star',
 };
 
-// Letters and dates read as red (the primary accent); memories and gallery
-// moments read as gold — a quiet color code so the panel is scannable at a
-// glance, matching the icon-avatar convention from the design preview.
+// Memory and gallery moments sit on a citrus tile, everything else on sea: a quiet color
+// code so the panel is scannable at a glance.
 const GOLD_TYPES = new Set(['MEMORY_CREATED', 'MEMORY_UPDATED', 'MEMORY_DELETED', 'GALLERY_UPLOAD']);
 
 function timeAgo(iso) {
@@ -36,7 +36,7 @@ function timeAgo(iso) {
 
 export default function NotificationItem({ notification, onMarkRead, onDelete, onNavigated }) {
   const navigate = useNavigate();
-  const Icon = TYPE_ICON[notification.type] || Bell;
+  const iconName = TYPE_ICON[notification.type] || 'bell';
   const isGold = GOLD_TYPES.has(notification.type);
 
   const handleClick = () => {
@@ -58,38 +58,38 @@ export default function NotificationItem({ notification, onMarkRead, onDelete, o
       className={`${styles.item} ${!notification.isRead ? styles.itemUnread : ''}`}
     >
       <div className={`${styles.itemIcon} ${isGold ? styles.itemIconGold : ''}`}>
-        <Icon size={15} strokeWidth={2} />
+        <Icon name={iconName} size={32} />
       </div>
       <div className={styles.itemBody}>
         <p className={styles.itemTitle}>{notification.title}</p>
         {notification.message && <p className={styles.itemMessage}>{notification.message}</p>}
         <p className={styles.itemTime}>{timeAgo(notification.createdAt)}</p>
       </div>
-      {!notification.isRead && <div className={styles.itemDot} />}
+      {!notification.isRead && <div className={styles.itemDot} aria-label="Unread" role="img" />}
       <div className={styles.itemActions}>
         {!notification.isRead && (
           <button
             type="button"
-            title="Mark as read"
+            aria-label="Mark as read"
             className={styles.itemActionBtn}
             onClick={(e) => {
               e.stopPropagation();
               onMarkRead(notification.id);
             }}
           >
-            <Check size={11} />
+            <Check size={18} strokeWidth={2.6} aria-hidden="true" />
           </button>
         )}
         <button
           type="button"
-          title="Delete"
+          aria-label="Delete notification"
           className={`${styles.itemActionBtn} ${styles.itemActionBtnDanger}`}
           onClick={(e) => {
             e.stopPropagation();
             onDelete(notification.id);
           }}
         >
-          <X size={11} />
+          <X size={18} strokeWidth={2.6} aria-hidden="true" />
         </button>
       </div>
     </motion.div>

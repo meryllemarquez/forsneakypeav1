@@ -55,3 +55,10 @@
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Phones show a fixed bottom tab bar (set by the Navbar): keep content clear of it. */
+@media (max-width: 900px) {
+  body.has-tabbar {
+    padding-bottom: calc(78px + env(safe-area-inset-bottom));
+  }
+}

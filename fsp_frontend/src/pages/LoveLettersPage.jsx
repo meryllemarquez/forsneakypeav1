@@ -13,8 +13,9 @@ import ArchiveDrawer from '../components/loveBoard/Archive/ArchiveDrawer';
 import LayerPanel from '../components/loveBoard/Layers/LayerPanel';
 import NoteComposerModal from '../components/loveBoard/Composer/NoteComposerModal';
 import NoteReaderModal from '../components/loveBoard/Note/NoteReaderModal';
-import ConfirmDialog from '../components/loveBoard/common/ConfirmDialog';
+import ConfirmDialog from '../components/ui/ConfirmDialog/ConfirmDialog';
 
+import Icon from '../components/Icon';
 import { useLoveBoardAssets } from '../hooks/useLoveBoardAssets';
 import { useLoveNotes, useLoveStickers, useCacheSetter } from '../queries/queries';
 import { useLoveBoardMutations } from '../queries/mutations';
@@ -512,46 +513,52 @@ export default function LoveLettersPage() {
 
   return (
     <div className="fixed inset-0 flex flex-col bg-[#1c140c] font-sans text-[#3a2b1e]">
-      <header className="z-[110] flex items-center justify-between gap-2 overflow-x-auto bg-[#2c2016] px-3 py-3 text-[#f4ece0] shadow-md sm:gap-3 sm:px-5">
-        <button
-          type="button"
-          onClick={() => navigate('/home')}
-          className="appearance-none inline-flex shrink-0 items-center gap-1.5 rounded-full border-0 bg-white/10 px-2.5 py-1.5 text-sm transition hover:bg-white/20 active:scale-95 sm:px-3"
-        >
-          <ArrowLeft size={15} strokeWidth={2.25} />
-          <span className="hidden sm:inline">Sanctuary</span>
-        </button>
+      <header className="z-[110] flex items-center justify-between gap-2 overflow-x-auto border-0 border-b-2 border-solid border-(--ink) bg-(--white) px-3 py-3 text-(--ink) sm:gap-4 sm:px-6">
+        <div className="flex shrink-0 items-center gap-3 sm:gap-4">
+          <button
+            type="button"
+            onClick={() => navigate('/home')}
+            aria-label="Back to Home"
+            className="inline-flex min-h-11 shrink-0 cursor-pointer appearance-none items-center gap-1.5 rounded-full border-2 border-solid border-(--ink) bg-(--white) px-3 text-sm font-extrabold text-(--ink) transition hover:bg-(--sea-tint) sm:px-4"
+          >
+            <ArrowLeft size={18} strokeWidth={2.8} aria-hidden="true" />
+            <span className="hidden sm:inline">Home</span>
+          </button>
 
-        <h1 className="m-0 hidden shrink-0 font-caveat text-2xl md:block">Our Love Board</h1>
+          <div className="hidden items-center gap-2.5 md:flex">
+            <Icon name="envelope" size={40} />
+            <h1 className="m-0 font-serif text-[1.9rem] leading-none font-extrabold">Our love board</h1>
+          </div>
+        </div>
 
-        <div className="flex shrink-0 items-center gap-0.5 rounded-xl bg-black/20 p-1 sm:gap-1">
+        <div role="toolbar" aria-label="Board tools" className="flex shrink-0 items-center gap-1 sm:gap-1.5">
           <HeaderIconButton label="Select" active={activeTool === 'select'} onClick={() => setActiveTool('select')}>
-            <MousePointer2 size={15} strokeWidth={2} />
+            <MousePointer2 size={20} strokeWidth={2.4} />
           </HeaderIconButton>
           <HeaderIconButton label="Hand Tool" active={activeTool === 'hand'} onClick={() => setActiveTool('hand')}>
-            <Hand size={15} strokeWidth={2} />
+            <Hand size={20} strokeWidth={2.4} />
           </HeaderIconButton>
 
-          <div className="mx-0.5 h-5 w-px shrink-0 bg-white/15" />
+          <div className="mx-0.5 h-6 w-0.5 shrink-0 bg-(--ink)/25" />
 
           <HeaderIconButton label="Undo (Ctrl+Z)" disabled={!canUndo} onClick={handleUndo}>
-            <Undo2 size={15} strokeWidth={2} />
+            <Undo2 size={20} strokeWidth={2.4} />
           </HeaderIconButton>
           <HeaderIconButton label="Redo (Ctrl+Shift+Z)" disabled={!canRedo} onClick={handleRedo}>
-            <Redo2 size={15} strokeWidth={2} />
+            <Redo2 size={20} strokeWidth={2.4} />
           </HeaderIconButton>
 
-          <div className="mx-0.5 h-5 w-px shrink-0 bg-white/15" />
+          <div className="mx-0.5 h-6 w-0.5 shrink-0 bg-(--ink)/25" />
 
           <HeaderIconButton label="Zoom out" onClick={() => boardRef.current?.zoomOut()}>
-            <ZoomOut size={15} strokeWidth={2} />
+            <ZoomOut size={20} strokeWidth={2.4} />
           </HeaderIconButton>
-          <span className="w-8 shrink-0 text-center text-xs tabular-nums text-white/70 sm:w-10">{zoomPercent}%</span>
+          <span className="w-10 shrink-0 text-center text-sm font-extrabold tabular-nums sm:w-12" aria-live="polite">{zoomPercent}%</span>
           <HeaderIconButton label="Zoom in" onClick={() => boardRef.current?.zoomIn()}>
-            <ZoomIn size={15} strokeWidth={2} />
+            <ZoomIn size={20} strokeWidth={2.4} />
           </HeaderIconButton>
           <HeaderIconButton label="Reset View" onClick={() => boardRef.current?.resetView()}>
-            <RotateCcw size={15} strokeWidth={2} />
+            <RotateCcw size={20} strokeWidth={2.4} />
           </HeaderIconButton>
         </div>
       </header>
@@ -703,8 +710,9 @@ function HeaderIconButton({ children, label, active, disabled, onClick }) {
       disabled={disabled}
       title={label}
       aria-label={label}
-      className={`appearance-none rounded-lg border-0 p-1.5 transition active:scale-90 disabled:cursor-not-allowed disabled:opacity-30 disabled:active:scale-100 ${
-        active ? 'bg-[#a8391f] text-white' : 'bg-transparent text-white/80 hover:bg-white/10 hover:text-white disabled:hover:bg-transparent'
+      aria-pressed={active === undefined ? undefined : active}
+      className={`inline-flex size-11 shrink-0 cursor-pointer appearance-none items-center justify-center rounded-[14px] border-2 border-solid p-0 text-(--ink) transition active:scale-90 disabled:cursor-not-allowed disabled:opacity-40 disabled:active:scale-100 ${
+        active ? 'border-(--ink) bg-(--citrus)' : 'border-(--ink) bg-(--white) hover:bg-(--sea-tint) disabled:hover:bg-(--white)'
       }`}
     >
       {children}

@@ -1,7 +1,8 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Bell, Search, X, CheckCheck } from 'lucide-react';
+import { Search, X, CheckCheck } from 'lucide-react';
+import Icon from '../Icon';
 import styles from './Notifications.module.css';
 import NotificationItem from './NotificationItem';
 
@@ -26,6 +27,26 @@ const BUCKET_ORDER = ['Today', 'Yesterday', 'Earlier This Week', 'Older'];
 export default function NotificationPanel({ open, notifications, loading, onClose, onMarkRead, onMarkAllRead, onDelete }) {
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState('all'); // all | unread
+  const closeRef = useRef(null);
+  const onCloseRef = useRef(onClose);
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  });
+
+  // Escape closes the panel; focus moves in on open and back to the bell on close.
+  useEffect(() => {
+    if (!open) return undefined;
+    const previous = document.activeElement;
+    closeRef.current?.focus();
+    const onKey = (e) => {
+      if (e.key === 'Escape') onCloseRef.current?.();
+    };
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      if (previous instanceof HTMLElement) previous.focus();
+    };
+  }, [open]);
 
   const filtered = useMemo(() => {
     return notifications
@@ -52,6 +73,9 @@ export default function NotificationPanel({ open, notifications, loading, onClos
           <motion.div className={styles.overlay} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onClose} />
           <motion.div
             className={styles.panel}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Notifications"
             initial={{ x: '100%' }}
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
@@ -62,18 +86,19 @@ export default function NotificationPanel({ open, notifications, loading, onClos
                 <h2>Notifications</h2>
                 <p>{unreadCount} unread</p>
               </div>
-              <button type="button" className={styles.closeBtn} onClick={onClose} aria-label="Close notifications">
-                <X size={17} />
+              <button type="button" ref={closeRef} className={styles.closeBtn} onClick={onClose} aria-label="Close notifications">
+                <X size={20} strokeWidth={2.6} aria-hidden="true" />
               </button>
             </div>
 
             <div className={styles.toolbar}>
               <div className={styles.searchWrap}>
-                <Search size={13} />
+                <Search size={18} strokeWidth={2.6} aria-hidden="true" />
                 <input
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   placeholder="Search notifications…"
+                  aria-label="Search notifications"
                   className={styles.searchInput}
                 />
               </div>
@@ -83,6 +108,7 @@ export default function NotificationPanel({ open, notifications, loading, onClos
                     key={f}
                     type="button"
                     onClick={() => setFilter(f)}
+                    aria-pressed={filter === f}
                     className={`${styles.filterChip} ${filter === f ? styles.filterChipActive : ''}`}
                   >
                     {f === 'all' ? 'All' : 'Unread'}
@@ -93,7 +119,7 @@ export default function NotificationPanel({ open, notifications, loading, onClos
 
             {unreadCount > 0 && (
               <button type="button" className={styles.markAllBtn} onClick={onMarkAllRead}>
-                <CheckCheck size={13} />
+                <CheckCheck size={18} strokeWidth={2.6} aria-hidden="true" />
                 Mark all as read
               </button>
             )}
@@ -103,10 +129,8 @@ export default function NotificationPanel({ open, notifications, loading, onClos
                 <p className={styles.loadingText}>Loading…</p>
               ) : grouped.length === 0 ? (
                 <div className={styles.emptyState}>
-                  <div className={styles.emptyIconWrap}>
-                    <Bell size={22} strokeWidth={1.75} />
-                  </div>
-                  <h3>You&rsquo;re all caught up</h3>
+                  <Icon name="bell" size={72} sticker tilt={-6} />
+                  <h3>You&rsquo;re all caught up, love</h3>
                   <p>Nothing to show here right now.</p>
                 </div>
               ) : (

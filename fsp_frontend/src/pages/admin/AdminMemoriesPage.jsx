@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Archive, ArchiveRestore, Trash2 } from 'lucide-react';
 import DataTable from '../../components/admin/common/DataTable';
 import FilterBar from '../../components/admin/common/FilterBar';
-import ConfirmDialog from '../../components/admin/common/ConfirmDialog';
+import ConfirmDialog from '../../components/ui/ConfirmDialog/ConfirmDialog';
 import { memoryService } from '../../services/memoryService';
 
 function formatDate(iso) {

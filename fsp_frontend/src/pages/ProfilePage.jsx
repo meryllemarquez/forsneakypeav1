@@ -8,7 +8,7 @@ import { useProfileMutations } from '../queries/mutations';
 import { uploadProfileAvatar, deleteProfileAvatar } from '../api/supabaseClient';
 import { ACCENT_COLORS, EMOJI_OPTIONS, DEFAULT_ACCENT_COLOR, getAccentHex } from '../constants/profileOptions';
 import AvatarCropModal from '../components/profile/AvatarCropModal';
-import ConfirmDialog from '../components/profile/ConfirmDialog';
+import ConfirmDialog from '../components/ui/ConfirmDialog/ConfirmDialog';
 import AnniversaryCounter from '../components/profile/AnniversaryCounter';
 import Navbar from '../components/layout/Navbar/Navbar';
 import Footer from '../components/layout/Footer/Footer';

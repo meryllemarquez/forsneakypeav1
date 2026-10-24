@@ -1,22 +1,19 @@
 import { useState, useEffect, useMemo, useCallback, useRef, memo } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence, Reorder, useDragControls } from 'framer-motion';
 import { dateService } from '../services/dateService';
 import { useDates, useDateCategories, useCacheSetter } from '../queries/queries';
 import { useDateMutations, useChecklistMutations } from '../queries/mutations';
 import { queryKeys } from '../queries/queryKeys';
+import Navbar from '../components/layout/Navbar/Navbar';
+import ConfirmDialog from '../components/ui/ConfirmDialog/ConfirmDialog';
 import styles from './DatesPage.module.css';
 
 /* ================================================================
    ICONS
    ================================================================ */
-const ArrowLeftIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline>
-  </svg>
-); 
 const SearchIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
     <circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line>
   </svg>
 );
@@ -93,11 +90,6 @@ const CopyIcon = () => (
 const CloseIcon = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line>
-  </svg>
-);
-const AlertIcon = () => (
-  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line>
   </svg>
 );
 const UserIcon = () => (
@@ -460,7 +452,6 @@ const EMPTY_FORM = {
 };
 
 export default function DatesPage() {
-  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
 
   // Dates and categories come from the shared query cache. `setDates` keeps the optimistic
@@ -987,21 +978,13 @@ export default function DatesPage() {
 
   return (
     <div className={styles.pageContainer}>
-      {/* NAVBAR */}
-      <header className={styles.navbar}>
-        <div className={styles.navLeft}>
-          <button className={styles.backHomeBtn} onClick={() => navigate('/home')}>
-            <ArrowLeftIcon /><span>Sanctuary</span>
-          </button>
-          <span className={styles.navDivider}>/</span>
-          <span className={styles.navBrand}>FOR SNEAKYPEA</span>
-          <span className={styles.navDivider}>/</span>
-          <span className={styles.navSubBrand}>Bucket List</span>
-        </div>
+      <Navbar />
 
+      {/* TOOLBAR: search + new date */}
+      <div className={styles.toolbar}>
         <div className={styles.searchBar}>
           <SearchIcon />
-          <input type="text" placeholder="Search dates, places, categories..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
+          <input type="text" aria-label="Search dates" placeholder="Search dates, places, categories..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
         </div>
 
         <div className={styles.navRight}>
@@ -1009,7 +992,7 @@ export default function DatesPage() {
             <PlusIcon /><span>New Date</span>
           </button>
         </div>
-      </header>
+      </div>
 
       <main className={styles.contentWrapper}>
         {(errorMessage || loadError) && <div className={styles.errorBanner}>{errorMessage || loadError}</div>}
@@ -1482,33 +1465,16 @@ export default function DatesPage() {
         )}
       </AnimatePresence>
 
-      {/* CONFIRM DELETE MODAL */}
-      <AnimatePresence>
-        {confirmState && (
-          <motion.div className={styles.confirmBackdrop} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.24 }} onClick={closeConfirm}>
-            <motion.div
-              className={styles.confirmCard}
-              initial={{ opacity: 0, y: 26, scale: 0.94 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 18, scale: 0.96 }}
-              transition={{ duration: 0.34, ease: [0.22, 1, 0.36, 1] }}
-              onClick={(e) => e.stopPropagation()}
-              role="alertdialog"
-              aria-modal="true"
-            >
-              <div className={styles.confirmIconRing}><AlertIcon /></div>
-              <h3 className={styles.confirmTitle}>{confirmState.title}</h3>
-              <p className={styles.confirmMessage}>{confirmState.message}</p>
-              <div className={styles.confirmFooter}>
-                <button type="button" className={styles.confirmCancelBtn} onClick={closeConfirm} disabled={confirmBusy}>Cancel</button>
-                <button type="button" className={styles.confirmDeleteBtn} onClick={handleConfirmAccept} disabled={confirmBusy}>
-                  {confirmBusy ? 'Removing…' : confirmState.confirmLabel}
-                </button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <ConfirmDialog
+        open={!!confirmState}
+        title={confirmState?.title}
+        message={confirmState?.message}
+        confirmLabel={confirmState?.confirmLabel}
+        busyLabel="Removing…"
+        busy={confirmBusy}
+        onConfirm={handleConfirmAccept}
+        onClose={closeConfirm}
+      />
     </div>
   );
 }

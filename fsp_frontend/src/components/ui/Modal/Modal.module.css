@@ -1,0 +1,112 @@
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgb(23 43 112 / 0.5);
+}
+
+.panel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-height: min(90vh, 900px);
+  background: var(--white);
+  color: var(--ink);
+  border: var(--border-width) solid var(--ink);
+  border-radius: var(--radius-card-lg);
+  box-shadow: var(--shadow-card);
+  font-family: var(--font-body);
+  outline: none;
+}
+
+.sm { max-width: 420px; }
+.md { max-width: 560px; }
+.lg { max-width: 760px; }
+.xl { max-width: 980px; }
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 20px 20px 0 24px;
+}
+
+.title {
+  margin: 4px 0 0;
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 1.5rem;
+  line-height: 1.15;
+  letter-spacing: -0.3px;
+}
+
+.close {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: var(--tap);
+  height: var(--tap);
+  margin-left: auto;
+  padding: 0;
+  background: var(--white);
+  color: var(--ink);
+  border: var(--border-width) solid var(--ink);
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.close:hover:not(:disabled) {
+  background: var(--sea-tint);
+}
+
+.close:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.body {
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: 16px 24px 24px;
+  overflow-y: auto;
+}
+
+.footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 0 24px 24px;
+}
+
+@media (max-width: 480px) {
+  .backdrop {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .panel {
+    max-height: 92vh;
+    border-radius: var(--radius-card-lg) var(--radius-card-lg) 0 0;
+    border-bottom-width: 0;
+  }
+
+  .body {
+    padding: 14px 18px 20px;
+  }
+
+  .header {
+    padding: 16px 16px 0 18px;
+  }
+
+  .footer {
+    padding: 0 18px calc(18px + env(safe-area-inset-bottom));
+  }
+}

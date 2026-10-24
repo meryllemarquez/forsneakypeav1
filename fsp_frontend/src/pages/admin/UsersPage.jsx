@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { ShieldCheck, UserX, UserCheck } from 'lucide-react';
 import DataTable from '../../components/admin/common/DataTable';
-import ConfirmDialog from '../../components/admin/common/ConfirmDialog';
+import ConfirmDialog from '../../components/ui/ConfirmDialog/ConfirmDialog';
 import { adminService } from '../../services/adminService';
 import { useAuth } from '../../hooks/useAuth';
 

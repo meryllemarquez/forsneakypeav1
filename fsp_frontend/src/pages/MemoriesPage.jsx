@@ -7,6 +7,7 @@ import { useMemoryMutations } from '../queries/mutations';
 import { uploadToSupabaseStorage } from '../api/supabaseClient';
 import Navbar from '../components/layout/Navbar/Navbar';
 import Footer from '../components/layout/Footer/Footer';
+import ConfirmDialog from '../components/ui/ConfirmDialog/ConfirmDialog';
 import CalendarView from '../components/memories/CalendarDump/CalendarView';
 import styles from './MemoriesPage.module.css';
 
@@ -85,13 +86,6 @@ const ChevronRightIcon = () => (
   </svg>
 );
 
-const AlertIcon = () => (
-  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
-    <line x1="12" y1="9" x2="12" y2="13"></line>
-    <line x1="12" y1="17" x2="12.01" y2="17"></line>
-  </svg>
-);
 
 const StarIcon = ({ filled }) => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill={filled ? '#D97785' : 'none'} stroke={filled ? '#D97785' : 'currentColor'} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -1176,127 +1170,49 @@ export default function MemoriesPage() {
         )}
       </AnimatePresence>
 
-      {/* LUXURY FROSTED GLASS CONFIRMATION MODAL */}
-      <AnimatePresence>
-        {confirmState && (
-          <motion.div
-            className={styles.confirmBackdrop}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.24 }}
-            onClick={closeConfirm}
-          >
-            <motion.div
-              className={styles.confirmCard}
-              initial={{ opacity: 0, y: 26, scale: 0.94 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 18, scale: 0.96 }}
-              transition={{ duration: 0.34, ease: [0.22, 1, 0.36, 1] }}
-              onClick={(e) => e.stopPropagation()}
-              role="alertdialog"
-              aria-modal="true"
-            >
-              <div className={styles.confirmIconRing}>
-                <AlertIcon />
-              </div>
+      <ConfirmDialog
+        open={!!confirmState}
+        title={confirmState?.title}
+        message={confirmState?.message}
+        confirmLabel={confirmState?.confirmLabel || 'Confirm Delete'}
+        busyLabel="Removing…"
+        busy={confirmBusy}
+        error={confirmError}
+        onConfirm={handleConfirmAccept}
+        onClose={closeConfirm}
+      />
 
-              <h3 className={styles.confirmTitle}>{confirmState.title}</h3>
-              <p className={styles.confirmMessage}>{confirmState.message}</p>
-
-              {confirmError && <p className={styles.confirmError}>{confirmError}</p>}
-
-              <div className={styles.confirmFooter}>
-                <button
-                  type="button"
-                  className={styles.confirmCancelBtn}
-                  onClick={closeConfirm}
-                  disabled={confirmBusy}
-                >
-                  Cancel
-                </button>
-                <button
-                  type="button"
-                  className={styles.confirmDeleteBtn}
-                  onClick={handleConfirmAccept}
-                  disabled={confirmBusy}
-                >
-                  {confirmBusy ? 'Removing…' : confirmState.confirmLabel || 'Confirm Delete'}
-                </button>
-              </div>
-            </motion.div>
-          </motion.div>
+      {/* CALENDAR CONFLICT DIALOG: "one highlight per day" */}
+      <ConfirmDialog
+        open={!!calendarConflict}
+        title="This day already has a highlighted memory"
+        message={
+          calendarConflict
+            ? `“${calendarConflict.conflict.conflictingFolderName}” is already highlighted on ${calendarConflict.conflict.eventDate}. Replacing it will remove that album from the calendar.`
+            : ''
+        }
+        cancelLabel="Keep Existing Highlight"
+        confirmLabel="Replace Existing Highlight"
+        busyLabel="Replacing…"
+        busy={calendarConflictBusy}
+        onClose={() => setCalendarConflict(null)}
+        onConfirm={async () => {
+          setCalendarConflictBusy(true);
+          try {
+            await calendarConflict.retry();
+            setCalendarConflict(null);
+          } catch (err) {
+            console.error('Failed to replace calendar highlight', err);
+            setErrorMessage('Could not replace the existing highlight. Please try again.');
+          } finally {
+            setCalendarConflictBusy(false);
+          }
+        }}
+      >
+        {calendarConflict?.conflict.conflictingHighlightPhotoUrl && (
+          <img src={calendarConflict.conflict.conflictingHighlightPhotoUrl} alt="" className={styles.conflictThumb} />
         )}
-      </AnimatePresence>
-
-      {/* CALENDAR CONFLICT DIALOG — "one highlight per day" */}
-      <AnimatePresence>
-        {calendarConflict && (
-          <motion.div
-            className={styles.confirmBackdrop}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.24 }}
-            onClick={() => !calendarConflictBusy && setCalendarConflict(null)}
-          >
-            <motion.div
-              className={styles.confirmCard}
-              initial={{ opacity: 0, y: 26, scale: 0.94 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 18, scale: 0.96 }}
-              transition={{ duration: 0.34, ease: [0.22, 1, 0.36, 1] }}
-              onClick={(e) => e.stopPropagation()}
-              role="alertdialog"
-              aria-modal="true"
-            >
-              {calendarConflict.conflict.conflictingHighlightPhotoUrl && (
-                <img
-                  src={calendarConflict.conflict.conflictingHighlightPhotoUrl}
-                  alt=""
-                  className={styles.conflictThumb}
-                />
-              )}
-
-              <h3 className={styles.confirmTitle}>This day already has a highlighted memory</h3>
-              <p className={styles.confirmMessage}>
-                “{calendarConflict.conflict.conflictingFolderName}” is already highlighted on{' '}
-                {calendarConflict.conflict.eventDate}. Replacing it will remove that album from the calendar.
-              </p>
-
-              <div className={styles.confirmFooter}>
-                <button
-                  type="button"
-                  className={styles.confirmCancelBtn}
-                  onClick={() => setCalendarConflict(null)}
-                  disabled={calendarConflictBusy}
-                >
-                  Keep Existing Highlight
-                </button>
-                <button
-                  type="button"
-                  className={styles.confirmDeleteBtn}
-                  disabled={calendarConflictBusy}
-                  onClick={async () => {
-                    setCalendarConflictBusy(true);
-                    try {
-                      await calendarConflict.retry();
-                      setCalendarConflict(null);
-                    } catch (err) {
-                      console.error('Failed to replace calendar highlight', err);
-                      setErrorMessage('Could not replace the existing highlight. Please try again.');
-                    } finally {
-                      setCalendarConflictBusy(false);
-                    }
-                  }}
-                >
-                  {calendarConflictBusy ? 'Replacing…' : 'Replace Existing Highlight'}
-                </button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      </ConfirmDialog>
 
       <Footer />
     </div>

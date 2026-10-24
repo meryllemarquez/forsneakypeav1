@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Trash2, Heart, Image } from 'lucide-react';
 import FilterBar from '../../components/admin/common/FilterBar';
 import EmptyState from '../../components/admin/common/EmptyState';
-import ConfirmDialog from '../../components/admin/common/ConfirmDialog';
+import ConfirmDialog from '../../components/ui/ConfirmDialog/ConfirmDialog';
 import { SkeletonCards } from '../../components/admin/common/LoadingSkeleton';
 import { memoryService } from '../../services/memoryService';
 

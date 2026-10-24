@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="512" height="512" fill="none" stroke="#172B70" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
+  <title>for sneakypea: Starshine and Junebug</title>
+  <path d="M83 53 L98 90 L138 93 L107 118 L117 158 L83 137 L49 158 L59 118 L28 93 L68 90 Z" fill="#5CB3FF" stroke="none"/>
+  <path d="M78 48 L93 85 L133 88 L102 113 L112 153 L78 132 L44 153 L54 113 L23 88 L63 85 Z" fill="#FF9F1C"/>
+  <circle cx="68" cy="106" r="3.6" fill="#172B70" stroke="none"/>
+  <circle cx="88" cy="106" r="3.6" fill="#172B70" stroke="none"/>
+  <circle cx="61" cy="115" r="5" fill="#E0301A" stroke="none" opacity="0.55"/>
+  <circle cx="95" cy="115" r="5" fill="#E0301A" stroke="none" opacity="0.55"/>
+  <path d="M71 116 c3 4 11 4 14 0" stroke-width="4.5"/>
+  <path d="M136 92 L130 74 M146 90 L156 74" stroke-width="4.5"/>
+  <circle cx="130" cy="72" r="4" fill="#E0301A" stroke-width="3.5"/>
+  <circle cx="157" cy="72" r="4" fill="#E0301A" stroke-width="3.5"/>
+  <path d="M120 164 l-8 8 M178 158 l9 6 M118 136 l-10 -2 M182 128 l10 -3" stroke-width="4.5"/>
+  <ellipse cx="153" cy="135" rx="31" ry="36" fill="#1F55C9" transform="rotate(-14 153 135)"/>
+  <path d="M146 101 C150 120 154 150 160 170" stroke="#5CB3FF" stroke-width="4"/>
+  <circle cx="141" cy="124" r="4" fill="#5CB3FF" stroke="none"/>
+  <circle cx="168" cy="140" r="5" fill="#5CB3FF" stroke="none"/>
+  <circle cx="148" cy="156" r="3.5" fill="#5CB3FF" stroke="none"/>
+  <circle cx="142" cy="99" r="17" fill="#172B70"/>
+  <circle cx="136" cy="98" r="3.4" fill="#FFFFFF" stroke="none"/>
+  <circle cx="149" cy="96" r="3.4" fill="#FFFFFF" stroke="none"/>
+  <path d="M137 106 c3 3 8 3 11 0" stroke="#FFFFFF" stroke-width="3"/>
+  <path d="M126 112 C116 112 110 112 104 110" stroke-width="5"/>
+  <path d="M178 46 C171 41 169 36 172 32 C174 29 177 31 178 34 C179 31 182 29 184 32 C187 36 185 41 178 46 Z" fill="#E0301A" stroke-width="4"/>
+  <path d="M30 40 v12 M24 46 h12" stroke-width="4.5"/>
+</svg>
