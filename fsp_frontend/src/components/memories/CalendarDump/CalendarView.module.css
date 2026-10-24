@@ -1,99 +1,88 @@
-/* ================================================================
-   TOOLBAR (nav + export/fullscreen actions — never captured in export)
-   ================================================================ */
+/* Calendar Dump: a scrapbook sheet on a white card. The sheet is exactly what the PNG export
+   captures, so it avoids effects html2canvas cannot draw (backdrop blur, color-mix). */
+
+/* ---------- Toolbar (never captured in the export) ---------- */
+
 .toolbar {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
+  gap: 12px;
+  margin-bottom: 24px;
 }
 
 .monthNav {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 0.6rem;
+  gap: 8px;
 }
 
-.navBtn {
+.navBtn,
+.fullscreenCloseBtn {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 38px;
-  height: 38px;
+  width: var(--tap);
+  height: var(--tap);
+  padding: 0;
+  background: var(--white);
+  color: var(--ink);
+  border: var(--border-width) solid var(--ink);
   border-radius: 50%;
-  border: 1px solid var(--color-border, #EEDFCC);
-  background: var(--color-surface, #FFFEFB);
-  color: var(--color-text-primary, #3E332E);
   cursor: pointer;
-  transition: background-color 0.2s ease, transform 0.2s ease;
 }
 
-.navBtn:hover {
-  background: var(--color-hover, #F5EAE0);
-  transform: translateY(-1px);
+.navBtn:hover,
+.fullscreenCloseBtn:hover {
+  background: var(--sea-tint);
 }
 
-.todayBtn {
-  background: var(--color-surface, #FFFEFB);
-  border: 1px solid var(--color-border, #EEDFCC);
-  color: var(--color-text-primary, #3E332E);
-  padding: 8px 18px;
-  border-radius: var(--radius-pill, 999px);
-  font-size: 0.82rem;
-  font-weight: 700;
-  cursor: pointer;
-  font-family: inherit;
-  margin-left: 4px;
-  transition: background-color 0.2s ease;
-}
-
-.todayBtn:hover:not(:disabled) {
-  background: var(--color-hover, #F5EAE0);
-}
-
-.todayBtn:disabled {
-  opacity: 0.45;
-  cursor: default;
-}
-
-/* Month/Year picker */
-.monthYearPicker {
-  position: relative;
-}
-
+.todayBtn,
+.toolbarIconBtn,
 .monthYearTrigger {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  background: var(--color-surface, #FFFEFB);
-  border: 1px solid var(--color-border, #EEDFCC);
-  color: var(--color-text-primary, #3E332E);
-  padding: 8px 14px;
-  border-radius: var(--radius-pill, 999px);
-  font-family: var(--font-heading);
-  font-weight: 600;
-  font-size: 0.9rem;
-  cursor: pointer;
+  gap: 8px;
+  min-height: var(--tap);
+  padding: 0 18px;
+  background: var(--white);
+  color: var(--ink);
+  border: var(--border-width) solid var(--ink);
+  border-radius: var(--radius-pill);
+  font-family: inherit;
+  font-weight: 800;
+  font-size: 0.95rem;
   white-space: nowrap;
-  transition: background-color 0.2s ease;
+  cursor: pointer;
 }
 
+.monthYearTrigger {
+  font-family: var(--font-heading);
+}
+
+.todayBtn:hover:not(:disabled),
+.toolbarIconBtn:hover:not(:disabled),
 .monthYearTrigger:hover {
-  background: var(--color-hover, #F5EAE0);
+  background: var(--sea-tint);
 }
 
-.monthYearPickerDark .monthYearTrigger {
-  background: rgba(255, 255, 255, 0.12);
-  border-color: rgba(255, 255, 255, 0.24);
-  color: #FAFAF9;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+.todayBtn:disabled,
+.toolbarIconBtn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
 }
 
-.monthYearPickerDark .monthYearTrigger:hover {
-  background: rgba(255, 255, 255, 0.24);
+.toolbarActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Month / year picker */
+.monthYearPicker {
+  position: relative;
 }
 
 .monthYearPopover {
@@ -104,77 +93,36 @@
   display: flex;
   gap: 8px;
   padding: 10px;
-  background: var(--color-surface, #FFFEFB);
-  border: 1px solid var(--color-border, #EEDFCC);
-  border-radius: 14px;
-  box-shadow: var(--shadow-modal, 0 20px 50px rgba(62, 51, 46, 0.2));
+  background: var(--white);
+  border: var(--border-width) solid var(--ink);
+  border-radius: 18px;
+  box-shadow: var(--shadow-card);
 }
 
 .monthYearSelect,
 .monthYearInput {
-  background: #FAFAF9;
-  border: 1px solid var(--color-border, #EEDFCC);
-  border-radius: 10px;
-  padding: 8px 10px;
+  min-height: var(--tap);
+  padding: 0 12px;
+  background: var(--white);
+  color: var(--ink);
+  border: var(--border-width) solid var(--ink);
+  border-radius: var(--radius-input);
   font-family: inherit;
-  font-size: 0.85rem;
-  color: var(--color-text-primary, #3E332E);
-  outline: none;
-}
-
-.monthYearSelect:focus,
-.monthYearInput:focus {
-  border-color: var(--color-golden-ochre, #A88A2B);
+  font-size: 1rem;
 }
 
 .monthYearInput {
-  width: 5.5em;
+  width: 6em;
 }
 
-.toolbarActions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
+/* ---------- The sheet ---------- */
 
-.toolbarIconBtn {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  background: var(--color-surface, #FFFEFB);
-  border: 1px solid var(--color-border, #EEDFCC);
-  color: var(--color-text-primary, #3E332E);
-  padding: 9px 16px;
-  border-radius: var(--radius-pill, 999px);
-  font-family: inherit;
-  font-size: 0.8rem;
-  font-weight: 700;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: background-color 0.2s ease, transform 0.2s ease;
-}
-
-.toolbarIconBtn:hover:not(:disabled) {
-  background: var(--color-burnt-red, #E38A96);
-  border-color: var(--color-burnt-red, #E38A96);
-  color: #ffffff;
-  transform: translateY(-1px);
-}
-
-.toolbarIconBtn:disabled {
-  opacity: 0.55;
-  cursor: not-allowed;
-}
-
-/* ================================================================
-   THE SHEET — captured verbatim by the PNG export
-   ================================================================ */
 .calendarSheet {
-  background: var(--color-surface, #FFFEFB);
-  border: 1px solid var(--color-border, #EEDFCC);
-  border-radius: var(--radius-card, 20px);
-  box-shadow: var(--shadow-soft, 0 8px 30px rgba(62, 51, 46, 0.07));
   padding: clamp(1.25rem, 3vw, 2.25rem);
+  background: var(--white);
+  border: var(--border-width) solid var(--ink);
+  border-radius: var(--radius-card-lg);
+  box-shadow: var(--shadow-card-citrus);
 }
 
 .sheetHeader {
@@ -187,9 +135,9 @@
 .bigMonthNumber {
   font-family: var(--font-heading);
   font-size: clamp(3.2rem, 7vw, 5rem);
-  font-weight: 600;
+  font-weight: 800;
   line-height: 1;
-  color: var(--color-burgundy-primary, #D97785);
+  color: var(--ink);
 }
 
 .sheetHeaderText {
@@ -201,61 +149,55 @@
 .sheetMonthName {
   font-family: var(--font-heading);
   font-size: clamp(1.3rem, 2.4vw, 1.75rem);
-  font-weight: 600;
-  color: var(--color-text-primary, #3E332E);
+  font-weight: 800;
+  color: var(--ink);
 }
 
 .sheetYear {
-  font-size: 0.9rem;
+  font-family: var(--font-hand);
+  font-size: 1.75rem;
   font-weight: 700;
-  letter-spacing: 0.06em;
-  color: var(--color-text-secondary, #8A7568);
+  line-height: 1;
+  color: var(--tomato);
 }
 
 .weekdayRow {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 4px;
+  gap: 6px;
   margin-bottom: 6px;
 }
 
 .weekdayLabel {
   text-align: center;
-  font-size: 0.72rem;
-  font-weight: 700;
+  font-size: 0.78rem;
+  font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--color-text-secondary, #8A7568);
+  color: var(--ink-muted);
 }
 
-/* Hairline grid: a single shared background peeking through a 1px gap reads
-   as one crisp line everywhere, instead of two overlapping cell borders
-   doubling up at shared edges. */
 .calendarGrid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 1px;
-  background: var(--color-border, #EEDFCC);
-  border: 1px solid var(--color-border, #EEDFCC);
-  border-radius: 12px;
-  overflow: hidden;
+  gap: 6px;
 }
 
 .dayCellBlank {
   aspect-ratio: 1;
-  background: var(--color-bg-main, #FBF3EA);
 }
 
 .dayCell {
   position: relative;
   aspect-ratio: 1;
-  border: none;
-  background: var(--color-surface, #FFFEFB);
   padding: 0;
   overflow: hidden;
-  cursor: default;
+  background: var(--paper);
+  border: var(--border-width) solid var(--ink);
+  border-radius: 14px;
   font-family: inherit;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: default;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
 .dayCellFilled {
@@ -267,8 +209,8 @@
 
 @media (hover: hover) and (pointer: fine) {
   .dayCellFilled:hover {
-    transform: scale(1.045);
-    box-shadow: 0 14px 34px rgba(62, 51, 46, 0.22);
+    transform: scale(1.05);
+    box-shadow: 4px 4px 0 var(--ink);
     z-index: 2;
   }
 }
@@ -276,53 +218,38 @@
 .dayCellDragging {
   cursor: grabbing;
   transform: scale(1.06);
-  box-shadow: 0 18px 40px rgba(62, 51, 46, 0.3);
+  box-shadow: 5px 5px 0 var(--ink);
   z-index: 3;
-  outline: 2px solid var(--color-burgundy-primary, #D97785);
-  outline-offset: -2px;
+  outline: 3px solid var(--tomato);
+  outline-offset: -3px;
 }
 
 .dayNumber {
   position: absolute;
   top: 4px;
-  left: 4px;
+  left: 6px;
   z-index: 2;
   max-width: calc(100% - 8px);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  box-sizing: border-box;
-  /* Scales with the sheet's own width (not the viewport) so it stays
-     proportional to the actual cell size whether there are 4 columns of
-     giant cells on a wide desktop or 7 tiny ones on a phone — a fixed
-     rem/px size looked oversized on small cells and undersized on big ones. */
-  font-size: clamp(0.58rem, 1.05vw, 0.82rem);
+  /* Scales with the sheet so it stays proportional to the cell size. */
+  font-size: clamp(0.62rem, 1.05vw, 0.85rem);
   line-height: 1;
-  font-weight: 700;
-  color: var(--color-burgundy-primary, #D97785);
+  font-weight: 800;
+  color: var(--ink);
 }
 
 .dayCellFilled .dayNumber {
-  color: #ffffff;
-  background: rgba(20, 18, 16, 0.42);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-  /* em padding so the pill shrinks/grows with the number itself instead of
-     a fixed px pad dominating tiny cells or looking sparse on huge ones. */
-  padding: 0.32em 0.55em;
+  padding: 0.28em 0.55em;
+  background: var(--white);
+  border: 2px solid var(--ink);
   border-radius: 999px;
 }
 
-.dayCellToday .dayNumber {
-  color: var(--color-sage, #8FAE7D);
-}
-
-.dayCellToday.dayCellFilled .dayNumber {
-  color: #ffffff;
-}
-
 .dayCellToday {
-  box-shadow: inset 0 0 0 2px var(--color-burgundy-primary, #D97785);
+  background: var(--gelato);
+  box-shadow: inset 0 0 0 3px var(--citrus);
 }
 
 .dayPhoto {
@@ -332,18 +259,7 @@
   height: 100%;
   background-size: cover;
   background-repeat: no-repeat;
-  transition: transform 0.35s ease;
   pointer-events: none;
-}
-
-@media (hover: hover) and (pointer: fine) {
-  .dayCellFilled:hover .dayPhoto {
-    transform: scale(1.06);
-  }
-}
-
-.dayCellDragging .dayPhoto {
-  transition: none;
 }
 
 .dayHoverInfo {
@@ -352,18 +268,19 @@
   right: 0;
   bottom: 0;
   z-index: 2;
-  padding: 1.4rem 0.5rem 0.4rem;
-  background: linear-gradient(to top, rgba(15, 12, 10, 0.85) 0%, rgba(15, 12, 10, 0) 100%);
+  padding: 4px 6px;
+  background: var(--white);
+  border-top: 2px solid var(--ink);
   opacity: 0;
   transform: translateY(6px);
-  transition: opacity 0.25s ease, transform 0.25s ease;
+  transition: opacity 0.2s ease, transform 0.2s ease;
 }
 
 .dayHoverTitle {
   display: block;
-  font-size: 0.7rem;
-  font-weight: 700;
-  color: #ffffff;
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: var(--ink);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -381,106 +298,62 @@
   flex-direction: column;
   align-items: center;
   gap: 0.75rem;
-  text-align: center;
-  padding: 3.5rem 1.5rem;
   margin-top: 1.5rem;
-  color: var(--color-text-secondary, #8A7568);
-}
-
-.emptyMonthState svg {
-  color: var(--color-blush, #F4A9B8);
+  padding: 2.5rem 1.5rem;
+  text-align: center;
 }
 
 .emptyMonthTitle {
   margin: 0;
   font-family: var(--font-heading);
-  font-size: 1.15rem;
-  font-weight: 600;
-  color: var(--color-text-primary, #3E332E);
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--ink);
 }
 
 .emptyMonthSubtitle {
   margin: 0;
-  font-size: 0.9rem;
+  color: var(--ink-soft);
+  font-size: 0.95rem;
 }
 
-/* ================================================================
-   FULL SCREEN VIEW
-   ================================================================ */
+/* ---------- Full screen ---------- */
+
 .fullscreenBackdrop {
   position: fixed;
   inset: 0;
-  z-index: 2000;
-  background: rgba(20, 15, 12, 0.78);
-  backdrop-filter: blur(18px) saturate(140%);
-  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  z-index: 1100;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: clamp(1rem, 3vw, 3rem);
+  background: rgb(23 43 112 / 0.9);
 }
 
 .fullscreenInner {
-  width: 100%;
-  max-width: 1400px;
-  max-height: 94vh;
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
+  width: 100%;
+  max-width: 1400px;
+  max-height: 94vh;
 }
 
 .fullscreenToolbar {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 1rem;
-}
-
-.fullscreenToolbar .monthNav .navBtn,
-.fullscreenToolbar .monthNav .todayBtn,
-.fullscreenToolbar .toolbarActions .toolbarIconBtn {
-  background: rgba(255, 255, 255, 0.12);
-  border-color: rgba(255, 255, 255, 0.24);
-  color: #FAFAF9;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-}
-
-.fullscreenToolbar .monthNav .navBtn:hover,
-.fullscreenToolbar .monthNav .todayBtn:hover:not(:disabled),
-.fullscreenToolbar .toolbarActions .toolbarIconBtn:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.24);
-}
-
-.fullscreenCloseBtn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.26);
-  background: rgba(255, 255, 255, 0.12);
-  color: #FAFAF9;
-  cursor: pointer;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  transition: background-color 0.2s ease, transform 0.2s ease;
-}
-
-.fullscreenCloseBtn:hover {
-  background: rgba(199, 54, 22, 0.75);
-  transform: scale(1.06);
+  gap: 12px;
 }
 
 .fullscreenSheetWrapper {
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
   display: flex;
+  flex: 1;
   align-items: flex-start;
   justify-content: center;
+  min-height: 0;
+  overflow-y: auto;
 }
 
 .calendarSheetFullscreen {
@@ -492,9 +365,8 @@
   font-size: clamp(3.6rem, 6vw, 6rem);
 }
 
-/* ================================================================
-   RESPONSIVE
-   ================================================================ */
+/* ---------- Phones ---------- */
+
 @media (max-width: 768px) {
   .toolbar {
     justify-content: center;
@@ -506,29 +378,30 @@
 }
 
 @media (max-width: 480px) {
+  .toolbarIconBtn {
+    width: var(--tap);
+    padding: 0;
+    justify-content: center;
+  }
+
   .toolbarIconBtn span {
     display: none;
   }
 
-  .toolbarIconBtn {
-    padding: 9px 12px;
-  }
-
-  .monthYearTrigger {
-    font-size: 0.8rem;
-    padding: 7px 11px;
-  }
-
   .monthYearPopover {
     left: 50%;
-    transform: translateX(-50%);
-    max-width: calc(100vw - 2.5rem);
     flex-wrap: wrap;
+    max-width: calc(100vw - 2.5rem);
+    transform: translateX(-50%);
   }
 
-  .todayBtn {
-    padding: 7px 14px;
-    font-size: 0.76rem;
+  .calendarGrid,
+  .weekdayRow {
+    gap: 3px;
+  }
+
+  .dayCell {
+    border-radius: 10px;
   }
 
   .fullscreenBackdrop {
@@ -537,7 +410,8 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .dayCellFilled, .dayPhoto, .dayHoverInfo, .navBtn, .toolbarIconBtn, .fullscreenCloseBtn {
+  .dayCell,
+  .dayHoverInfo {
     transition: none;
   }
 }

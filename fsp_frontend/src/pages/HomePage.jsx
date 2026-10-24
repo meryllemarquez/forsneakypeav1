@@ -1,9 +1,10 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth } from '../hooks/useAuth';
 import { useHomeSummary } from '../queries/queries';
 import { getDaysTogether, ANNIVERSARY_LABEL } from '../constants/relationship';
+import { HOME_GREETINGS } from '../constants/homeGreetings';
 import { albumIcon, dateIcon } from '../utils/doodleFor';
 import Icon from '../components/Icon';
 import Navbar from '../components/layout/Navbar/Navbar';
@@ -78,6 +79,8 @@ function formatMonthDay(dateStr) {
 export default function HomePage() {
   const { user } = useAuth();
   const daysTogether = getDaysTogether();
+  // One greeting per visit (picked once when the page opens).
+  const [greeting] = useState(() => HOME_GREETINGS[Math.floor(Math.random() * HOME_GREETINGS.length)]);
   const firstName = user?.nickname || (user?.name || '').trim().split(/\s+/)[0] || '';
 
   // One small request (GET /home/summary) replaces the three list fetches this page used to
@@ -118,7 +121,7 @@ export default function HomePage() {
 
             <p className={styles.heroSubtext}>
               {firstName ? `Hi ${firstName}! ` : 'Hi love! '}
-              Your memories, plans and love letters are all right here. Where are we going next?
+              {greeting}
             </p>
 
             <div className={styles.ctaRow}>

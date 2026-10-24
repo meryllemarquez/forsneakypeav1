@@ -1,114 +1,66 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import {
+  ArrowLeft,
+  ChevronLeft,
+  ChevronRight,
+  Heart,
+  Pencil,
+  Plus,
+  Search,
+  Sparkle,
+  Trash2,
+  Upload,
+  X,
+} from 'lucide-react';
 import { memoryService } from '../services/memoryService';
 import { useFolders } from '../queries/queries';
 import { useMemoryMutations } from '../queries/mutations';
 import { uploadToSupabaseStorage } from '../api/supabaseClient';
+import { useScrollLock } from '../hooks/useScrollLock';
+import { doodleToIconStyle, resolveAlbumIcon, storedDoodle } from '../utils/doodleFor';
+import Icon, { ICON_NAMES } from '../components/Icon';
 import Navbar from '../components/layout/Navbar/Navbar';
 import Footer from '../components/layout/Footer/Footer';
+import Button from '../components/ui/Button/Button';
+import Modal from '../components/ui/Modal/Modal';
 import ConfirmDialog from '../components/ui/ConfirmDialog/ConfirmDialog';
 import CalendarView from '../components/memories/CalendarDump/CalendarView';
+import form from '../components/ui/FormControls.module.css';
 import styles from './MemoriesPage.module.css';
 
-// Minimal Lucide Outline Icons
-const ArrowLeftIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <line x1="19" y1="12" x2="5" y2="12"></line>
-    <polyline points="12 19 5 12 12 5"></polyline>
-  </svg>
-);
+// Filled (on) states use the doodle hearts / sparkles; off states are plain line icons.
+const HeartToggle = ({ on, size = 22 }) =>
+  on ? <Icon name="heart" size={size + 6} /> : <Heart size={size} strokeWidth={2.6} aria-hidden="true" />;
+const HighlightToggle = ({ on, size = 22 }) =>
+  on ? <Icon name="sparkle" size={size + 6} /> : <Sparkle size={size} strokeWidth={2.6} aria-hidden="true" />;
 
-const FolderIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
-  </svg>
-);
-
-const PlusIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <line x1="12" y1="5" x2="12" y2="19"></line>
-    <line x1="5" y1="12" x2="19" y2="12"></line>
-  </svg>
-);
-
-const SearchIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <circle cx="11" cy="11" r="8"></circle>
-    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-  </svg>
-);
-
-const HeartIcon = ({ filled }) => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill={filled ? "#E38A96" : "none"} stroke={filled ? "#E38A96" : "currentColor"} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
-  </svg>
-);
-
-const UploadIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-    <polyline points="17 8 12 3 7 8"></polyline>
-    <line x1="12" y1="3" x2="12" y2="15"></line>
-  </svg>
-);
-
-const TrashIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <polyline points="3 6 5 6 21 6"></polyline>
-    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-  </svg>
-);
-
-const CloseIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <line x1="18" y1="6" x2="6" y2="18"></line>
-    <line x1="6" y1="6" x2="18" y2="18"></line>
-  </svg>
-);
-
-const EditIcon = () => (
-  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-  </svg>
-);
-
-const ChevronLeftIcon = () => (
-  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <polyline points="15 18 9 12 15 6"></polyline>
-  </svg>
-);
-
-const ChevronRightIcon = () => (
-  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <polyline points="9 18 15 12 9 6"></polyline>
-  </svg>
-);
-
-
-const StarIcon = ({ filled }) => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill={filled ? '#D97785' : 'none'} stroke={filled ? '#D97785' : 'currentColor'} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-  </svg>
-);
-
-const CalendarIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-    <line x1="16" y1="2" x2="16" y2="6"></line>
-    <line x1="8" y1="2" x2="8" y2="6"></line>
-    <line x1="3" y1="10" x2="21" y2="10"></line>
-  </svg>
-);
-
+// Album accent swatches: the thin colour bar beside the title on an album page.
 const PALETTE_ACCENTS = [
-  { name: 'Coral', value: '#E38A96' },
-  { name: 'Coral Deep', value: '#D97785' },
-  { name: 'Sage', value: '#8FAE7D' },
-  { name: 'Blush', value: '#F4A9B8' },
-  { name: 'Warm Ink', value: '#3E332E' },
+  { name: 'Citrus', value: '#FF9F1C' },
+  { name: 'Sea', value: '#5CB3FF' },
+  { name: 'Gelato', value: '#FFE680' },
+  { name: 'Amalfi', value: '#1F55C9' },
+  { name: 'Ink', value: '#172B70' },
 ];
+const DEFAULT_ACCENT = PALETTE_ACCENTS[0].value;
+// Albums saved before the rebrand keep their old hex in the database; show them in the new palette.
+const LEGACY_ACCENTS = {
+  '#E38A96': '#FF9F1C',
+  '#D97785': '#FF9F1C',
+  '#C73616': '#FF9F1C',
+  '#F4A9B8': '#FFE680',
+  '#8FAE7D': '#1F55C9',
+  '#3E332E': '#172B70',
+};
+const displayAccent = (hex) => LEGACY_ACCENTS[(hex || '').toUpperCase()] || hex || DEFAULT_ACCENT;
+
+// Cover tiles for albums with no cover photo cycle through these soft fills.
+const COVER_TINTS = ['var(--sea)', 'var(--gelato)', 'var(--citrus-cover)', 'var(--sea-tint)'];
+
+// Doodles offered in the album form (people stay out of the list).
+const PICKABLE_DOODLES = ICON_NAMES.filter((name) => name !== 'her' && name !== 'him');
 
 // Framer Motion slide variants for the Lightbox carousel.
 // `direction` is 1 when moving forward, -1 when moving backward.
@@ -136,7 +88,6 @@ const SWIPE_DISTANCE_THRESHOLD = 70;
 const SWIPE_VELOCITY_THRESHOLD = 450;
 
 export default function MemoriesPage() {
-  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   // Album list from the shared query cache (fresh for 45s, re-validated in the background).
   const foldersQuery = useFolders(false);
@@ -178,7 +129,7 @@ export default function MemoriesPage() {
   const [folderForm, setFolderForm] = useState({
     name: '',
     description: '',
-    accentColor: '#E38A96',
+    accentColor: DEFAULT_ACCENT,
     iconStyle: 'camera',
     coverImageUrl: '',
     eventDate: '',
@@ -288,6 +239,9 @@ export default function MemoriesPage() {
     if (lightbox.index < 0) return undefined;
 
     const handleKeyDown = (e) => {
+      // A shared Modal on top (confirm dialog) already handled this key: leave the lightbox open.
+      if (e.defaultPrevented) return;
+
       if (confirmState) {
         // The confirmation modal owns Escape while it is open.
         if (e.key === 'Escape' && !confirmBusy) {
@@ -314,19 +268,21 @@ export default function MemoriesPage() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [lightbox.index, confirmState, confirmBusy, paginate, closeLightbox]);
 
-  // Lock body scroll while any overlay is open
+  // The lightbox is the one overlay that isn't a shared Modal, so it locks page scroll itself.
+  useScrollLock(lightbox.index >= 0);
+
+  // Move focus into the lightbox when it opens and back to what opened it when it closes.
+  const lightboxCloseRef = useRef(null);
+  const lightboxOpen = lightbox.index >= 0;
   useEffect(() => {
-    const anyOverlayOpen =
-      isFolderModalOpen || isUploadModalOpen || lightbox.index >= 0 || !!confirmState || !!calendarConflict;
-
-    if (!anyOverlayOpen) return undefined;
-
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
+    if (!lightboxOpen) return undefined;
+    const opener = document.activeElement;
+    const frame = requestAnimationFrame(() => lightboxCloseRef.current?.focus());
     return () => {
-      document.body.style.overflow = previousOverflow;
+      cancelAnimationFrame(frame);
+      if (opener instanceof HTMLElement && document.contains(opener)) opener.focus();
     };
-  }, [isFolderModalOpen, isUploadModalOpen, lightbox.index, confirmState, calendarConflict]);
+  }, [lightboxOpen]);
 
   /* ---------------------------------------------------------------
      LUXURY CONFIRMATION MODAL
@@ -365,7 +321,7 @@ export default function MemoriesPage() {
       setFolderForm({
         name: folder.name || '',
         description: folder.description || '',
-        accentColor: folder.accentColor || '#E38A96',
+        accentColor: displayAccent(folder.accentColor),
         iconStyle: folder.iconStyle || 'camera',
         coverImageUrl: folder.coverImageUrl || '',
         eventDate: folder.eventDate || '',
@@ -376,7 +332,7 @@ export default function MemoriesPage() {
       setFolderForm({
         name: '',
         description: '',
-        accentColor: '#E38A96',
+        accentColor: DEFAULT_ACCENT,
         iconStyle: 'camera',
         coverImageUrl: '',
         eventDate: '',
@@ -395,7 +351,7 @@ export default function MemoriesPage() {
       const payload = {
         name: folderForm.name.trim(),
         description: folderForm.description.trim(),
-        accentColor: folderForm.accentColor || '#E38A96',
+        accentColor: folderForm.accentColor || DEFAULT_ACCENT,
         iconStyle: folderForm.iconStyle || 'camera',
         coverImageUrl: folderForm.coverImageUrl || '',
         eventDate: folderForm.eventDate || null,
@@ -580,133 +536,188 @@ export default function MemoriesPage() {
     );
   }, [folders, searchQuery]);
 
+  const openAlbumFromCard = (folder, e) => {
+    e?.stopPropagation();
+    loadFolderDetails(folder.id);
+  };
+
+  const closeFolderModal = () => setIsFolderModalOpen(false);
+  const closeUploadModal = () => setIsUploadModalOpen(false);
+  const pickedDoodle = storedDoodle(folderForm.iconStyle);
+  const showHighlightControls = !!(selectedFolder?.isCalendarHighlight && selectedFolder?.eventDate);
+
+  // Same panel for portrait (sidebar) and landscape (bottom bar) photos.
+  const lightboxPanel = activePhoto && (
+    <div className={styles.lightboxPanel}>
+      <div className={styles.lightboxActions}>
+        {showHighlightControls && (
+          <Button size="sm" onClick={() => setPhotoHighlight(activePhoto)}>
+            <HighlightToggle on={activePhoto.id === selectedFolder.highlightPhotoId} size={20} />
+            {activePhoto.id === selectedFolder.highlightPhotoId ? 'Highlighted' : 'Highlight'}
+          </Button>
+        )}
+        <Button size="sm" onClick={(e) => handleToggleFavorite(activePhoto, e)}>
+          <HeartToggle on={activePhoto.isFavorite} size={20} />
+          {activePhoto.isFavorite ? 'Favorited' : 'Favorite'}
+        </Button>
+        <Button size="sm" onClick={() => requestDeletePhoto(activePhoto)}>
+          <Trash2 size={20} strokeWidth={2.6} aria-hidden="true" />
+          Delete
+        </Button>
+      </div>
+
+      <p className={styles.lightboxCaption}>{activePhoto.caption || 'No caption provided.'}</p>
+
+      {activePhoto.location && (
+        <span className={styles.locationTag}>
+          <Icon name="pin" size={22} />
+          {activePhoto.location}
+        </span>
+      )}
+    </div>
+  );
+
   return (
     <div className={styles.pageContainer}>
       <Navbar />
 
-      {/* PAGE HEAD */}
-      <div className={styles.pageHead}>
-        <button className={styles.breadcrumb} onClick={() => navigate('/home')}>
-          <ArrowLeftIcon />
-          <span>Back home</span>
-        </button>
-        <h1 className={styles.pageTitle}>Our memories</h1>
-        <p className={styles.pageSubtitle}>Every folder is a little pocket of time — open one to relive it.</p>
-      </div>
-
-      {/* TOOLBAR */}
-      <div className={styles.toolbar}>
-        <div className={styles.searchBar}>
-          <SearchIcon />
-          <input
-            type="text"
-            placeholder="Search albums or captions..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
+      <main className={`${styles.main} ${viewMode === 'calendar' ? styles.mainWide : ''}`}>
+        {/* PAGE HEAD + TOOLBAR */}
+        <div className={styles.pageHead}>
+          <div>
+            <p className={styles.handLabel}>every album is a little pocket of time</p>
+            <h1 className={styles.pageTitle}>Our memories</h1>
+          </div>
+          <div className={styles.toolbar}>
+            <label className={styles.searchBar}>
+              <Search size={20} strokeWidth={2.6} aria-hidden="true" />
+              <span className={styles.srOnly}>Search albums</span>
+              <input
+                type="search"
+                placeholder="Search albums or captions"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </label>
+            <Button variant="primary" onClick={() => openFolderModal()}>
+              <Plus size={20} strokeWidth={3} aria-hidden="true" />
+              New album
+            </Button>
+          </div>
         </div>
-        <button className={styles.primaryActionBtn} onClick={() => openFolderModal()}>
-          <PlusIcon />
-          <span>New Album</span>
-        </button>
-      </div>
 
-      {/* VIEW SWITCHER */}
-      <div className={`${styles.viewTabsWrapper} ${viewMode === 'calendar' ? styles.contentWrapperWide : ''}`}>
-        <div className={styles.segmentedControl}>
+        {/* VIEW SWITCHER */}
+        <div className={styles.tabs} role="tablist" aria-label="View">
           <button
-            className={`${styles.segmentBtn} ${viewMode === 'albums' ? styles.segmentActive : ''}`}
+            type="button"
+            role="tab"
+            aria-selected={viewMode === 'albums'}
+            className={`${styles.tab} ${viewMode === 'albums' ? styles.tabActive : ''}`}
             onClick={() => setViewMode('albums')}
           >
-            <FolderIcon />
-            <span>Albums</span>
+            <Icon name="film" size={26} />
+            Albums
           </button>
           <button
-            className={`${styles.segmentBtn} ${viewMode === 'calendar' ? styles.segmentActive : ''}`}
+            type="button"
+            role="tab"
+            aria-selected={viewMode === 'calendar'}
+            className={`${styles.tab} ${viewMode === 'calendar' ? styles.tabActive : ''}`}
             onClick={() => setViewMode('calendar')}
           >
-            <CalendarIcon />
-            <span>Calendar Dump</span>
+            <Icon name="sparkle" size={26} />
+            Calendar dump
           </button>
         </div>
-      </div>
 
-      {/* MAIN CONTENT */}
-      <main className={`${styles.contentWrapper} ${viewMode === 'calendar' ? styles.contentWrapperWide : ''}`}>
         {(errorMessage || loadError) && (
-          <div className={styles.errorBanner}>{errorMessage || loadError}</div>
+          <div className={styles.errorBanner} role="alert">
+            <Icon name="bell" size={28} />
+            <span>{errorMessage || loadError}</span>
+          </div>
         )}
 
         {/* VIEW: CALENDAR DUMP */}
-        {viewMode === 'calendar' && (
-          <CalendarView onOpenAlbum={handleOpenAlbumFromCalendar} />
-        )}
+        {viewMode === 'calendar' && <CalendarView onOpenAlbum={handleOpenAlbumFromCalendar} />}
 
         {/* VIEW 1: ALBUMS GRID */}
         {viewMode === 'albums' && !selectedFolder && (
-          <motion.div
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-
+          <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
             {loading ? (
-              <div className={styles.loadingState}>Loading sanctuary memories...</div>
+              <div className={styles.folderGrid} aria-busy="true" aria-label="Loading your albums">
+                {[0, 1, 2].map((i) => (
+                  <div key={i} className={`${styles.folderCard} ${styles.skeleton}`} />
+                ))}
+              </div>
             ) : filteredFolders.length === 0 ? (
               <div className={styles.emptyStateCard}>
-                <p>No albums created yet, love.</p>
-                <button className={styles.primaryActionBtn} onClick={() => openFolderModal()}>
-                  <PlusIcon />
-                  <span>Create Your First Memory Album</span>
-                </button>
+                <Icon name="camera" size={88} sticker tilt={-6} />
+                <p>{searchQuery ? 'No albums match that search, love.' : 'No albums created yet, love.'}</p>
+                {!searchQuery && (
+                  <Button variant="primary" onClick={() => openFolderModal()}>
+                    <Plus size={20} strokeWidth={3} aria-hidden="true" />
+                    Create your first memory album
+                  </Button>
+                )}
               </div>
             ) : (
               <div className={styles.folderGrid}>
-                {filteredFolders.map((folder) => (
-                  <motion.div
-                    key={folder.id}
-                    className={styles.folderCard}
-                    whileHover={{ y: -4 }}
-                    transition={{ duration: 0.25 }}
-                    onClick={() => loadFolderDetails(folder.id)}
-                  >
-                    <div className={styles.coverImageWrapper}>
+                {filteredFolders.map((folder, i) => (
+                  <article key={folder.id} className={styles.folderCard}>
+                    <div
+                      className={styles.cover}
+                      style={folder.coverImageUrl ? undefined : { background: COVER_TINTS[i % COVER_TINTS.length] }}
+                      onClick={(e) => openAlbumFromCard(folder, e)}
+                    >
                       {folder.coverImageUrl ? (
-                        <img src={folder.coverImageUrl} alt={folder.name} className={styles.coverImage} loading="lazy" />
+                        <img src={folder.coverImageUrl} alt="" className={styles.coverImage} loading="lazy" decoding="async" />
                       ) : (
-                        <div className={styles.placeholderCover}>
-                          <FolderIcon />
-                        </div>
+                        <Icon name={resolveAlbumIcon(folder)} size={96} className={styles.coverIcon} />
                       )}
-                      <span className={styles.photoBadge}>{folder.photoCount || 0} Photos</span>
+                      <span className={styles.photoBadge}>
+                        {folder.photoCount || 0} {folder.photoCount === 1 ? 'photo' : 'photos'}
+                      </span>
                     </div>
 
-                    <div className={styles.folderCardBody}>
-                      <div className={styles.folderCardHeader}>
-                        <h3 className={styles.folderTitle}>{folder.name}</h3>
-                        <div className={styles.folderActions}>
-                          <button
-                            className={styles.iconGhostBtn}
-                            onClick={(e) => { e.stopPropagation(); openFolderModal(folder); }}
-                            title="Edit Album"
-                          >
-                            <EditIcon />
+                    <div className={styles.folderBody}>
+                      <div className={styles.folderText}>
+                        <h2 className={styles.folderTitle}>
+                          <button type="button" className={styles.folderOpen} onClick={(e) => openAlbumFromCard(folder, e)}>
+                            {folder.name}
                           </button>
-                          <button
-                            className={styles.iconGhostBtn}
-                            onClick={(e) => requestDeleteFolder(folder, e)}
-                            title="Delete Album"
-                          >
-                            <TrashIcon />
-                          </button>
-                        </div>
+                        </h2>
+                        {folder.description && <p className={styles.folderDesc}>{folder.description}</p>}
                       </div>
-                      {folder.description && (
-                        <p className={styles.folderDesc}>{folder.description}</p>
-                      )}
+                      <div className={styles.folderActions}>
+                        <button
+                          type="button"
+                          className={styles.iconBtn}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openFolderModal(folder);
+                          }}
+                          aria-label={`Edit album ${folder.name}`}
+                        >
+                          <Pencil size={20} strokeWidth={2.6} aria-hidden="true" />
+                        </button>
+                        <button
+                          type="button"
+                          className={styles.iconBtn}
+                          onClick={(e) => requestDeleteFolder(folder, e)}
+                          aria-label={`Delete album ${folder.name}`}
+                        >
+                          <Trash2 size={20} strokeWidth={2.6} aria-hidden="true" />
+                        </button>
+                      </div>
                     </div>
-                  </motion.div>
+                  </article>
                 ))}
+
+                <button type="button" className={styles.newAlbumTile} onClick={() => openFolderModal()}>
+                  <Icon name="dog" size={96} sticker tilt={-6} />
+                  <span className={styles.newAlbumTitle}>Start a new album</span>
+                  <span className={styles.newAlbumHand}>what are we keeping next?</span>
+                </button>
               </div>
             )}
           </motion.div>
@@ -714,284 +725,280 @@ export default function MemoriesPage() {
 
         {/* VIEW 2: SELECTED ALBUM GALLERY */}
         {viewMode === 'albums' && selectedFolder && (
-          <motion.div
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4 }}
-          >
+          <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
             <div className={styles.albumHeader}>
-              <button className={styles.backBtn} onClick={() => setSelectedFolder(null)}>
-                <ArrowLeftIcon />
-                <span>All Albums</span>
-              </button>
+              <Button size="sm" onClick={() => setSelectedFolder(null)}>
+                <ArrowLeft size={20} strokeWidth={2.8} aria-hidden="true" />
+                All albums
+              </Button>
 
               <div className={styles.albumTitleBlock}>
-                <div
-                  className={styles.colorPillIndicator}
-                  style={{ backgroundColor: selectedFolder.accentColor || '#E38A96' }}
-                />
+                <span className={styles.accentBar} style={{ backgroundColor: displayAccent(selectedFolder.accentColor) }} aria-hidden="true" />
                 <div>
-                  <h1 className={styles.albumHeading}>{selectedFolder.name}</h1>
-                  <p className={styles.albumMeta}>{selectedFolder.description || 'Private Collection'}</p>
-                  {selectedFolder.isCalendarHighlight && selectedFolder.eventDate && (
+                  <h2 className={styles.albumHeading}>{selectedFolder.name}</h2>
+                  <p className={styles.albumMeta}>{selectedFolder.description || 'Private collection'}</p>
+                  {showHighlightControls && (
                     <span className={styles.calendarBadge}>
-                      <CalendarIcon />
-                      {selectedFolder.highlightPhotoId ? 'On the Calendar' : 'Pick a highlight photo below'} · {selectedFolder.eventDate}
+                      <Icon name="sparkle" size={22} />
+                      {selectedFolder.highlightPhotoId ? 'On the calendar' : 'Pick a highlight photo below'} · {selectedFolder.eventDate}
                     </span>
                   )}
                 </div>
               </div>
 
-              <button
-                className={styles.primaryActionBtn}
-                onClick={() => { setUploadError(''); setIsUploadModalOpen(true); }}
+              <Button
+                variant="primary"
+                onClick={() => {
+                  setUploadError('');
+                  setIsUploadModalOpen(true);
+                }}
               >
-                <UploadIcon />
-                <span>Add Photo</span>
-              </button>
+                <Upload size={20} strokeWidth={2.8} aria-hidden="true" />
+                Add photo
+              </Button>
             </div>
 
             {/* GALLERY GRID */}
             {photos.length === 0 ? (
               <div className={styles.emptyStateCard}>
+                <Icon name="camera" size={88} sticker tilt={-6} />
                 <p>This album is quiet. Upload a photo to start keeping memories here.</p>
-                <button
-                  className={styles.primaryActionBtn}
-                  onClick={() => { setUploadError(''); setIsUploadModalOpen(true); }}
+                <Button
+                  variant="primary"
+                  onClick={() => {
+                    setUploadError('');
+                    setIsUploadModalOpen(true);
+                  }}
                 >
-                  <UploadIcon />
-                  <span>Upload First Photo</span>
-                </button>
+                  <Upload size={20} strokeWidth={2.8} aria-hidden="true" />
+                  Upload first photo
+                </Button>
               </div>
             ) : (
-              <div className={styles.photoGrid}>
-                {photos.map((photo, index) => (
-                  <motion.div
-                    key={photo.id}
-                    className={styles.photoCard}
-                    whileHover={{ y: -3 }}
-                    transition={{ duration: 0.2 }}
-                    onClick={() => openLightbox(index)}
-                  >
-                    <img
-                      src={photo.photoUrl}
-                      alt={photo.caption || 'Memory'}
-                      className={styles.photoImage}
-                      loading="lazy"
-                      onLoad={(e) => recordOrientation(photo, e)}
-                    />
-                    <div className={styles.photoCardOverlay}>
-                      <div className={styles.overlayIconRow}>
-                        {selectedFolder.isCalendarHighlight && selectedFolder.eventDate && (
+              <ul className={styles.photoGrid}>
+                {photos.map((photo, index) => {
+                  const isHighlight = photo.id === selectedFolder.highlightPhotoId;
+                  return (
+                    <li key={photo.id} className={styles.photoCard}>
+                      <button
+                        type="button"
+                        className={styles.photoOpen}
+                        onClick={() => openLightbox(index)}
+                        aria-label={`Open photo${photo.caption ? `: ${photo.caption}` : ` ${index + 1}`}`}
+                      >
+                        <img
+                          src={photo.photoUrl}
+                          alt=""
+                          className={styles.photoImage}
+                          loading="lazy"
+                          decoding="async"
+                          onLoad={(e) => recordOrientation(photo, e)}
+                        />
+                      </button>
+
+                      {/* Always visible: no hover needed, so they work on phones */}
+                      <div className={styles.photoActions}>
+                        {showHighlightControls && (
                           <button
-                            className={styles.favIconBtn}
-                            onClick={(e) => { e.stopPropagation(); setPhotoHighlight(photo); }}
-                            title={photo.id === selectedFolder.highlightPhotoId ? 'Remove as calendar highlight' : 'Set as calendar highlight'}
+                            type="button"
+                            className={styles.roundBtn}
+                            onClick={() => setPhotoHighlight(photo)}
+                            aria-pressed={isHighlight}
+                            aria-label={isHighlight ? 'Remove as calendar highlight' : 'Set as calendar highlight'}
                           >
-                            <StarIcon filled={photo.id === selectedFolder.highlightPhotoId} />
+                            <HighlightToggle on={isHighlight} />
                           </button>
                         )}
                         <button
-                          className={styles.favIconBtn}
+                          type="button"
+                          className={styles.roundBtn}
                           onClick={(e) => handleToggleFavorite(photo, e)}
+                          aria-pressed={!!photo.isFavorite}
+                          aria-label={photo.isFavorite ? 'Remove from favorites' : 'Add to favorites'}
                         >
-                          <HeartIcon filled={photo.isFavorite} />
+                          <HeartToggle on={photo.isFavorite} />
                         </button>
                       </div>
-                      {photo.caption && <p className={styles.photoCaptionSnippet}>{photo.caption}</p>}
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
+
+                      {photo.caption && <p className={styles.photoCaption}>{photo.caption}</p>}
+                    </li>
+                  );
+                })}
+              </ul>
             )}
           </motion.div>
         )}
       </main>
 
       {/* MODAL 1: CREATE / EDIT ALBUM */}
-      <AnimatePresence>
-        {isFolderModalOpen && (
-          <motion.div
-            className={styles.modalBackdrop}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.22 }}
-            onClick={() => setIsFolderModalOpen(false)}
-          >
-            <motion.div
-              className={styles.editorialModalCard}
-              initial={{ opacity: 0, y: 20, scale: 0.98 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 15, scale: 0.98 }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className={styles.modalHeader}>
-                <h2>{editingFolder ? 'Edit Memory Album' : 'Create New Album'}</h2>
-                <button className={styles.closeBtn} onClick={() => setIsFolderModalOpen(false)}>
-                  <CloseIcon />
+      <Modal open={isFolderModalOpen} onClose={closeFolderModal} title={editingFolder ? 'Edit memory album' : 'Create new album'} locked={submitting}>
+        <form onSubmit={handleSaveFolder} className={form.form}>
+          <div className={form.field}>
+            <label className={form.label} htmlFor="album-name">Album name</label>
+            <input
+              id="album-name"
+              className={form.input}
+              type="text"
+              required
+              placeholder="e.g. Sunset in La Union"
+              value={folderForm.name}
+              onChange={(e) => setFolderForm({ ...folderForm, name: e.target.value })}
+            />
+          </div>
+
+          <div className={form.field}>
+            <label className={form.label} htmlFor="album-desc">Description / note</label>
+            <textarea
+              id="album-desc"
+              className={form.textarea}
+              rows={3}
+              placeholder="Brief memory description..."
+              value={folderForm.description}
+              onChange={(e) => setFolderForm({ ...folderForm, description: e.target.value })}
+            />
+          </div>
+
+          <fieldset className={styles.fieldset}>
+            <legend className={form.label}>Album doodle</legend>
+            <p className={form.hint}>Shown when the album has no cover photo. Automatic picks one from the album name.</p>
+            <div className={styles.doodleGrid} role="radiogroup" aria-label="Album doodle">
+              <button
+                type="button"
+                role="radio"
+                aria-checked={!pickedDoodle}
+                className={`${styles.doodleOption} ${styles.doodleAuto} ${!pickedDoodle ? styles.doodleActive : ''}`}
+                onClick={() => setFolderForm({ ...folderForm, iconStyle: doodleToIconStyle(null) })}
+              >
+                <Icon name={resolveAlbumIcon({ name: folderForm.name })} size={30} />
+                Automatic
+              </button>
+              {PICKABLE_DOODLES.map((name) => (
+                <button
+                  key={name}
+                  type="button"
+                  role="radio"
+                  aria-checked={pickedDoodle === name}
+                  aria-label={name}
+                  title={name}
+                  className={`${styles.doodleOption} ${pickedDoodle === name ? styles.doodleActive : ''}`}
+                  onClick={() => setFolderForm({ ...folderForm, iconStyle: doodleToIconStyle(name) })}
+                >
+                  <Icon name={name} size={32} />
                 </button>
-              </div>
+              ))}
+            </div>
+          </fieldset>
 
-              <form onSubmit={handleSaveFolder} className={styles.modalForm}>
-                <div className={styles.formGroup}>
-                  <label>Album Name</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="e.g. Sunset in La Union"
-                    value={folderForm.name}
-                    onChange={(e) => setFolderForm({ ...folderForm, name: e.target.value })}
-                  />
-                </div>
+          <fieldset className={styles.fieldset}>
+            <legend className={form.label}>Accent color</legend>
+            <div className={styles.palette} role="radiogroup" aria-label="Accent color">
+              {PALETTE_ACCENTS.map((item) => (
+                <button
+                  key={item.value}
+                  type="button"
+                  role="radio"
+                  aria-checked={folderForm.accentColor === item.value}
+                  aria-label={item.name}
+                  title={item.name}
+                  className={`${styles.swatch} ${folderForm.accentColor === item.value ? styles.swatchActive : ''}`}
+                  style={{ backgroundColor: item.value }}
+                  onClick={() => setFolderForm({ ...folderForm, accentColor: item.value })}
+                />
+              ))}
+            </div>
+          </fieldset>
 
-                <div className={styles.formGroup}>
-                  <label>Description / Note</label>
-                  <textarea
-                    rows={3}
-                    placeholder="Brief memory description..."
-                    value={folderForm.description}
-                    onChange={(e) => setFolderForm({ ...folderForm, description: e.target.value })}
-                  />
-                </div>
+          <div className={form.field}>
+            <label className={form.label} htmlFor="album-date">Date happened</label>
+            <input
+              id="album-date"
+              className={form.input}
+              type="date"
+              value={folderForm.eventDate}
+              onChange={(e) => setFolderForm({ ...folderForm, eventDate: e.target.value })}
+            />
+          </div>
 
-                <div className={styles.formGroup}>
-                  <label>Accent Color</label>
-                  <div className={styles.palettePicker}>
-                    {PALETTE_ACCENTS.map((item) => (
-                      <button
-                        key={item.value}
-                        type="button"
-                        className={`${styles.colorChip} ${folderForm.accentColor === item.value ? styles.colorChipActive : ''}`}
-                        style={{ backgroundColor: item.value }}
-                        onClick={() => setFolderForm({ ...folderForm, accentColor: item.value })}
-                        title={item.name}
-                      />
-                    ))}
-                  </div>
-                </div>
+          <div className={form.switchRow}>
+            <label className={form.switch}>
+              <input
+                type="checkbox"
+                checked={folderForm.isCalendarHighlight}
+                onChange={(e) => setFolderForm({ ...folderForm, isCalendarHighlight: e.target.checked })}
+                aria-label="Add to Calendar Dump"
+              />
+              <span className={form.switchTrack}><span className={form.switchThumb} /></span>
+            </label>
+            <div className={form.switchText}>
+              <p className={form.switchTitle}>Add to Calendar Dump</p>
+              <p className={form.hint}>
+                {editingFolder && editingFolder.photoCount > 0
+                  ? 'Once saved, pick one photo from this album as its calendar highlight.'
+                  : 'You’ll pick a highlight photo after adding photos to this album.'}
+              </p>
+            </div>
+          </div>
 
-                <div className={styles.formGroup}>
-                  <label>Date Happened</label>
-                  <input
-                    type="date"
-                    value={folderForm.eventDate}
-                    onChange={(e) => setFolderForm({ ...folderForm, eventDate: e.target.value })}
-                  />
-                </div>
+          {errorMessage && <p className={form.error} role="alert">{errorMessage}</p>}
 
-                <div className={styles.toggleRow}>
-                  <label className={styles.toggleSwitch}>
-                    <input
-                      type="checkbox"
-                      checked={folderForm.isCalendarHighlight}
-                      onChange={(e) => setFolderForm({ ...folderForm, isCalendarHighlight: e.target.checked })}
-                    />
-                    <span className={styles.toggleTrack}><span className={styles.toggleThumb} /></span>
-                  </label>
-                  <div>
-                    <p className={styles.toggleLabel}>Add to Calendar Dump</p>
-                    <p className={styles.toggleHint}>
-                      {editingFolder && editingFolder.photoCount > 0
-                        ? 'Once saved, pick one photo from this album as its calendar highlight.'
-                        : 'You’ll pick a highlight photo after adding photos to this album.'}
-                    </p>
-                  </div>
-                </div>
-
-                {errorMessage && <p className={styles.inlineFormError}>{errorMessage}</p>}
-
-                <div className={styles.modalFooter}>
-                  <button type="button" className={styles.secondaryBtn} onClick={() => setIsFolderModalOpen(false)}>
-                    Cancel
-                  </button>
-                  <button type="submit" className={styles.primaryActionBtn} disabled={submitting}>
-                    {submitting ? 'Saving...' : editingFolder ? 'Save Changes' : 'Create Album'}
-                  </button>
-                </div>
-              </form>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          <div className={form.footer}>
+            <Button onClick={closeFolderModal} disabled={submitting}>Cancel</Button>
+            <Button type="submit" variant="primary" disabled={submitting}>
+              {submitting ? 'Saving...' : editingFolder ? 'Save changes' : 'Create album'}
+            </Button>
+          </div>
+        </form>
+      </Modal>
 
       {/* MODAL 2: UPLOAD PHOTO */}
-      <AnimatePresence>
-        {isUploadModalOpen && (
-          <motion.div
-            className={styles.modalBackdrop}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.22 }}
-            onClick={() => setIsUploadModalOpen(false)}
-          >
-            <motion.div
-              className={styles.editorialModalCard}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 15 }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className={styles.modalHeader}>
-                <h2>Add Photo to Album</h2>
-                <button className={styles.closeBtn} onClick={() => setIsUploadModalOpen(false)}>
-                  <CloseIcon />
-                </button>
-              </div>
+      <Modal open={isUploadModalOpen} onClose={closeUploadModal} title="Add photo to album" locked={uploadState.uploading}>
+        <form onSubmit={handleUploadPhoto} className={form.form}>
+          <label className={styles.dropZone}>
+            {uploadState.previewUrl ? (
+              <img src={uploadState.previewUrl} alt="Preview of the chosen photo" className={styles.uploadPreview} />
+            ) : (
+              <span className={styles.dropPrompt}>
+                <Icon name="camera" size={64} />
+                <span>Click or drag a photo here to upload</span>
+              </span>
+            )}
+            <input type="file" accept="image/*" required onChange={handleFileChange} aria-label="Choose a photo" />
+          </label>
 
-              <form onSubmit={handleUploadPhoto} className={styles.modalForm}>
-                <div className={styles.fileDropZone}>
-                  {uploadState.previewUrl ? (
-                    <img src={uploadState.previewUrl} alt="Preview" className={styles.uploadPreviewImage} />
-                  ) : (
-                    <div className={styles.dropZonePrompt}>
-                      <UploadIcon />
-                      <p>Click or drag a photo here to upload</p>
-                    </div>
-                  )}
-                  <input type="file" accept="image/*" required onChange={handleFileChange} />
-                </div>
+          <div className={form.field}>
+            <label className={form.label} htmlFor="photo-caption">Caption</label>
+            <input
+              id="photo-caption"
+              className={form.input}
+              type="text"
+              placeholder="A sweet phrase or note..."
+              value={uploadState.caption}
+              onChange={(e) => setUploadState({ ...uploadState, caption: e.target.value })}
+            />
+          </div>
 
-                <div className={styles.formGroup}>
-                  <label>Caption</label>
-                  <input
-                    type="text"
-                    placeholder="A sweet phrase or note..."
-                    value={uploadState.caption}
-                    onChange={(e) => setUploadState({ ...uploadState, caption: e.target.value })}
-                  />
-                </div>
+          <div className={form.field}>
+            <label className={form.label} htmlFor="photo-location">Location (optional)</label>
+            <input
+              id="photo-location"
+              className={form.input}
+              type="text"
+              placeholder="e.g. Quezon City"
+              value={uploadState.location}
+              onChange={(e) => setUploadState({ ...uploadState, location: e.target.value })}
+            />
+          </div>
 
-                <div className={styles.formGroup}>
-                  <label>Location (Optional)</label>
-                  <input
-                    type="text"
-                    placeholder="e.g. Quezon City"
-                    value={uploadState.location}
-                    onChange={(e) => setUploadState({ ...uploadState, location: e.target.value })}
-                  />
-                </div>
+          {uploadError && <p className={form.error} role="alert">{uploadError}</p>}
 
-                {uploadError && <p className={styles.inlineFormError}>{uploadError}</p>}
-
-                <div className={styles.modalFooter}>
-                  <button type="button" className={styles.secondaryBtn} onClick={() => setIsUploadModalOpen(false)}>
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className={styles.primaryActionBtn}
-                    disabled={uploadState.uploading || !uploadState.file}
-                  >
-                    {uploadState.uploading ? 'Uploading...' : 'Save Photo'}
-                  </button>
-                </div>
-              </form>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          <div className={form.footer}>
+            <Button onClick={closeUploadModal} disabled={uploadState.uploading}>Cancel</Button>
+            <Button type="submit" variant="primary" disabled={uploadState.uploading || !uploadState.file}>
+              {uploadState.uploading ? 'Uploading...' : 'Save photo'}
+            </Button>
+          </div>
+        </form>
+      </Modal>
 
       {/* LIGHTBOX PHOTO PREVIEW + CAROUSEL */}
       <AnimatePresence>
@@ -1006,13 +1013,16 @@ export default function MemoriesPage() {
           >
             <motion.div
               className={`${styles.lightboxContent} ${isLandscape ? styles.lightboxLandscape : ''}`}
+              role="dialog"
+              aria-modal="true"
+              aria-label="Photo viewer"
               initial={{ opacity: 0, scale: 0.96, y: 12 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.96, y: 8 }}
               transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
               onClick={(e) => e.stopPropagation()}
             >
-              {/* IMAGE STAGE — draggable carousel */}
+              {/* IMAGE STAGE: draggable carousel */}
               <div className={styles.lightboxStage}>
                 <motion.div
                   className={styles.imageDragLayer}
@@ -1039,132 +1049,42 @@ export default function MemoriesPage() {
                   </AnimatePresence>
                 </motion.div>
 
-                {/* Carousel controls */}
+                <button
+                  type="button"
+                  ref={lightboxCloseRef}
+                  className={`${styles.stageBtn} ${styles.stageClose}`}
+                  onClick={closeLightbox}
+                  aria-label="Close preview"
+                >
+                  <X size={22} strokeWidth={2.8} aria-hidden="true" />
+                </button>
+
                 {photos.length > 1 && (
                   <>
                     <button
-                      className={`${styles.carouselNavBtn} ${styles.carouselNavPrev}`}
+                      type="button"
+                      className={`${styles.stageBtn} ${styles.stagePrev}`}
                       onClick={() => paginate(-1)}
                       aria-label="Previous photo"
                     >
-                      <ChevronLeftIcon />
+                      <ChevronLeft size={24} strokeWidth={2.8} aria-hidden="true" />
                     </button>
                     <button
-                      className={`${styles.carouselNavBtn} ${styles.carouselNavNext}`}
+                      type="button"
+                      className={`${styles.stageBtn} ${styles.stageNext}`}
                       onClick={() => paginate(1)}
                       aria-label="Next photo"
                     >
-                      <ChevronRightIcon />
+                      <ChevronRight size={24} strokeWidth={2.8} aria-hidden="true" />
                     </button>
-                    <span className={styles.carouselCounter}>
+                    <span className={styles.counter} aria-live="polite">
                       {lightbox.index + 1} / {photos.length}
                     </span>
                   </>
                 )}
-
-                {/* Landscape: floating glass close + hover caption overlay */}
-                {isLandscape && (
-                  <>
-                    <button
-                      className={styles.glassCloseBtn}
-                      onClick={closeLightbox}
-                      aria-label="Close preview"
-                    >
-                      <CloseIcon />
-                    </button>
-
-                    <div className={styles.landscapeOverlay}>
-                      <div className={styles.landscapeCaptionGlass}>
-                        <div className={styles.landscapeTextBlock}>
-                          <p className={styles.landscapeCaption}>
-                            {activePhoto.caption || 'No caption provided.'}
-                          </p>
-                          {activePhoto.location && (
-                            <span className={styles.landscapeLocationTag}>
-                              📍 {activePhoto.location}
-                            </span>
-                          )}
-                        </div>
-
-                        <div className={styles.landscapeActions}>
-                          {selectedFolder?.isCalendarHighlight && selectedFolder?.eventDate && (
-                            <button
-                              className={styles.glassActionBtn}
-                              onClick={() => setPhotoHighlight(activePhoto)}
-                            >
-                              <StarIcon filled={activePhoto.id === selectedFolder.highlightPhotoId} />
-                              <span>{activePhoto.id === selectedFolder.highlightPhotoId ? 'Highlighted' : 'Highlight'}</span>
-                            </button>
-                          )}
-
-                          <button
-                            className={styles.glassActionBtn}
-                            onClick={(e) => handleToggleFavorite(activePhoto, e)}
-                          >
-                            <HeartIcon filled={activePhoto.isFavorite} />
-                            <span>{activePhoto.isFavorite ? 'Favorited' : 'Favorite'}</span>
-                          </button>
-
-                          <button
-                            className={`${styles.glassActionBtn} ${styles.glassDangerBtn}`}
-                            onClick={() => requestDeletePhoto(activePhoto)}
-                          >
-                            <TrashIcon />
-                            <span>Delete</span>
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </>
-                )}
               </div>
 
-              {/* Portrait / square: editorial caption sidebar */}
-              {!isLandscape && (
-                <div className={styles.lightboxSidebar}>
-                  <button className={styles.lightboxCloseBtn} onClick={closeLightbox}>
-                    <CloseIcon />
-                  </button>
-
-                  <div className={styles.lightboxBody}>
-                    <div className={styles.lightboxHeader}>
-                      {selectedFolder?.isCalendarHighlight && selectedFolder?.eventDate && (
-                        <button
-                          className={styles.lightboxFavBtn}
-                          onClick={() => setPhotoHighlight(activePhoto)}
-                        >
-                          <StarIcon filled={activePhoto.id === selectedFolder.highlightPhotoId} />
-                          <span>{activePhoto.id === selectedFolder.highlightPhotoId ? 'Highlighted' : 'Highlight'}</span>
-                        </button>
-                      )}
-
-                      <button
-                        className={styles.lightboxFavBtn}
-                        onClick={(e) => handleToggleFavorite(activePhoto, e)}
-                      >
-                        <HeartIcon filled={activePhoto.isFavorite} />
-                        <span>{activePhoto.isFavorite ? 'Favorited' : 'Favorite'}</span>
-                      </button>
-
-                      <button
-                        className={styles.dangerBtn}
-                        onClick={() => requestDeletePhoto(activePhoto)}
-                      >
-                        <TrashIcon />
-                        <span>Delete</span>
-                      </button>
-                    </div>
-
-                    <p className={styles.lightboxCaption}>
-                      {activePhoto.caption || 'No caption provided.'}
-                    </p>
-
-                    {activePhoto.location && (
-                      <span className={styles.lightboxLocationTag}>📍 {activePhoto.location}</span>
-                    )}
-                  </div>
-                </div>
-              )}
+              {lightboxPanel}
             </motion.div>
           </motion.div>
         )}

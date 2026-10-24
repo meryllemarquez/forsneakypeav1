@@ -1,9 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { ChevronDown, ChevronLeft, ChevronRight, Download, Maximize2, X } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useCalendarMonth } from '../../../queries/queries';
 import { useMemoryMutations } from '../../../queries/mutations';
 import { queryKeys } from '../../../queries/queryKeys';
+import { useScrollLock } from '../../../hooks/useScrollLock';
+import Icon from '../../Icon';
 import MemoryPreviewModal from './MemoryPreviewModal';
 import styles from './CalendarView.module.css';
 
@@ -13,60 +16,12 @@ const MONTH_NAMES = [
 ];
 const WEEKDAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
-// A press has to be held this long before it turns into a reposition drag —
+// A press has to be held this long before it turns into a reposition drag â€”
 // short of that, releasing is treated as a plain tap (open the preview).
 const LONG_PRESS_MS = 380;
 // If the pointer moves more than this before the hold fires, the gesture is
 // abandoned outright (neither a tap nor a reposition) rather than guessed at.
 const MOVE_CANCEL_PX = 6;
-
-const ChevronLeftIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <polyline points="15 18 9 12 15 6"></polyline>
-  </svg>
-);
-
-const ChevronRightIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <polyline points="9 18 15 12 9 6"></polyline>
-  </svg>
-);
-
-const HeartIcon = () => (
-  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
-  </svg>
-);
-
-const DownloadIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-    <polyline points="7 10 12 15 17 10"></polyline>
-    <line x1="12" y1="15" x2="12" y2="3"></line>
-  </svg>
-);
-
-const ExpandIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M8 3H5a2 2 0 0 0-2 2v3"></path>
-    <path d="M21 8V5a2 2 0 0 0-2-2h-3"></path>
-    <path d="M3 16v3a2 2 0 0 0 2 2h3"></path>
-    <path d="M16 21h3a2 2 0 0 0 2-2v-3"></path>
-  </svg>
-);
-
-const CloseIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <line x1="18" y1="6" x2="6" y2="18"></line>
-    <line x1="6" y1="6" x2="18" y2="18"></line>
-  </svg>
-);
-
-const ChevronDownIcon = () => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-    <polyline points="6 9 12 15 18 9"></polyline>
-  </svg>
-);
 
 const MIN_YEAR = 1970;
 const MAX_YEAR = 2100;
@@ -102,7 +57,7 @@ function MonthYearPicker({ cursor, onSelect, className }) {
         aria-expanded={open}
       >
         <span>{MONTH_NAMES[cursor.month - 1]} {cursor.year}</span>
-        <ChevronDownIcon />
+        <ChevronDown size={18} strokeWidth={2.8} aria-hidden="true" />
       </button>
 
       {open && (
@@ -235,12 +190,12 @@ function useHighlightReposition(onSave) {
   return { dragState, onPointerDown };
 }
 
-// The scrapbook "sheet" — big month number, weekday row, photo grid. Rendered
+// The scrapbook "sheet" â€” big month number, weekday row, photo grid. Rendered
 // both inline and (bigger) inside the fullscreen overlay, and is exactly the
 // DOM node the PNG export screenshots, so all three stay visually identical
 // by construction. The highlight photo is a CSS background-image (not an
 // <img> with object-fit) because html2canvas doesn't respect object-fit and
-// stretches such images to fill their box — background-size/position it
+// stretches such images to fill their box â€” background-size/position it
 // renders correctly, which also gives the reposition drag a natural knob.
 function CalendarSheet({ cursor, cells, isCurrentMonth, today, entries, loading, onDayClick, onRepositionSave, sheetRef, fullscreen }) {
   const { dragState, onPointerDown } = useHighlightReposition(onRepositionSave);
@@ -277,8 +232,15 @@ function CalendarSheet({ cursor, cells, isCurrentMonth, today, entries, loading,
               type="button"
               className={`${styles.dayCell} ${isToday ? styles.dayCellToday : ''} ${hasEntry ? styles.dayCellFilled : ''} ${isDragging ? styles.dayCellDragging : ''}`}
               onPointerDown={(e) => hasEntry && onPointerDown(e, cell.entry, () => onDayClick(cell.entry))}
+              onKeyDown={(e) => {
+                if (hasEntry && (e.key === 'Enter' || e.key === ' ')) {
+                  e.preventDefault();
+                  onDayClick(cell.entry);
+                }
+              }}
               disabled={!hasEntry}
-              title={hasEntry ? 'Click to open · press & hold to reposition' : undefined}
+              aria-label={hasEntry ? `${cell.entry.folderName}, ${MONTH_NAMES[cursor.month - 1]} ${cell.day}` : undefined}
+              title={hasEntry ? 'Click to open Â· press & hold to reposition' : undefined}
             >
               <span className={styles.dayNumber}>{cell.day}</span>
               {hasEntry && (
@@ -304,9 +266,9 @@ function CalendarSheet({ cursor, cells, isCurrentMonth, today, entries, loading,
 
       {!loading && entries.length === 0 && (
         <div className={styles.emptyMonthState}>
-          <HeartIcon />
+          <Icon name="heart" size={72} sticker tilt={-6} />
           <p className={styles.emptyMonthTitle}>No highlighted memories this month.</p>
-          <p className={styles.emptyMonthSubtitle}>Start creating beautiful moments ❤️</p>
+          <p className={styles.emptyMonthSubtitle}>Pick a highlight photo in an album and it will land on its day, love.</p>
         </div>
       )}
     </div>
@@ -324,7 +286,13 @@ export default function CalendarView({ onOpenAlbum }) {
   const entries = useMemo(() => calendarQuery.data ?? [], [calendarQuery.data]);
   // Loading on first paint and while a not-yet-cached month is fetched (cached months are instant).
   const loading = calendarQuery.isPending || calendarQuery.isPlaceholderData;
+  // The entry is kept after closing so the dialog can finish its exit animation.
   const [previewEntry, setPreviewEntry] = useState(null);
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const openPreview = useCallback((entry) => {
+    setPreviewEntry(entry);
+    setPreviewOpen(true);
+  }, []);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [exporting, setExporting] = useState(false);
   const sheetRef = useRef(null);
@@ -368,10 +336,13 @@ export default function CalendarView({ onOpenAlbum }) {
 
   const isCurrentMonth = cursor.year === today.year && cursor.month === today.month;
 
+  useScrollLock(isFullscreen);
+
   // Close fullscreen on Escape, matching the rest of the app's overlay convention.
   useEffect(() => {
     if (!isFullscreen) return undefined;
     const handleKeyDown = (e) => {
+      if (e.defaultPrevented) return; // the preview dialog on top already took this Escape
       if (e.key === 'Escape') setIsFullscreen(false);
     };
     window.addEventListener('keydown', handleKeyDown);
@@ -384,7 +355,7 @@ export default function CalendarView({ onOpenAlbum }) {
     try {
       const { default: html2canvas } = await import('html2canvas');
       const canvas = await html2canvas(sheetRef.current, {
-        backgroundColor: '#FBF3EA',
+        backgroundColor: '#FFF8E8',
         scale: Math.max(3, window.devicePixelRatio || 1),
         useCORS: true,
       });
@@ -412,18 +383,18 @@ export default function CalendarView({ onOpenAlbum }) {
     }
   }, [queryClient, cursor.year, cursor.month, updateHighlightPosition]);
 
-  const sheetProps = { cursor, cells, isCurrentMonth, today, entries, loading, onDayClick: setPreviewEntry, onRepositionSave: handleRepositionSave };
+  const sheetProps = { cursor, cells, isCurrentMonth, today, entries, loading, onDayClick: openPreview, onRepositionSave: handleRepositionSave };
 
   return (
     <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
       <div className={styles.toolbar}>
         <div className={styles.monthNav}>
           <button className={styles.navBtn} onClick={() => goToMonth(-1)} aria-label="Previous month">
-            <ChevronLeftIcon />
+            <ChevronLeft size={22} strokeWidth={2.8} aria-hidden="true" />
           </button>
           <MonthYearPicker cursor={cursor} onSelect={handlePickMonth} />
           <button className={styles.navBtn} onClick={() => goToMonth(1)} aria-label="Next month">
-            <ChevronRightIcon />
+            <ChevronRight size={22} strokeWidth={2.8} aria-hidden="true" />
           </button>
           <button className={styles.todayBtn} onClick={jumpToToday} disabled={isCurrentMonth}>
             Jump to Today
@@ -431,12 +402,12 @@ export default function CalendarView({ onOpenAlbum }) {
         </div>
 
         <div className={styles.toolbarActions}>
-          <button className={styles.toolbarIconBtn} onClick={handleExportPng} disabled={exporting}>
-            <DownloadIcon />
-            <span>{exporting ? 'Exporting…' : 'Export as PNG'}</span>
+          <button className={styles.toolbarIconBtn} onClick={handleExportPng} disabled={exporting} aria-label="Export as PNG">
+            <Download size={20} strokeWidth={2.6} aria-hidden="true" />
+            <span>{exporting ? 'Exportingâ€¦' : 'Export as PNG'}</span>
           </button>
-          <button className={styles.toolbarIconBtn} onClick={() => setIsFullscreen(true)}>
-            <ExpandIcon />
+          <button className={styles.toolbarIconBtn} onClick={() => setIsFullscreen(true)} aria-label="Full screen">
+            <Maximize2 size={20} strokeWidth={2.6} aria-hidden="true" />
             <span>Full Screen</span>
           </button>
         </div>
@@ -448,6 +419,9 @@ export default function CalendarView({ onOpenAlbum }) {
         {isFullscreen && (
           <motion.div
             className={styles.fullscreenBackdrop}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Calendar dump, full screen"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -463,23 +437,23 @@ export default function CalendarView({ onOpenAlbum }) {
               <div className={styles.fullscreenToolbar}>
                 <div className={styles.monthNav}>
                   <button className={styles.navBtn} onClick={() => goToMonth(-1)} aria-label="Previous month">
-                    <ChevronLeftIcon />
+                    <ChevronLeft size={22} strokeWidth={2.8} aria-hidden="true" />
                   </button>
                   <MonthYearPicker cursor={cursor} onSelect={handlePickMonth} className={styles.monthYearPickerDark} />
                   <button className={styles.navBtn} onClick={() => goToMonth(1)} aria-label="Next month">
-                    <ChevronRightIcon />
+                    <ChevronRight size={22} strokeWidth={2.8} aria-hidden="true" />
                   </button>
                   <button className={styles.todayBtn} onClick={jumpToToday} disabled={isCurrentMonth}>
                     Jump to Today
                   </button>
                 </div>
                 <div className={styles.toolbarActions}>
-                  <button className={styles.toolbarIconBtn} onClick={handleExportPng} disabled={exporting}>
-                    <DownloadIcon />
-                    <span>{exporting ? 'Exporting…' : 'Export as PNG'}</span>
+                  <button className={styles.toolbarIconBtn} onClick={handleExportPng} disabled={exporting} aria-label="Export as PNG">
+                    <Download size={20} strokeWidth={2.6} aria-hidden="true" />
+                    <span>{exporting ? 'Exportingâ€¦' : 'Export as PNG'}</span>
                   </button>
-                  <button className={styles.fullscreenCloseBtn} onClick={() => setIsFullscreen(false)} aria-label="Exit full screen">
-                    <CloseIcon />
+                  <button className={styles.fullscreenCloseBtn} onClick={() => setIsFullscreen(false)} aria-label="Exit full screen" autoFocus>
+                    <X size={22} strokeWidth={2.8} aria-hidden="true" />
                   </button>
                 </div>
               </div>
@@ -492,18 +466,17 @@ export default function CalendarView({ onOpenAlbum }) {
         )}
       </AnimatePresence>
 
-      <AnimatePresence>
-        {previewEntry && (
-          <MemoryPreviewModal
-            entry={previewEntry}
-            onClose={() => setPreviewEntry(null)}
-            onOpenAlbum={() => {
-              setPreviewEntry(null);
-              onOpenAlbum(previewEntry.folderId);
-            }}
-          />
-        )}
-      </AnimatePresence>
+      {previewEntry && (
+        <MemoryPreviewModal
+          open={previewOpen}
+          entry={previewEntry}
+          onClose={() => setPreviewOpen(false)}
+          onOpenAlbum={() => {
+            setPreviewOpen(false);
+            onOpenAlbum(previewEntry.folderId);
+          }}
+        />
+      )}
     </motion.div>
   );
 }

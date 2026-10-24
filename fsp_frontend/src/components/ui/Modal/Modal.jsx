@@ -2,20 +2,13 @@ import { useEffect, useId, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { X } from 'lucide-react';
+import { lockScroll, unlockScroll } from '../../../hooks/useScrollLock';
 import styles from './Modal.module.css';
 
 const FOCUSABLE = 'a[href],button:not([disabled]),textarea:not([disabled]),input:not([disabled]),select:not([disabled]),[tabindex]:not([tabindex="-1"])';
 
 // Open modals, top of the stack last: only the top one reacts to Escape / Tab.
 const stack = [];
-let lockCount = 0;
-
-function lockScroll() {
-  if (lockCount++ === 0) document.body.style.overflow = 'hidden';
-}
-function unlockScroll() {
-  if (--lockCount === 0) document.body.style.overflow = '';
-}
 
 /**
  * The one dialog shell for the whole app: backdrop, Escape, focus trap + restore,

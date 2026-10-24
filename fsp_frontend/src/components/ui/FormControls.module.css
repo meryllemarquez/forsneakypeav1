@@ -1,0 +1,150 @@
+/* Shared form look for modals and drawers: labelled fields, switches, error line, footer row. */
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.label {
+  font-weight: 800;
+  font-size: 0.95rem;
+}
+
+.hint {
+  margin: 0;
+  color: var(--ink-muted);
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+
+.input,
+.textarea,
+.select {
+  width: 100%;
+  min-height: 48px;
+  padding: 10px 16px;
+  background: var(--white);
+  color: var(--ink);
+  border: var(--border-width) solid var(--ink);
+  border-radius: var(--radius-input);
+  font-family: var(--font-body);
+  font-size: 1rem;
+}
+
+.textarea {
+  min-height: 96px;
+  resize: vertical;
+}
+
+.input::placeholder,
+.textarea::placeholder {
+  color: var(--ink-muted);
+}
+
+.input:focus-visible,
+.textarea:focus-visible,
+.select:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: 1px;
+}
+
+.error {
+  margin: 0;
+  padding: 8px 14px;
+  background: var(--citrus-tint);
+  border: var(--border-width) solid var(--ink);
+  border-radius: var(--radius-input);
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+/* On/off switch: a real checkbox, restyled. */
+.switchRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.switch {
+  position: relative;
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--tap);
+  cursor: pointer;
+}
+
+.switch input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.switchTrack {
+  position: relative;
+  width: 54px;
+  height: 30px;
+  background: var(--white);
+  border: var(--border-width) solid var(--ink);
+  border-radius: var(--radius-pill);
+  transition: background-color 0.15s ease;
+}
+
+.switchThumb {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  background: var(--ink);
+  border-radius: 50%;
+  transition: transform 0.15s ease;
+}
+
+.switch input:checked + .switchTrack {
+  background: var(--citrus);
+}
+
+.switch input:checked + .switchTrack .switchThumb {
+  transform: translateX(24px);
+}
+
+.switch input:focus-visible + .switchTrack {
+  outline: var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.switchText {
+  padding-top: 6px;
+}
+
+.switchTitle {
+  margin: 0;
+  font-weight: 800;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .switchTrack,
+  .switchThumb {
+    transition: none;
+  }
+}
