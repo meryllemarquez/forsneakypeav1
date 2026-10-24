@@ -1,0 +1,54 @@
+.wrap {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.9rem;
+  padding: 2rem 1rem;
+  text-align: center;
+  background: var(--color-bg-main, #FBF3EA);
+  color: var(--color-text-primary, #3E332E);
+}
+
+.heart {
+  color: var(--color-blush, #F4A9B8);
+}
+
+.title {
+  margin: 0;
+  font-family: var(--font-serif, Georgia, serif);
+  font-size: 1.7rem;
+  font-weight: 600;
+}
+
+.message {
+  margin: 0;
+  max-width: 26rem;
+  line-height: 1.5;
+  color: var(--color-text-secondary, #8A7568);
+}
+
+.button {
+  margin-top: 0.6rem;
+  padding: 0.7rem 1.6rem;
+  border: none;
+  border-radius: 999px;
+  background: var(--color-coral-deep, #D97785);
+  color: #fff;
+  font-family: var(--font-sans, sans-serif);
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.button:hover {
+  background: var(--color-coral, #E38A96);
+  transform: translateY(-1px);
+}
+
+.button:focus-visible {
+  outline: 3px solid var(--color-blush, #F4A9B8);
+  outline-offset: 2px;
+}

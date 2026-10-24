@@ -44,8 +44,13 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional
     public AuthResponse login(LoginRequest request) {
-        // 1. Fetch user by username or throw a friendly authentication error
-        User user = userRepository.findByUsername(request.getUsername())
+        // 1. Fetch user by username (surrounding spaces ignored) or throw a friendly authentication
+        // error. A blank username gets the same error as any wrong credentials.
+        String username = normalizeUsername(request.getUsername());
+        if (username.isEmpty()) {
+            throw new BadCredentialsException("Oops! Incorrect username or password, love. 💕");
+        }
+        User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new BadCredentialsException("Oops! Incorrect username or password, love. 💕"));
 
         // 2. Verify raw password against BCrypt password hash stored in database. A disabled
@@ -97,8 +102,13 @@ public class AuthServiceImpl implements AuthService {
             throw new IllegalArgumentException("Invalid master passcode. Cannot create account.");
         }
 
-        // 2. Ensure username is unique
-        if (userRepository.existsByUsername(request.getUsername())) {
+        // 2. Usernames are stored trimmed (a stray space would make the account impossible to
+        // log into), must not be blank once trimmed, and must be unique.
+        String username = normalizeUsername(request.getUsername());
+        if (username.isEmpty()) {
+            throw new IllegalArgumentException("Username is required.");
+        }
+        if (userRepository.existsByUsername(username)) {
             throw new IllegalArgumentException("Username is already taken.");
         }
 
@@ -107,7 +117,7 @@ public class AuthServiceImpl implements AuthService {
         // yields a regular user (admins are created via the admin API).
         User user = User.builder()
                 .name(request.getName())
-                .username(request.getUsername())
+                .username(username)
                 .passwordHash(passwordEncoder.encode(request.getPassword()))
                 .role(Role.ROLE_USER)
                 .active(true)
@@ -134,5 +144,10 @@ public class AuthServiceImpl implements AuthService {
                 .accentColor(user.getAccentColor())
                 .avatarUrl(user.getAvatarUrl())
                 .build();
+    }
+
+    /** Trims surrounding whitespace; null becomes an empty string. */
+    static String normalizeUsername(String raw) {
+        return raw == null ? "" : raw.trim();
     }
 }

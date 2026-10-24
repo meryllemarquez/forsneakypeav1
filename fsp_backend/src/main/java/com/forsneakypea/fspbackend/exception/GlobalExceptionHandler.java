@@ -2,10 +2,17 @@ package com.forsneakypea.fspbackend.exception;
 
 import com.forsneakypea.fspbackend.dto.CalendarConflictDTO;
 import com.forsneakypea.fspbackend.dto.response.ApiResponse;
+import com.forsneakypea.fspbackend.observability.RequestIdFilter;
+import com.forsneakypea.fspbackend.observability.RequestTimingFilter;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -87,12 +94,39 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.error("Invalid request body — please check the values you sent (e.g. priority, dates)."));
     }
 
+    // Malformed requests are the caller's mistake, not a server failure: answering them with 4xx
+    // keeps the 500 log (and any alerting built on it) limited to real bugs.
+    @ExceptionHandler({MethodArgumentTypeMismatchException.class, MissingServletRequestParameterException.class})
+    public ResponseEntity<ApiResponse<Object>> handleBadParameter(Exception ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ApiResponse.error("Invalid request parameter."));
+    }
+
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<ApiResponse<Object>> handleMethodNotAllowed(HttpRequestMethodNotSupportedException ex) {
+        return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)
+                .body(ApiResponse.error("That method is not supported for this endpoint."));
+    }
+
+    @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
+    public ResponseEntity<ApiResponse<Object>> handleUnsupportedMediaType(HttpMediaTypeNotSupportedException ex) {
+        return ResponseEntity.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
+                .body(ApiResponse.error("Unsupported content type."));
+    }
+
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ApiResponse<Object>> handleGenericException(Exception ex) {
-        // Full detail goes to the server log only — returning ex.getMessage() to the
-        // client can leak internal state (SQL fragments, class/field names, etc.).
-        log.error("💥 Unhandled Server Error: ", ex);
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ApiResponse.error("An unexpected error occurred. Please try again."));
+    public ResponseEntity<ApiResponse<Object>> handleGenericException(Exception ex, HttpServletRequest request) {
+        String requestId = RequestIdFilter.currentId(request);
+        if (requestId == null) requestId = RequestIdFilter.newId();
+
+        // One ERROR line to search for: request id, exception type, route. The stack trace follows
+        // it in the log. The exception *message* is kept out of the line itself (it can carry SQL
+        // fragments or user text) and is never sent to the client.
+        log.error("Unhandled server error requestId={} type={} method={} path={}",
+                requestId, ex.getClass().getName(), request.getMethod(), RequestTimingFilter.safePath(request), ex);
+
+        ApiResponse<Object> body = ApiResponse.error("An unexpected error occurred. Please try again. (ref: " + requestId + ")");
+        body.setRequestId(requestId);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(body);
     }
 }
