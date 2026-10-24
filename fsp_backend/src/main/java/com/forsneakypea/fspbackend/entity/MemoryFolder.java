@@ -38,6 +38,9 @@ public class MemoryFolder {
     @Column(name = "cover_image_url", columnDefinition = "TEXT")
     private String coverImageUrl;
 
+    @Column(name = "cover_drive_file_id", columnDefinition = "TEXT")
+    private String coverDriveFileId;
+
     @Column(name = "is_archived")
     @Builder.Default
     private Boolean isArchived = false;

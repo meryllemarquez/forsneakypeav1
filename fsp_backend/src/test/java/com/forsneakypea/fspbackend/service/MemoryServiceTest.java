@@ -41,7 +41,8 @@ class MemoryServiceTest {
         folderRepository = mock(MemoryFolderRepository.class);
         photoRepository = mock(MemoryPhotoRepository.class);
         notificationService = mock(NotificationService.class);
-        service = new MemoryService(folderRepository, photoRepository, mock(ActivityLogService.class), notificationService);
+        service = new MemoryService(folderRepository, photoRepository, mock(ActivityLogService.class), notificationService,
+                new MediaUrlService(), mock(UploadService.class), mock(DriveClient.class));
     }
 
     @Test
@@ -108,6 +109,7 @@ class MemoryServiceTest {
         return new MemoryPhotoRepository.PhotoUrlRow() {
             public UUID getId() { return id; }
             public String getPhotoUrl() { return url; }
+            public String getDriveFileId() { return null; }
         };
     }
 }

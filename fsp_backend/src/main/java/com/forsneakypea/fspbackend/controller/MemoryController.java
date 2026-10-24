@@ -68,8 +68,7 @@ public class MemoryController {
         Long currentUserId = getCurrentUserId(); // ✅ Long
         return ResponseEntity.ok(memoryService.addPhotoToFolder(
                 folderId,
-                payload.getPhotoUrl(),
-                payload.getStoragePath(),
+                payload.getDriveFileId(),
                 payload.getCaption(),
                 payload.getLocation(),
                 currentUserId
@@ -133,8 +132,7 @@ public class MemoryController {
 
     @Data
     public static class AddPhotoPayload {
-        private String photoUrl;
-        private String storagePath;
+        private String driveFileId;
         private String caption;
         private String location;
     }

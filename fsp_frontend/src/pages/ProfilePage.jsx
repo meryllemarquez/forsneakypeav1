@@ -6,7 +6,7 @@ import { useAuth } from '../hooks/useAuth';
 import { useNotification } from '../hooks/useNotification';
 import { useProfile } from '../queries/queries';
 import { useProfileMutations } from '../queries/mutations';
-import { uploadProfileAvatar, deleteProfileAvatar } from '../api/supabaseClient';
+import { uploadImageToDrive } from '../api/driveUpload';
 import { ACCENT_COLORS, EMOJI_OPTIONS, DEFAULT_ACCENT_COLOR, getAccent } from '../constants/profileOptions';
 import Icon from '../components/Icon';
 import AvatarCropModal from '../components/profile/AvatarCropModal';
@@ -191,13 +191,10 @@ export default function ProfilePage() {
   const handleCropConfirm = async (blob) => {
     setAvatarBusy(true);
     try {
-      const previousStoragePath = profile?.avatarStoragePath;
-      const { avatarUrl, storagePath } = await uploadProfileAvatar(blob, user?.id);
-      const updated = await profileMutations.updateAvatar({ avatarUrl, storagePath });
+      // The backend trashes the previous avatar file in Drive.
+      const driveFileId = await uploadImageToDrive(blob, 'avatars');
+      const updated = await profileMutations.updateAvatar({ driveFileId });
       updateUser({ avatarUrl: updated.avatarUrl });
-      if (previousStoragePath) {
-        deleteProfileAvatar(previousStoragePath).catch(() => {});
-      }
       addToast('Profile picture updated, love.', 'success');
       setPendingCropFile(null);
     } catch (err) {
@@ -215,12 +212,8 @@ export default function ProfilePage() {
   const handleRemoveAvatarConfirm = async () => {
     setAvatarBusy(true);
     try {
-      const previousStoragePath = profile?.avatarStoragePath;
       await profileMutations.removeAvatar();
       updateUser({ avatarUrl: null });
-      if (previousStoragePath) {
-        deleteProfileAvatar(previousStoragePath).catch(() => {});
-      }
       addToast('Profile picture removed.', 'success');
       setShowRemoveAvatarConfirm(false);
     } catch (err) {

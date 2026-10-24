@@ -27,7 +27,7 @@ class BulkDeleteServiceTest {
     void setUp() {
         jdbc = mock(JdbcTemplate.class);
         when(jdbc.update(anyString())).thenReturn(3);
-        service = new BulkDeleteService(jdbc);
+        service = new BulkDeleteService(jdbc, mock(DriveClient.class));
     }
 
     private List<String> statements(int expected) {
@@ -50,15 +50,15 @@ class BulkDeleteServiceTest {
     }
 
     @Test
-    void memoriesReturnsTheStoragePathsAndDeletesPhotosBeforeFolders() {
-        when(jdbc.queryForList(anyString(), eq(String.class))).thenReturn(List.of("photos/a.jpg", "photos/b.jpg"));
+    void memoriesTrashesTheDriveFilesAndDeletesPhotosBeforeFolders() {
+        when(jdbc.queryForList(anyString(), eq(String.class))).thenReturn(List.of("fileA", "fileB"));
 
         Map<String, Object> result = service.deleteMemories();
 
         List<String> sql = statements(4);
         assertEquals("DELETE FROM memory_photos", sql.get(2));
         assertEquals("DELETE FROM memory_folders", sql.get(3));
-        assertEquals(List.of("photos/a.jpg", "photos/b.jpg"), result.get("storagePaths"));
+        assertEquals(2, result.get("trashedFiles"));
         assertEquals(3, result.get("deletedFolders"));
     }
 

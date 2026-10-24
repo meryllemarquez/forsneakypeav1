@@ -52,7 +52,7 @@ class DateServiceTest {
         userRepository = mock(UserRepository.class);
         service = new DateService(dateEntryRepository, mock(DateCategoryRepository.class), mock(ActivityLogService.class),
                 mock(NotificationService.class), favoriteRepository, checklistItemRepository, userRepository,
-                mock(ChecklistItemService.class));
+                mock(ChecklistItemService.class), new MediaUrlService(), mock(UploadService.class), mock(DriveClient.class));
         SecurityContextHolder.getContext().setAuthentication(
                 new UsernamePasswordAuthenticationToken(me, null, me.getAuthorities()));
     }

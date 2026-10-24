@@ -9,6 +9,7 @@ import com.forsneakypea.fspbackend.entity.User;
 import com.forsneakypea.fspbackend.repository.UserRepository;
 import com.forsneakypea.fspbackend.service.ActivityLogService;
 import com.forsneakypea.fspbackend.service.AuthService;
+import com.forsneakypea.fspbackend.service.MediaUrlService;
 import com.forsneakypea.fspbackend.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,6 +31,7 @@ public class AuthServiceImpl implements AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
     private final ActivityLogService activityLogService;
+    private final MediaUrlService mediaUrls;
 
     // Added default value :"" to prevent Spring Boot startup crash if property is missing
     @Value("${app.master-password:}")
@@ -84,7 +86,7 @@ public class AuthServiceImpl implements AuthService {
                 .bio(user.getBio())
                 .favoriteEmoji(user.getFavoriteEmoji())
                 .accentColor(user.getAccentColor())
-                .avatarUrl(user.getAvatarUrl())
+                .avatarUrl(mediaUrls.resolve(user.getAvatarUrl(), user.getAvatarDriveFileId(), MediaUrlService.Size.THUMB))
                 .build();
     }
 
@@ -142,7 +144,7 @@ public class AuthServiceImpl implements AuthService {
                 .bio(user.getBio())
                 .favoriteEmoji(user.getFavoriteEmoji())
                 .accentColor(user.getAccentColor())
-                .avatarUrl(user.getAvatarUrl())
+                .avatarUrl(mediaUrls.resolve(user.getAvatarUrl(), user.getAvatarDriveFileId(), MediaUrlService.Size.THUMB))
                 .build();
     }
 

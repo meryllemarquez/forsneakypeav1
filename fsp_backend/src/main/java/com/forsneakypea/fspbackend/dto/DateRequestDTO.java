@@ -53,6 +53,7 @@ public class DateRequestDTO {
         private BigDecimal estimatedCost;
 
         private String coverImageUrl;
+        private String coverDriveFileId;
     }
 
     @Data
@@ -94,6 +95,7 @@ public class DateRequestDTO {
         private BigDecimal estimatedCost;
 
         private String coverImageUrl;
+        private String coverDriveFileId;
 
         private Boolean isArchived;
     }

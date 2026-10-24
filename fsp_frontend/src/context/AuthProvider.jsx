@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { AuthContext } from './AuthContext';
 import { queryClient } from '../queries/queryClient';
+import { profileService } from '../services/profileService';
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(() => {
@@ -52,6 +53,23 @@ export function AuthProvider({ children }) {
       return next;
     });
   };
+
+  // The avatar is a signed URL that expires after 1-2 hours, so the copy saved at login goes stale.
+  // Re-read it from the profile on load and every 45 minutes while the app stays open.
+  const signedIn = !!user;
+  useEffect(() => {
+    if (!signedIn) return undefined;
+    const refreshAvatar = () => {
+      profileService
+        .getProfile()
+        .then((profile) => updateUser({ avatarUrl: profile?.avatarUrl ?? null }))
+        .catch(() => {});
+    };
+    refreshAvatar();
+    const timer = setInterval(refreshAvatar, 45 * 60 * 1000);
+    return () => clearInterval(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [signedIn]);
 
   return (
     <AuthContext.Provider value={{ user, loading, login, logout, updateUser }}>

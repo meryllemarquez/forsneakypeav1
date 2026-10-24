@@ -24,6 +24,7 @@ import {
   X,
 } from 'lucide-react';
 import { dateService } from '../services/dateService';
+import { uploadImageToDrive } from '../api/driveUpload';
 import { useDates, useDateCategories, useCacheSetter } from '../queries/queries';
 import { useDateMutations, useChecklistMutations } from '../queries/mutations';
 import { queryKeys } from '../queries/queryKeys';
@@ -347,7 +348,7 @@ const EMPTY_FORM = {
   title: '', categoryId: '', activityType: '', description: '', location: '', travelMethod: '',
   plannedDate: '', plannedTime: '', durationMinutes: '', priority: 'MEDIUM',
   status: 'DREAMING', reservationStatus: 'NOT_NEEDED', specialOccasion: '',
-  estimatedCost: '', coverImageUrl: '',
+  estimatedCost: '', coverImageUrl: '', coverDriveFileId: '', coverPreview: '',
 };
 
 export default function DatesPage() {
@@ -380,6 +381,7 @@ export default function DatesPage() {
   const [checklistDraft, setChecklistDraft] = useState('');
   const checklistInputRef = useRef(null);
 
+  const [coverUploading, setCoverUploading] = useState(false);
   const [formState, setFormState] = useState({ open: false, mode: 'create', values: EMPTY_FORM, editingId: null, submitting: false, error: '' });
 
   const [confirmState, setConfirmState] = useState(null);
@@ -740,7 +742,10 @@ export default function DatesPage() {
         reservationStatus: date.reservationStatus || 'NOT_NEEDED',
         specialOccasion: date.specialOccasion || '',
         estimatedCost: date.estimatedCost ?? '',
-        coverImageUrl: date.coverImageUrl || '',
+        // A Drive cover is addressed by file id; its coverImageUrl is a short-lived signed URL.
+        coverImageUrl: date.coverDriveFileId ? '' : date.coverImageUrl || '',
+        coverDriveFileId: date.coverDriveFileId || '',
+        coverPreview: date.coverThumbUrl || date.coverImageUrl || '',
       },
     });
   };
@@ -749,6 +754,33 @@ export default function DatesPage() {
 
   const updateFormField = (field, value) => {
     setFormState((prev) => ({ ...prev, values: { ...prev.values, [field]: value } }));
+  };
+
+  // Uploads the chosen cover straight to Google Drive; the date saves only its file id.
+  const handleCoverFile = async (e) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+    setCoverUploading(true);
+    setFormState((prev) => ({ ...prev, error: '' }));
+    try {
+      const driveFileId = await uploadImageToDrive(file, 'date-covers');
+      setFormState((prev) => ({
+        ...prev,
+        values: { ...prev.values, coverDriveFileId: driveFileId, coverImageUrl: '', coverPreview: URL.createObjectURL(file) },
+      }));
+    } catch (err) {
+      setFormState((prev) => ({ ...prev, error: err?.message || 'Could not upload that image. Please try again.' }));
+    } finally {
+      setCoverUploading(false);
+    }
+  };
+
+  const removeCover = () => {
+    setFormState((prev) => ({
+      ...prev,
+      values: { ...prev.values, coverDriveFileId: '', coverImageUrl: '', coverPreview: '' },
+    }));
   };
 
   const buildPayload = (values) => ({
@@ -767,6 +799,7 @@ export default function DatesPage() {
     specialOccasion: values.specialOccasion || null,
     estimatedCost: values.estimatedCost === '' ? null : Number(values.estimatedCost),
     coverImageUrl: values.coverImageUrl || null,
+    coverDriveFileId: values.coverDriveFileId || '',
   });
 
   const handleSubmitForm = async (e) => {
@@ -812,7 +845,7 @@ export default function DatesPage() {
           <div className={styles.cardTop}>
             <div className={`${styles.tile} ${tileClass}`}>
               {date.coverImageUrl ? (
-                <img src={date.coverImageUrl} alt="" className={styles.tileImage} loading="lazy" decoding="async" />
+                <img src={date.coverThumbUrl || date.coverImageUrl} alt="" className={styles.tileImage} loading="lazy" decoding="async" />
               ) : (
                 <Icon name={doodleForDate(date)} size={56} />
               )}
@@ -1281,16 +1314,23 @@ export default function DatesPage() {
 
           <fieldset className={styles.formSection}>
             <legend className={styles.formSectionTitle}>Cover photo</legend>
-            {field('date-cover', 'Cover image URL (optional)', (
-              <input id="date-cover" className={form.input} type="text" placeholder="https://..." value={values.coverImageUrl} onChange={(e) => updateFormField('coverImageUrl', e.target.value)} />
+            {values.coverPreview && (
+              <img src={values.coverPreview} alt="Cover preview" className={styles.drawerCover} />
+            )}
+            {field('date-cover', 'Cover image (optional, up to 15 MB)', (
+              <input id="date-cover" className={form.input} type="file" accept="image/*" onChange={handleCoverFile} disabled={coverUploading} />
             ))}
+            {coverUploading && <p className={form.hint}>Uploading...</p>}
+            {values.coverPreview && !coverUploading && (
+              <Button onClick={removeCover}>Remove cover</Button>
+            )}
           </fieldset>
 
           {formState.error && <p className={form.error} role="alert">{formState.error}</p>}
 
           <div className={form.footer}>
             <Button onClick={closeForm} disabled={formState.submitting}>Cancel</Button>
-            <Button type="submit" variant="primary" disabled={formState.submitting}>
+            <Button type="submit" variant="primary" disabled={formState.submitting || coverUploading}>
               {formState.submitting ? 'Saving...' : formState.mode === 'create' ? 'Create date' : 'Save changes'}
             </Button>
           </div>

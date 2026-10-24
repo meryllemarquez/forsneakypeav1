@@ -14,8 +14,8 @@ export const profileService = {
   },
 
   // PUT /api/profile/avatar
-  updateAvatar: async ({ avatarUrl, storagePath }) => {
-    const res = await api.put('/profile/avatar', { avatarUrl, storagePath });
+  updateAvatar: async ({ driveFileId }) => {
+    const res = await api.put('/profile/avatar', { driveFileId });
     return res.data?.data || res.data;
   },
 

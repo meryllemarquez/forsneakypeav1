@@ -53,7 +53,7 @@ class AdminServiceTest {
         notificationService = mock(NotificationService.class);
         service = new AdminService(userRepository, folderRepository, photoRepository, dateEntryRepository,
                 mock(NotificationRepository.class), activityLogRepository, mock(AuditTrailService.class),
-                notificationService, countsRepository);
+                notificationService, countsRepository, new MediaUrlService());
 
         when(countsRepository.loadCounts(any(OffsetDateTime.class))).thenReturn(counts());
         when(folderRepository.findAllBy(any(Pageable.class))).thenReturn(new SliceImpl<>(List.of()));

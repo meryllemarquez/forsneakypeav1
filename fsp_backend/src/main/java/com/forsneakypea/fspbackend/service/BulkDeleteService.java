@@ -5,9 +5,10 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashSet;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * "Delete all" for one section of the app. Hard deletes (no soft-delete flags) the section's rows
@@ -21,6 +22,7 @@ import java.util.Map;
 public class BulkDeleteService {
 
     private final JdbcTemplate jdbc;
+    private final DriveClient drive;
 
     /** Letters and stickers. */
     @Transactional
@@ -41,12 +43,14 @@ public class BulkDeleteService {
     }
 
     /**
-     * Albums and photos. The photo files live in Supabase Storage, which the backend cannot reach,
-     * so the storage paths are returned and the browser removes the files afterwards.
+     * Albums and photos. Their Google Drive files are moved to the Drive trash once the delete commits.
      */
     @Transactional
     public Map<String, Object> deleteMemories() {
-        List<String> storagePaths = jdbc.queryForList("SELECT storage_path FROM memory_photos WHERE storage_path IS NOT NULL", String.class);
+        Set<String> driveFiles = new HashSet<>(jdbc.queryForList(
+                "SELECT drive_file_id FROM memory_photos WHERE drive_file_id IS NOT NULL", String.class));
+        driveFiles.addAll(jdbc.queryForList(
+                "SELECT cover_drive_file_id FROM memory_folders WHERE cover_drive_file_id IS NOT NULL", String.class));
 
         int notifications = jdbc.update(
                 "DELETE FROM notifications WHERE related_entity_type IN ('MEMORY_FOLDER', 'MEMORY_PHOTO') "
@@ -60,13 +64,16 @@ public class BulkDeleteService {
         result.put("deletedPhotos", photos);
         result.put("deletedNotifications", notifications);
         result.put("deletedActivityLogs", activity);
-        result.put("storagePaths", storagePaths);
+        result.put("trashedFiles", driveFiles.size());
+        drive.trashAfterCommit(driveFiles);
         return result;
     }
 
     /** Dates with their checklists, reminders, attachments and favorites. Categories stay. */
     @Transactional
     public Map<String, Object> deleteDates() {
+        Set<String> coverFiles = new HashSet<>(jdbc.queryForList(
+                "SELECT cover_drive_file_id FROM dates WHERE cover_drive_file_id IS NOT NULL", String.class));
         jdbc.update("DELETE FROM reminders");
         jdbc.update("DELETE FROM attachments WHERE attachable_type IN ('DATE', 'CHECKLIST_ITEM')");
         jdbc.update("DELETE FROM favorites WHERE favorable_type IN ('DATE', 'CHECKLIST_ITEM')");
@@ -77,6 +84,7 @@ public class BulkDeleteService {
                 "DELETE FROM activity_logs WHERE entity_type IN ('DATE', 'CHECKLIST_ITEM', 'REMINDER', 'ATTACHMENT')");
         int checklistItems = jdbc.update("DELETE FROM checklist_items");
         int dates = jdbc.update("DELETE FROM dates");
+        drive.trashAfterCommit(coverFiles);
 
         Map<String, Object> result = new LinkedHashMap<>();
         result.put("deletedDates", dates);

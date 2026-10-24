@@ -1,6 +1,7 @@
 package com.forsneakypea.fspbackend.service;
 
 
+import com.forsneakypea.fspbackend.exception.BadRequestException;
 import com.forsneakypea.fspbackend.exception.NotFoundException;
 import com.forsneakypea.fspbackend.dto.CalendarConflictDTO;
 import com.forsneakypea.fspbackend.dto.CalendarEntryDTO;
@@ -19,9 +20,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -33,6 +37,9 @@ public class MemoryService {
     private final MemoryPhotoRepository photoRepository;
     private final ActivityLogService activityLogService;
     private final NotificationService notificationService;
+    private final MediaUrlService mediaUrls;
+    private final UploadService uploadService;
+    private final DriveClient drive;
 
     @Transactional(readOnly = true)
     public List<FolderDTO> getAllFolders(boolean includeArchived) {
@@ -70,7 +77,7 @@ public class MemoryService {
                 .description(request.getDescription())
                 .accentColor(request.getAccentColor() != null ? request.getAccentColor() : "#C73616")
                 .iconStyle(request.getIconStyle() != null ? request.getIconStyle() : "camera")
-                .coverImageUrl(request.getCoverImageUrl())
+                .coverImageUrl(mediaUrls.isSignedUrl(request.getCoverImageUrl()) ? null : request.getCoverImageUrl())
                 .createdBy(userId)
                 .isArchived(false)
                 .eventDate(request.getEventDate())
@@ -96,7 +103,7 @@ public class MemoryService {
         folder.setDescription(request.getDescription());
         if (request.getAccentColor() != null) folder.setAccentColor(request.getAccentColor());
         if (request.getIconStyle() != null) folder.setIconStyle(request.getIconStyle());
-        if (request.getCoverImageUrl() != null) folder.setCoverImageUrl(request.getCoverImageUrl());
+        applyCover(folder, request);
         if (request.getIsArchived() != null) folder.setIsArchived(request.getIsArchived());
         folder.setEventDate(request.getEventDate());
 
@@ -120,6 +127,27 @@ public class MemoryService {
         return mapFolderToDTO(folder);
     }
 
+    // The cover is either one of this album's Drive photos (coverDriveFileId) or a legacy URL.
+    // Signed media URLs expire, so one echoed back from a DTO is never stored.
+    private void applyCover(MemoryFolder folder, FolderRequestDTO.CreateOrUpdateFolder request) {
+        String driveId = request.getCoverDriveFileId();
+        String url = request.getCoverImageUrl();
+        if (driveId != null && !driveId.isBlank()) {
+            if (!photoRepository.existsByFolderIdAndDriveFileId(folder.getId(), driveId)) {
+                throw new BadRequestException("The cover must be a photo from this album.");
+            }
+            folder.setCoverDriveFileId(driveId);
+            folder.setCoverImageUrl(null);
+            return;
+        }
+        if (driveId != null) {
+            folder.setCoverDriveFileId(null);
+        }
+        if (url != null && !mediaUrls.isSignedUrl(url)) {
+            folder.setCoverImageUrl(url);
+        }
+    }
+
     // Looks for another folder already highlighting the same day. If found and
     // `force` is false, throws so the caller can offer a Replace/Keep choice; if
     // `force` is true, silently un-highlights the other folder instead.
@@ -131,7 +159,7 @@ public class MemoryService {
         MemoryFolder other = conflict.get();
         if (!force) {
             String photoUrl = photoRepository.findById(other.getHighlightPhotoId())
-                    .map(MemoryPhoto::getPhotoUrl)
+                    .map(p -> mediaUrls.resolve(p.getPhotoUrl(), p.getDriveFileId(), MediaUrlService.Size.THUMB))
                     .orElse(null);
             throw new CalendarConflictException(
                     "This day already has a highlighted memory.",
@@ -219,11 +247,12 @@ public class MemoryService {
 
         // One IN query for every highlight photo URL instead of a findById per folder.
         List<UUID> photoIds = folders.stream().map(MemoryFolder::getHighlightPhotoId).distinct().collect(Collectors.toList());
-        Map<UUID, String> photoUrls = photoIds.isEmpty()
-                ? Map.of()
-                : photoRepository.findPhotoUrlsByIds(photoIds).stream()
-                        .collect(Collectors.toMap(MemoryPhotoRepository.PhotoUrlRow::getId,
-                                MemoryPhotoRepository.PhotoUrlRow::getPhotoUrl));
+        Map<UUID, String> photoUrls = new HashMap<>();
+        if (!photoIds.isEmpty()) {
+            for (MemoryPhotoRepository.PhotoUrlRow row : photoRepository.findPhotoUrlsByIds(photoIds)) {
+                photoUrls.put(row.getId(), mediaUrls.resolve(row.getPhotoUrl(), row.getDriveFileId(), MediaUrlService.Size.LARGE));
+            }
+        }
 
         return folders.stream().map(folder -> {
             String photoUrl = photoUrls.get(folder.getHighlightPhotoId());
@@ -244,29 +273,42 @@ public class MemoryService {
         MemoryFolder folder = folderRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Folder not found"));
         String name = folder.getName();
+        Set<String> driveFiles = new HashSet<>();
+        folder.getPhotos().forEach(p -> driveFiles.add(p.getDriveFileId()));
+        driveFiles.add(folder.getCoverDriveFileId());
         folderRepository.deleteById(id);
+        drive.trashAfterCommit(driveFiles);
         activityLogService.log(userId, "MEMORY_FOLDER_DELETED", RelatedEntityType.MEMORY_FOLDER, id);
         notificationService.notifyOthers(userId, NotificationType.MEMORY_DELETED, name,
                 RelatedEntityType.MEMORY_FOLDER, id);
     }
 
     @Transactional
-    public PhotoDTO addPhotoToFolder(UUID folderId, String photoUrl, String storagePath, String caption, String location, Long userId) { // ✅ Long userId
+    public PhotoDTO addPhotoToFolder(UUID folderId, String driveFileId, String caption, String location, Long userId) { // ✅ Long userId
         MemoryFolder folder = folderRepository.findById(folderId)
                 .orElseThrow(() -> new NotFoundException("Folder not found"));
 
+        if (driveFileId == null || driveFileId.isBlank()) {
+            throw new BadRequestException("The uploaded photo is missing.");
+        }
+        if (photoRepository.existsByDriveFileId(driveFileId)) {
+            throw new BadRequestException("That photo was already added.");
+        }
+        uploadService.requireUploadedImage(driveFileId, "memories");
+
         MemoryPhoto photo = MemoryPhoto.builder()
                 .folder(folder)
-                .photoUrl(photoUrl)
-                .storagePath(storagePath)
+                .driveFileId(driveFileId)
                 .caption(caption)
                 .location(location)
                 .createdBy(userId)
                 .isFavorite(false)
                 .build();
 
-        if (folder.getCoverImageUrl() == null || folder.getCoverImageUrl().isBlank()) {
-            folder.setCoverImageUrl(photoUrl);
+        boolean hasCover = (folder.getCoverImageUrl() != null && !folder.getCoverImageUrl().isBlank())
+                || (folder.getCoverDriveFileId() != null && !folder.getCoverDriveFileId().isBlank());
+        if (!hasCover) {
+            folder.setCoverDriveFileId(driveFileId);
             folderRepository.save(folder);
         }
 
@@ -296,12 +338,23 @@ public class MemoryService {
                 .orElseThrow(() -> new NotFoundException("Photo not found"));
 
         MemoryFolder folder = photo.getFolder();
-        if (folder != null && photoId.equals(folder.getHighlightPhotoId())) {
-            folder.setHighlightPhotoId(null);
-            folderRepository.save(folder);
+        if (folder != null) {
+            boolean changed = false;
+            if (photoId.equals(folder.getHighlightPhotoId())) {
+                folder.setHighlightPhotoId(null);
+                changed = true;
+            }
+            if (photo.getDriveFileId() != null && photo.getDriveFileId().equals(folder.getCoverDriveFileId())) {
+                folder.setCoverDriveFileId(null);
+                changed = true;
+            }
+            if (changed) {
+                folderRepository.save(folder);
+            }
         }
 
         photoRepository.deleteById(photoId);
+        drive.trashAfterCommit(List.of(photo.getDriveFileId() == null ? "" : photo.getDriveFileId()));
         activityLogService.log(userId, "MEMORY_PHOTO_DELETED", RelatedEntityType.MEMORY_PHOTO, photoId);
     }
 
@@ -315,7 +368,8 @@ public class MemoryService {
                 .description(folder.getDescription())
                 .accentColor(folder.getAccentColor())
                 .iconStyle(folder.getIconStyle())
-                .coverImageUrl(folder.getCoverImageUrl())
+                .coverImageUrl(mediaUrls.resolve(folder.getCoverImageUrl(), folder.getCoverDriveFileId(), MediaUrlService.Size.THUMB))
+                .coverDriveFileId(folder.getCoverDriveFileId())
                 .isArchived(folder.getIsArchived())
                 .photoCount(photoCounts.getOrDefault(folder.getId(), 0L).intValue())
                 .createdAt(folder.getCreatedAt())
@@ -337,7 +391,8 @@ public class MemoryService {
                 .description(folder.getDescription())
                 .accentColor(folder.getAccentColor())
                 .iconStyle(folder.getIconStyle())
-                .coverImageUrl(folder.getCoverImageUrl())
+                .coverImageUrl(mediaUrls.resolve(folder.getCoverImageUrl(), folder.getCoverDriveFileId(), MediaUrlService.Size.THUMB))
+                .coverDriveFileId(folder.getCoverDriveFileId())
                 .isArchived(folder.getIsArchived())
                 .photoCount(0)
                 .createdAt(folder.getCreatedAt())
@@ -357,7 +412,8 @@ public class MemoryService {
                 .description(folder.getDescription())
                 .accentColor(folder.getAccentColor())
                 .iconStyle(folder.getIconStyle())
-                .coverImageUrl(folder.getCoverImageUrl())
+                .coverImageUrl(mediaUrls.resolve(folder.getCoverImageUrl(), folder.getCoverDriveFileId(), MediaUrlService.Size.THUMB))
+                .coverDriveFileId(folder.getCoverDriveFileId())
                 .isArchived(folder.getIsArchived())
                 .photoCount(folder.getPhotos() != null ? folder.getPhotos().size() : 0)
                 .createdAt(folder.getCreatedAt())
@@ -375,7 +431,9 @@ public class MemoryService {
         return PhotoDTO.builder()
                 .id(photo.getId())
                 .folderId(photo.getFolder().getId())
-                .photoUrl(photo.getPhotoUrl())
+                .photoUrl(mediaUrls.resolve(photo.getPhotoUrl(), photo.getDriveFileId(), MediaUrlService.Size.LARGE))
+                .thumbUrl(mediaUrls.resolve(photo.getPhotoUrl(), photo.getDriveFileId(), MediaUrlService.Size.THUMB))
+                .driveFileId(photo.getDriveFileId())
                 .storagePath(photo.getStoragePath())
                 .caption(photo.getCaption())
                 .location(photo.getLocation())

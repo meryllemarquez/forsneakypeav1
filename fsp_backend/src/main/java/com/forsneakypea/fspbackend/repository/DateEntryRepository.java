@@ -16,6 +16,8 @@ import java.util.UUID;
 
 @Repository
 public interface DateEntryRepository extends JpaRepository<DateEntry, UUID> {
+    boolean existsByCoverDriveFileIdAndIdNot(String coverDriveFileId, UUID id);
+
 
     List<DateEntry> findAllByDeletedAtIsNullAndIsArchivedOrderByCreatedAtDesc(Boolean isArchived);
 

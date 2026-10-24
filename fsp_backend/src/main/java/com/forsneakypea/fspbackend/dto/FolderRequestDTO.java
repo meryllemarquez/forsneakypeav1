@@ -21,6 +21,7 @@ public class FolderRequestDTO {
         private String accentColor = "#C73616";
         private String iconStyle = "camera";
         private String coverImageUrl;
+        private String coverDriveFileId;
         private Boolean isArchived = false;
         private LocalDate eventDate;
         private Boolean isCalendarHighlight = false;

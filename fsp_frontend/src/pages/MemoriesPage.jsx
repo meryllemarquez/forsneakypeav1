@@ -17,7 +17,7 @@ import {
 import { memoryService } from '../services/memoryService';
 import { useFolders } from '../queries/queries';
 import { useMemoryMutations } from '../queries/mutations';
-import { uploadToSupabaseStorage, removeMemoryFiles } from '../api/supabaseClient';
+import { uploadImageToDrive } from '../api/driveUpload';
 import { useNotification } from '../hooks/useNotification';
 import { useScrollLock } from '../hooks/useScrollLock';
 import { albumCoverUrl, buildIconStyle, parseIconStyle, resolveAlbumIcon } from '../utils/doodleFor';
@@ -140,6 +140,7 @@ export default function MemoriesPage() {
     accentColor: DEFAULT_ACCENT,
     iconStyle: 'camera',
     coverImageUrl: '',
+    coverDriveFileId: '',
     eventDate: '',
     isCalendarHighlight: false,
   });
@@ -336,7 +337,9 @@ export default function MemoriesPage() {
         description: folder.description || '',
         accentColor: displayAccent(folder.accentColor),
         iconStyle: folder.iconStyle || 'camera',
-        coverImageUrl: folder.coverImageUrl || '',
+        // A Drive cover is addressed by file id; its coverImageUrl is a short-lived signed URL.
+        coverImageUrl: folder.coverDriveFileId ? '' : folder.coverImageUrl || '',
+        coverDriveFileId: folder.coverDriveFileId || '',
         eventDate: folder.eventDate || '',
         isCalendarHighlight: !!folder.isCalendarHighlight,
       });
@@ -348,6 +351,7 @@ export default function MemoriesPage() {
         accentColor: DEFAULT_ACCENT,
         iconStyle: 'camera',
         coverImageUrl: '',
+        coverDriveFileId: '',
         eventDate: '',
         isCalendarHighlight: false,
       });
@@ -367,6 +371,7 @@ export default function MemoriesPage() {
         accentColor: folderForm.accentColor || DEFAULT_ACCENT,
         iconStyle: folderForm.iconStyle || 'camera',
         coverImageUrl: folderForm.coverImageUrl || '',
+        coverDriveFileId: folderForm.coverDriveFileId || '',
         eventDate: folderForm.eventDate || null,
         isCalendarHighlight: folderForm.isCalendarHighlight,
       };
@@ -438,7 +443,7 @@ export default function MemoriesPage() {
     }));
   };
 
-  // Upload Photo to Supabase & Save via API
+  // Upload the photo straight to Google Drive, then save its Drive file id via the API
   const handleUploadPhoto = async (e) => {
     e.preventDefault();
     if (!uploadState.file || !selectedFolder) return;
@@ -447,16 +452,11 @@ export default function MemoriesPage() {
       setUploadError('');
       setUploadState((prev) => ({ ...prev, uploading: true }));
 
-      // Upload to Supabase Storage
-      const { photoUrl, storagePath } = await uploadToSupabaseStorage(
-        uploadState.file,
-        `photos/folder_${selectedFolder.id}`
-      );
+      const driveFileId = await uploadImageToDrive(uploadState.file, 'memories');
 
       // Save Metadata to Backend
       await memoryMutations.addPhotoToFolder(selectedFolder.id, {
-        photoUrl,
-        storagePath,
+        driveFileId,
         caption: uploadState.caption,
         location: uploadState.location,
       });
@@ -542,22 +542,16 @@ export default function MemoriesPage() {
   };
 
   // "Delete all albums": the backend removes every album and photo row for both accounts and
-  // hands back the storage paths; the files are then removed from the bucket on a best-effort basis.
+  // moves their Google Drive files to the Drive trash.
   const handleDeleteAll = async () => {
     setDeleteAllBusy(true);
     setDeleteAllError('');
     try {
-      const result = await memoryMutations.deleteAll();
+      await memoryMutations.deleteAll();
       setSelectedFolder(null);
       closeLightbox();
       setDeleteAllOpen(false);
-      const leftBehind = await removeMemoryFiles(result?.storagePaths ?? []);
-      if (leftBehind.length > 0) {
-        console.warn('Photo files that stayed in storage:', leftBehind);
-        addToast(`All albums deleted. ${leftBehind.length} photo file(s) could not be removed from storage and stay there.`, 'error', 9000);
-      } else {
-        addToast('All albums and photos deleted.', 'success');
-      }
+      addToast('All albums and photos deleted.', 'success');
     } catch (err) {
       setDeleteAllError(err?.response?.data?.message || 'Could not delete everything. Please try again.');
     } finally {
@@ -825,7 +819,7 @@ export default function MemoriesPage() {
                         aria-label={`Open photo${photo.caption ? `: ${photo.caption}` : ` ${index + 1}`}`}
                       >
                         <img
-                          src={photo.photoUrl}
+                          src={photo.thumbUrl || photo.photoUrl}
                           alt=""
                           className={styles.photoImage}
                           loading="lazy"
@@ -972,19 +966,29 @@ export default function MemoriesPage() {
                 </p>
               ) : (
                 <div className={styles.coverGrid} role="radiogroup" aria-label="Cover photo">
-                  {coverChoices.map((photo, index) => (
-                    <button
-                      key={photo.id}
-                      type="button"
-                      role="radio"
-                      aria-checked={folderForm.coverImageUrl === photo.photoUrl}
-                      aria-label={`Photo ${index + 1}${photo.caption ? `: ${photo.caption}` : ''}`}
-                      className={`${styles.coverOption} ${folderForm.coverImageUrl === photo.photoUrl ? styles.coverOptionActive : ''}`}
-                      onClick={() => setFolderForm((f) => ({ ...f, coverImageUrl: photo.photoUrl }))}
-                    >
-                      <img src={photo.photoUrl} alt="" loading="lazy" />
-                    </button>
-                  ))}
+                  {coverChoices.map((photo, index) => {
+                    // Drive photos are picked by file id; legacy photos by their (permanent) URL.
+                    const isCover = photo.driveFileId
+                      ? folderForm.coverDriveFileId === photo.driveFileId
+                      : !folderForm.coverDriveFileId && folderForm.coverImageUrl === photo.photoUrl;
+                    return (
+                      <button
+                        key={photo.id}
+                        type="button"
+                        role="radio"
+                        aria-checked={isCover}
+                        aria-label={`Photo ${index + 1}${photo.caption ? `: ${photo.caption}` : ''}`}
+                        className={`${styles.coverOption} ${isCover ? styles.coverOptionActive : ''}`}
+                        onClick={() => setFolderForm((f) => ({
+                          ...f,
+                          coverDriveFileId: photo.driveFileId || '',
+                          coverImageUrl: photo.driveFileId ? '' : photo.photoUrl,
+                        }))}
+                      >
+                        <img src={photo.thumbUrl || photo.photoUrl} alt="" loading="lazy" />
+                      </button>
+                    );
+                  })}
                 </div>
               )}
             </fieldset>

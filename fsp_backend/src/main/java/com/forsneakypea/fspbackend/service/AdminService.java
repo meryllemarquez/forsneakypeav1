@@ -41,6 +41,7 @@ public class AdminService {
     private final AuditTrailService auditTrailService;
     private final NotificationService notificationService;
     private final DashboardCountsRepository dashboardCountsRepository;
+    private final MediaUrlService mediaUrls;
 
     @Transactional(readOnly = true)
     public DashboardStatsDTO getDashboardStats() {
@@ -98,13 +99,13 @@ public class AdminService {
                         .createdAt(l.getCreatedAt())
                         .build()).collect(Collectors.toList()))
                 .recentUploads(recentPhotos.stream().map(p -> DashboardStatsDTO.RecentUploadDTO.builder()
-                        .photoUrl(p.getPhotoUrl())
+                        .photoUrl(mediaUrls.resolve(p.getPhotoUrl(), p.getDriveFileId(), MediaUrlService.Size.THUMB))
                         .caption(p.getCaption())
                         .createdAt(p.getCreatedAt())
                         .build()).collect(Collectors.toList()))
                 .recentMemories(recentFolders.stream().map(f -> DashboardStatsDTO.RecentMemoryDTO.builder()
                         .name(f.getName())
-                        .coverImageUrl(f.getCoverImageUrl())
+                        .coverImageUrl(mediaUrls.resolve(f.getCoverImageUrl(), f.getCoverDriveFileId(), MediaUrlService.Size.THUMB))
                         .createdAt(f.getCreatedAt())
                         .build()).collect(Collectors.toList()))
                 .recentNotifications(recentNotifications.stream().map(n -> DashboardStatsDTO.RecentNotificationDTO.builder()

@@ -6,9 +6,6 @@ import lombok.Data;
 @Data
 public class AvatarUpdateRequestDTO {
 
-    @NotBlank(message = "Avatar URL is required")
-    private String avatarUrl;
-
-    @NotBlank(message = "Avatar storage path is required")
-    private String storagePath;
+    @NotBlank(message = "Avatar file id is required")
+    private String driveFileId;
 }

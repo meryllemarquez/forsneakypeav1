@@ -22,11 +22,15 @@ public class MemoryPhoto {
     @JoinColumn(name = "folder_id", nullable = false)
     private MemoryFolder folder;
 
-    @Column(name = "photo_url", nullable = false, columnDefinition = "TEXT")
+    // Legacy Supabase photos only; Drive-backed photos use driveFileId instead.
+    @Column(name = "photo_url", columnDefinition = "TEXT")
     private String photoUrl;
 
-    @Column(name = "storage_path", nullable = false, columnDefinition = "TEXT")
+    @Column(name = "storage_path", columnDefinition = "TEXT")
     private String storagePath;
+
+    @Column(name = "drive_file_id", columnDefinition = "TEXT")
+    private String driveFileId;
 
     @Column(columnDefinition = "TEXT")
     private String caption;

@@ -59,6 +59,8 @@ public class SecurityConfig {
                     AntPathRequestMatcher.antMatcher("/api/auth/**"),
                     AntPathRequestMatcher.antMatcher("/error"),
                     AntPathRequestMatcher.antMatcher("/error/**"),
+                    // Drive images: access is controlled by the HMAC-signed URL (see MediaController).
+                    AntPathRequestMatcher.antMatcher(HttpMethod.GET, "/api/v1/media/**"),
                     AntPathRequestMatcher.antMatcher(HttpMethod.GET, "/actuator/health")
                 ).permitAll()
                 // Authenticated endpoints

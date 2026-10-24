@@ -16,6 +16,7 @@ public class FolderDTO {
     private String accentColor;
     private String iconStyle;
     private String coverImageUrl;
+    private String coverDriveFileId;
     private Boolean isArchived;
     private Integer photoCount;
     private OffsetDateTime createdAt;

@@ -7,6 +7,7 @@ import com.forsneakypea.fspbackend.entity.Role;
 import com.forsneakypea.fspbackend.entity.User;
 import com.forsneakypea.fspbackend.repository.UserRepository;
 import com.forsneakypea.fspbackend.service.ActivityLogService;
+import com.forsneakypea.fspbackend.service.MediaUrlService;
 import com.forsneakypea.fspbackend.util.JwtUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -35,7 +36,7 @@ class AuthServiceImplTest {
         PasswordEncoder encoder = mock(PasswordEncoder.class);
         jwtUtil = mock(JwtUtil.class);
         ActivityLogService activityLog = mock(ActivityLogService.class);
-        service = new AuthServiceImpl(userRepository, encoder, jwtUtil, activityLog);
+        service = new AuthServiceImpl(userRepository, encoder, jwtUtil, activityLog, new MediaUrlService());
         ReflectionTestUtils.setField(service, "masterPassword", "master-secret");
 
         when(userRepository.existsByUsername(anyString())).thenReturn(false);

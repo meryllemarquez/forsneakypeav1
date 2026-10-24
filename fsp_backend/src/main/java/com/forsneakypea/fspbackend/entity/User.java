@@ -68,6 +68,9 @@ public class User implements UserDetails {
     @Column(name = "avatar_storage_path", columnDefinition = "text")
     private String avatarStoragePath;
 
+    @Column(name = "avatar_drive_file_id", columnDefinition = "text")
+    private String avatarDriveFileId;
+
     @Column(name = "created_at", insertable = false, updatable = false)
     private OffsetDateTime createdAt;
 

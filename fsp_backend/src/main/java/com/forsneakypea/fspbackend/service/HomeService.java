@@ -32,6 +32,7 @@ public class HomeService {
     private final DateEntryRepository dateEntryRepository;
     private final LoveNoteRepository noteRepository;
     private final UserRepository userRepository;
+    private final MediaUrlService mediaUrls;
 
     /**
      * @param today the viewer's local date (the client sends it so "upcoming" matches their
@@ -56,7 +57,7 @@ public class HomeService {
                         .id(f.getId())
                         .name(f.getName())
                         .description(f.getDescription())
-                        .coverImageUrl(f.getCoverImageUrl())
+                        .coverImageUrl(mediaUrls.resolve(f.getCoverImageUrl(), f.getCoverDriveFileId(), MediaUrlService.Size.THUMB))
                         .iconStyle(f.getIconStyle())
                         .photoCount(photoCounts.getOrDefault(f.getId(), 0L).intValue())
                         .build())

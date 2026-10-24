@@ -77,7 +77,7 @@ export default function AdminGalleryPage() {
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
           {filtered.map((photo) => (
             <div key={photo.id} className="group relative aspect-square overflow-hidden rounded-xl bg-(--color-admin-surface-2)">
-              <img src={photo.photoUrl} alt={photo.caption || ''} className="h-full w-full object-cover transition group-hover:scale-105" />
+              <img src={photo.thumbUrl || photo.photoUrl} alt={photo.caption || ''} className="h-full w-full object-cover transition group-hover:scale-105" />
               <div className="absolute inset-0 flex flex-col justify-between bg-gradient-to-t from-black/60 via-transparent to-transparent p-2 opacity-0 transition group-hover:opacity-100">
                 <div className="flex justify-end">
                   <button

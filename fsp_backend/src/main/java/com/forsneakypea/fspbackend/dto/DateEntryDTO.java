@@ -34,6 +34,8 @@ public class DateEntryDTO {
     private ReservationStatus reservationStatus;
     private BigDecimal estimatedCost;
     private String coverImageUrl;
+    private String coverThumbUrl;
+    private String coverDriveFileId;
     private Boolean isArchived;
     private Boolean isFavorite;
     private Long createdBy;

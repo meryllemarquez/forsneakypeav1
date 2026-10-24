@@ -45,6 +45,9 @@ public class DateService {
     private final ChecklistItemRepository checklistItemRepository;
     private final UserRepository userRepository;
     private final ChecklistItemService checklistItemService;
+    private final MediaUrlService mediaUrls;
+    private final UploadService uploadService;
+    private final DriveClient drive;
 
     @Transactional
     public DateEntryDTO createDate(DateRequestDTO.Create request, Long userId) {
@@ -64,7 +67,8 @@ public class DateService {
                 .priority(request.getPriority() != null ? request.getPriority() : DatePriority.MEDIUM)
                 .reservationStatus(request.getReservationStatus() != null ? request.getReservationStatus() : ReservationStatus.NOT_NEEDED)
                 .estimatedCost(request.getEstimatedCost())
-                .coverImageUrl(request.getCoverImageUrl())
+                .coverImageUrl(mediaUrls.isSignedUrl(request.getCoverImageUrl()) ? null : request.getCoverImageUrl())
+                .coverDriveFileId(newCoverFileId(request.getCoverDriveFileId()))
                 .status(DateStatus.DREAMING)
                 .isArchived(false)
                 .createdBy(userId)
@@ -113,6 +117,37 @@ public class DateService {
         return dates.stream().map(d -> mapToDTOBulk(d, favoriteIds, checklistCounts, creatorNames)).collect(Collectors.toList());
     }
 
+    /** Validates a freshly uploaded cover; blank means none. */
+    private String newCoverFileId(String driveFileId) {
+        if (driveFileId == null || driveFileId.isBlank()) {
+            return null;
+        }
+        uploadService.requireUploadedImage(driveFileId, "date-covers");
+        return driveFileId;
+    }
+
+    // A null driveFileId leaves the cover alone, a blank one removes the Drive cover. Signed media
+    // URLs expire, so one echoed back from a DTO is never stored as the legacy URL.
+    private void applyCover(DateEntry date, String driveFileId, String legacyUrl) {
+        String oldFileId = date.getCoverDriveFileId();
+        if (driveFileId != null) {
+            if (driveFileId.isBlank()) {
+                date.setCoverDriveFileId(null);
+            } else if (!driveFileId.equals(oldFileId)) {
+                date.setCoverDriveFileId(newCoverFileId(driveFileId));
+                date.setCoverImageUrl(null);
+            }
+            // Duplicated dates share a cover file, so it is only trashed once nothing else uses it.
+            if (oldFileId != null && !oldFileId.equals(date.getCoverDriveFileId())
+                    && !dateEntryRepository.existsByCoverDriveFileIdAndIdNot(oldFileId, date.getId())) {
+                drive.trashAfterCommit(List.of(oldFileId));
+            }
+        }
+        if ((driveFileId == null || driveFileId.isBlank()) && legacyUrl != null && !mediaUrls.isSignedUrl(legacyUrl)) {
+            date.setCoverImageUrl(legacyUrl);
+        }
+    }
+
     @Transactional(readOnly = true)
     public DateEntryDTO getDateById(UUID id, Long currentUserId) {
         return mapToDTO(findActiveOrThrow(id), currentUserId, true);
@@ -133,7 +168,7 @@ public class DateService {
         date.setTravelMethod(request.getTravelMethod());
         date.setSpecialOccasion(request.getSpecialOccasion());
         date.setEstimatedCost(request.getEstimatedCost());
-        if (request.getCoverImageUrl() != null) date.setCoverImageUrl(request.getCoverImageUrl());
+        applyCover(date, request.getCoverDriveFileId(), request.getCoverImageUrl());
         if (request.getStatus() != null) date.setStatus(request.getStatus());
         if (request.getPriority() != null) date.setPriority(request.getPriority());
         if (request.getReservationStatus() != null) date.setReservationStatus(request.getReservationStatus());
@@ -210,6 +245,7 @@ public class DateService {
                 .reservationStatus(original.getReservationStatus())
                 .estimatedCost(original.getEstimatedCost())
                 .coverImageUrl(original.getCoverImageUrl())
+                .coverDriveFileId(original.getCoverDriveFileId())
                 .isArchived(false)
                 .createdBy(currentUserId)
                 .build();
@@ -323,7 +359,9 @@ public class DateService {
                 .priority(date.getPriority())
                 .reservationStatus(date.getReservationStatus())
                 .estimatedCost(date.getEstimatedCost())
-                .coverImageUrl(date.getCoverImageUrl())
+                .coverImageUrl(mediaUrls.resolve(date.getCoverImageUrl(), date.getCoverDriveFileId(), MediaUrlService.Size.LARGE))
+                .coverThumbUrl(mediaUrls.resolve(date.getCoverImageUrl(), date.getCoverDriveFileId(), MediaUrlService.Size.THUMB))
+                .coverDriveFileId(date.getCoverDriveFileId())
                 .isArchived(date.getIsArchived())
                 .isFavorite(favoriteIds.contains(date.getId()))
                 .createdBy(date.getCreatedBy())
@@ -363,7 +401,9 @@ public class DateService {
                 .priority(date.getPriority())
                 .reservationStatus(date.getReservationStatus())
                 .estimatedCost(date.getEstimatedCost())
-                .coverImageUrl(date.getCoverImageUrl())
+                .coverImageUrl(mediaUrls.resolve(date.getCoverImageUrl(), date.getCoverDriveFileId(), MediaUrlService.Size.LARGE))
+                .coverThumbUrl(mediaUrls.resolve(date.getCoverImageUrl(), date.getCoverDriveFileId(), MediaUrlService.Size.THUMB))
+                .coverDriveFileId(date.getCoverDriveFileId())
                 .isArchived(date.getIsArchived())
                 .isFavorite(favorite)
                 .createdBy(date.getCreatedBy())

@@ -55,7 +55,7 @@ class HomeServiceTest {
         dateRepository = mock(DateEntryRepository.class);
         noteRepository = mock(LoveNoteRepository.class);
         userRepository = mock(UserRepository.class);
-        service = new HomeService(folderRepository, photoRepository, dateRepository, noteRepository, userRepository);
+        service = new HomeService(folderRepository, photoRepository, dateRepository, noteRepository, userRepository, new MediaUrlService());
         SecurityContextHolder.getContext().setAuthentication(
                 new UsernamePasswordAuthenticationToken(me, null, me.getAuthorities()));
 

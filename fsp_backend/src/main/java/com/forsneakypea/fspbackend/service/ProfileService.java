@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.Set;
 
 @Service
@@ -20,6 +21,9 @@ public class ProfileService {
 
     private final UserRepository userRepository;
     private final ActivityLogService activityLogService;
+    private final MediaUrlService mediaUrls;
+    private final UploadService uploadService;
+    private final DriveClient drive;
 
     // Curated accent-color palette (matches constants/profileOptions.js on the frontend).
     // Kept as a fixed allow-list rather than free-form hex so the value can only ever
@@ -64,20 +68,30 @@ public class ProfileService {
     @Transactional
     public ProfileDTO updateAvatar(Long userId, AvatarUpdateRequestDTO request) {
         User user = findUser(userId);
-        user.setAvatarUrl(request.getAvatarUrl());
-        user.setAvatarStoragePath(request.getStoragePath());
+        String newFileId = request.getDriveFileId();
+        uploadService.requireUploadedImage(newFileId, "avatars");
+        String oldFileId = user.getAvatarDriveFileId();
+        user.setAvatarDriveFileId(newFileId);
+        user.setAvatarUrl(null);
+        user.setAvatarStoragePath(null);
         user = userRepository.save(user);
         activityLogService.log(userId, "PROFILE_AVATAR_UPDATED", RelatedEntityType.USER, null);
+        if (oldFileId != null && !oldFileId.equals(newFileId)) {
+            drive.trashAfterCommit(Collections.singletonList(oldFileId));
+        }
         return mapToDTO(user);
     }
 
     @Transactional
     public ProfileDTO removeAvatar(Long userId) {
         User user = findUser(userId);
+        String oldFileId = user.getAvatarDriveFileId();
+        user.setAvatarDriveFileId(null);
         user.setAvatarUrl(null);
         user.setAvatarStoragePath(null);
         user = userRepository.save(user);
         activityLogService.log(userId, "PROFILE_AVATAR_REMOVED", RelatedEntityType.USER, null);
+        drive.trashAfterCommit(Collections.singletonList(oldFileId));
         return mapToDTO(user);
     }
 
@@ -115,7 +129,7 @@ public class ProfileService {
                 .bio(user.getBio())
                 .favoriteEmoji(user.getFavoriteEmoji())
                 .accentColor(user.getAccentColor())
-                .avatarUrl(user.getAvatarUrl())
+                .avatarUrl(mediaUrls.resolve(user.getAvatarUrl(), user.getAvatarDriveFileId(), MediaUrlService.Size.THUMB))
                 .role(user.getRole() != null ? user.getRole().name() : null)
                 .updatedAt(user.getUpdatedAt())
                 .build();
