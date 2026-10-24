@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Welcome to for sneakypea</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&amp;family=Nunito:wght@400;600;700;800&amp;family=Shantell+Sans:wght@500;700;800&amp;display=swap">
+<style>
+body{margin:0;background:#FFE680}
+a{color:#1F55C9}a:hover{color:#172B70}
+:focus-visible{outline:3px solid #E0301A;outline-offset:3px}
+</style>
+</helmet>
+<div style="min-height: 100vh; display: flex; flex-direction: column; background-color: #FFE680; background-image: radial-gradient(circle at 20% 30%, rgba(255, 159, 28, 0.85) 0 3.5px, transparent 4.5px), radial-gradient(circle at 70% 65%, rgba(92, 179, 255, 0.95) 0 3px, transparent 4px), radial-gradient(circle at 40% 85%, rgba(224, 48, 26, 0.6) 0 2.5px, transparent 3.5px), radial-gradient(circle at 85% 15%, rgba(31, 85, 201, 0.7) 0 2.5px, transparent 3.5px); background-size: 52px 52px, 42px 42px, 62px 62px, 34px 34px; color: #172B70; font-family: 'Nunito', system-ui, sans-serif; font-size: 17px; line-height: 1.55">
+
+<header style="width: 100%; max-width: 1200px; box-sizing: border-box; margin: 0 auto; padding: 24px; display: flex; align-items: center; justify-content: space-between; gap: 16px">
+<div style="display: flex; align-items: center; gap: 10px; padding: 6px 18px 6px 6px; background: #FFFFFF; border: 2px solid #172B70; border-radius: 999px">
+<dc-import name="Icon" icon="star" size="40" sticker="true" tilt="-8" hint-size="40px,40px"></dc-import>
+<span style="font-family: 'Shantell Sans', cursive; font-weight: 800; font-size: 24px; letter-spacing: -0.5px">for sneakypea</span>
+</div>
+<a href="#login" style="display: inline-flex; align-items: center; min-height: 48px; padding: 0 22px; background: #FFFFFF; border: 2px solid #172B70; border-radius: 999px; color: #172B70; font-weight: 800; text-decoration: none">Log in</a>
+</header>
+
+<main style="flex: 1 1 auto; width: 100%; max-width: 1200px; box-sizing: border-box; margin: 0 auto; padding: 24px 24px 64px; display: flex; flex-wrap: wrap; align-items: center; gap: 48px">
+
+<section style="flex: 999 1 520px; min-width: 0; position: relative">
+<div style="background: #FFFFFF; border: 2px solid #172B70; border-radius: 32px; padding: 44px 44px 40px; box-shadow: 10px 10px 0 #5CB3FF">
+<p style="margin: 0 0 6px; font-family: 'Caveat', cursive; font-weight: 700; font-size: 28px; color: #E0301A">for Merylle &amp; Cj</p>
+<h1 style="margin: 0; font-family: 'Shantell Sans', cursive; font-weight: 800; font-size: clamp(42px, 5vw, 68px); line-height: 1.05; letter-spacing: -1.5px">Every memory deserves a <span style="background: linear-gradient(transparent 58%, #FF9F1C 58%, #FF9F1C 92%, transparent 92%); padding: 0 6px">place to stay.</span></h1>
+<p style="margin: 20px 0 0; max-width: 32em; font-size: 19px; color: #3A4A73">Our private little corner for photos, date plans and love letters. Just the two of us, Motmot, and five very good dogs.</p>
+<ul aria-label="What's inside" style="list-style: none; margin: 28px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 10px">
+<sc-for list="{{ features }}" as="f" hint-placeholder-count="4">
+<li style="display: flex; align-items: center; gap: 8px; padding: 6px 16px 6px 8px; background: #FFF8E8; border: 2px solid #172B70; border-radius: 999px; font-weight: 800; font-size: 15px">
+<dc-import name="Icon" icon="{{ f.icon }}" size="30" hint-size="30px,30px"></dc-import>{{ f.label }}</li>
+</sc-for>
+</ul>
+</div>
+<div aria-hidden="true" style="position: absolute; top: -40px; right: -18px"><dc-import name="Icon" icon="motmot" size="120" sticker="true" tilt="-6" hint-size="120px,120px"></dc-import></div>
+<div aria-hidden="true" style="position: absolute; bottom: -34px; left: 32px"><dc-import name="Icon" icon="dog" size="82" sticker="true" tilt="8" hint-size="82px,82px"></dc-import></div>
+<div aria-hidden="true" style="position: absolute; bottom: -26px; left: 126px"><dc-import name="Icon" icon="tulip" size="64" sticker="true" tilt="-10" hint-size="64px,64px"></dc-import></div>
+</section>
+
+<section id="login" style="flex: 1 1 360px; min-width: 0; max-width: 440px; margin: 0 auto; position: relative">
+<div aria-hidden="true" style="display: flex; justify-content: center; gap: 4px; margin-bottom: -26px; position: relative; z-index: 1">
+<dc-import name="Icon" icon="her" size="78" sticker="true" tilt="-8" hint-size="78px,78px"></dc-import>
+<dc-import name="Icon" icon="him" size="78" sticker="true" tilt="8" hint-size="78px,78px"></dc-import>
+</div>
+<form style="background-color: #FFFDF6; background-image: linear-gradient(to right, transparent 26px, rgba(224, 48, 26, 0.45) 26px, rgba(224, 48, 26, 0.45) 28px, transparent 28px); border: 2px solid #172B70; border-radius: 28px; padding: 44px 32px 30px 44px; box-shadow: 8px 8px 0 #172B70">
+<h2 style="margin: 0; font-family: 'Shantell Sans', cursive; font-weight: 800; font-size: 32px; text-align: center">Welcome home</h2>
+<p style="margin: 2px 0 22px; text-align: center; font-family: 'Caveat', cursive; font-weight: 700; font-size: 22px; color: #E0301A">the dogs missed you</p>
+<label style="display: block; margin-bottom: 16px">
+<span style="display: block; margin-bottom: 6px; font-weight: 800; font-size: 15px">Username</span>
+<input type="text" autocomplete="username" placeholder="your username" style="width: 100%; box-sizing: border-box; min-height: 52px; padding: 0 16px; background: #FFFFFF; border: 2px solid #172B70; border-radius: 16px; font-family: inherit; font-size: 16px; color: #172B70">
+</label>
+<label style="display: block; margin-bottom: 22px">
+<span style="display: block; margin-bottom: 6px; font-weight: 800; font-size: 15px">Password</span>
+<input type="password" autocomplete="current-password" placeholder="your password" style="width: 100%; box-sizing: border-box; min-height: 52px; padding: 0 16px; background: #FFFFFF; border: 2px solid #172B70; border-radius: 16px; font-family: inherit; font-size: 16px; color: #172B70">
+</label>
+<button type="button" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px; min-height: 54px; border-radius: 999px; background: #E0301A; color: #FFFFFF; border: 2px solid #172B70; box-shadow: 4px 4px 0 #172B70; font-family: inherit; font-weight: 800; font-size: 17px; cursor: pointer">Log in
+<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h13M13 6l6 6-6 6"/></svg>
+</button>
+<p style="margin: 18px 0 0; text-align: center; font-size: 15px; color: #3A4A73">Have an invite code? <a href="#register" style="font-weight: 800">Create an account</a></p>
+</form>
+</section>
+</main>
+
+<footer style="width: 100%; max-width: 1200px; box-sizing: border-box; margin: 0 auto; padding: 0 24px 28px">
+<p style="display: inline-flex; align-items: center; gap: 8px; margin: 0; padding: 6px 16px; background: #FFFFFF; border: 2px solid #172B70; border-radius: 999px; font-size: 14px; font-weight: 700">
+<dc-import name="Icon" icon="heart" size="20" hint-size="20px,20px"></dc-import>made with love for Merylle &amp; Cj</p>
+</footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":960}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const features = [
+      { icon: 'camera', label: 'Memories' },
+      { icon: 'motmot', label: 'Dates & roadtrips' },
+      { icon: 'envelope', label: 'Love letters' },
+      { icon: 'sparkle', label: 'Day counter' }
+    ];
+    return { features };
+  }
+}
+</script>
+</body>
+</html>

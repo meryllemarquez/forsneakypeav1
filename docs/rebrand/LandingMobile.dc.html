@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Welcome on phone</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&amp;family=Nunito:wght@400;600;700;800&amp;family=Shantell+Sans:wght@500;700;800&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#1F55C9}a:hover{color:#172B70}
+:focus-visible{outline:3px solid #E0301A;outline-offset:3px}
+</style>
+</helmet>
+<div style="position: relative; width: 390px; height: 844px; overflow: hidden; box-sizing: border-box; padding: 18px 18px 0; background-color: #FFE680; background-image: radial-gradient(circle at 20% 30%, rgba(255, 159, 28, 0.85) 0 3.5px, transparent 4.5px), radial-gradient(circle at 70% 65%, rgba(92, 179, 255, 0.95) 0 3px, transparent 4px), radial-gradient(circle at 40% 85%, rgba(224, 48, 26, 0.6) 0 2.5px, transparent 3.5px), radial-gradient(circle at 85% 15%, rgba(31, 85, 201, 0.7) 0 2.5px, transparent 3.5px); background-size: 52px 52px, 42px 42px, 62px 62px, 34px 34px; color: #172B70; font-family: 'Nunito', system-ui, sans-serif; font-size: 15px; line-height: 1.5">
+
+<div style="display: inline-flex; align-items: center; gap: 8px; padding: 4px 14px 4px 4px; background: #FFFFFF; border: 2px solid #172B70; border-radius: 999px">
+<dc-import name="Icon" icon="star" size="32" sticker="true" tilt="-8" hint-size="32px,32px"></dc-import>
+<span style="font-family: 'Shantell Sans', cursive; font-weight: 800; font-size: 19px">for sneakypea</span>
+</div>
+
+<section style="position: relative; margin-top: 22px; background: #FFFFFF; border: 2px solid #172B70; border-radius: 26px; padding: 22px 20px 20px; box-shadow: 6px 6px 0 #5CB3FF">
+<div aria-hidden="true" style="position: absolute; top: -28px; right: -6px"><dc-import name="Icon" icon="motmot" size="76" sticker="true" tilt="-6" hint-size="76px,76px"></dc-import></div>
+<p style="margin: 0; font-family: 'Caveat', cursive; font-weight: 700; font-size: 22px; color: #E0301A">for Merylle &amp; Cj</p>
+<h1 style="margin: 0; font-family: 'Shantell Sans', cursive; font-weight: 800; font-size: 31px; line-height: 1.08; letter-spacing: -0.6px">Every memory deserves a <span style="background: linear-gradient(transparent 58%, #FF9F1C 58%, #FF9F1C 92%, transparent 92%); padding: 0 4px">place to stay.</span></h1>
+<p style="margin: 10px 0 0; color: #3A4A73">Photos, date plans and love letters. Just the two of us, Motmot, and five very good dogs.</p>
+</section>
+
+<section style="position: relative; margin-top: 34px">
+<div aria-hidden="true" style="display: flex; justify-content: center; gap: 4px; margin-bottom: -22px; position: relative; z-index: 1">
+<dc-import name="Icon" icon="her" size="64" sticker="true" tilt="-8" hint-size="64px,64px"></dc-import>
+<dc-import name="Icon" icon="him" size="64" sticker="true" tilt="8" hint-size="64px,64px"></dc-import>
+</div>
+<form style="background-color: #FFFDF6; background-image: linear-gradient(to right, transparent 20px, rgba(224, 48, 26, 0.45) 20px, rgba(224, 48, 26, 0.45) 22px, transparent 22px); border: 2px solid #172B70; border-radius: 24px; padding: 32px 20px 20px 34px; box-shadow: 6px 6px 0 #172B70">
+<h2 style="margin: 0; font-family: 'Shantell Sans', cursive; font-weight: 800; font-size: 24px; text-align: center">Welcome home</h2>
+<p style="margin: 0 0 12px; text-align: center; font-family: 'Caveat', cursive; font-weight: 700; font-size: 19px; color: #E0301A">the dogs missed you</p>
+<label style="display: block; margin-bottom: 12px">
+<span style="display: block; margin-bottom: 4px; font-weight: 800; font-size: 14px">Username</span>
+<input type="text" autocomplete="username" placeholder="your username" style="width: 100%; box-sizing: border-box; min-height: 48px; padding: 0 14px; background: #FFFFFF; border: 2px solid #172B70; border-radius: 14px; font-family: inherit; font-size: 16px; color: #172B70">
+</label>
+<label style="display: block; margin-bottom: 16px">
+<span style="display: block; margin-bottom: 4px; font-weight: 800; font-size: 14px">Password</span>
+<input type="password" autocomplete="current-password" placeholder="your password" style="width: 100%; box-sizing: border-box; min-height: 48px; padding: 0 14px; background: #FFFFFF; border: 2px solid #172B70; border-radius: 14px; font-family: inherit; font-size: 16px; color: #172B70">
+</label>
+<button type="button" style="width: 100%; min-height: 52px; border-radius: 999px; background: #E0301A; color: #FFFFFF; border: 2px solid #172B70; box-shadow: 3px 3px 0 #172B70; font-family: inherit; font-weight: 800; font-size: 16px">Log in</button>
+<p style="margin: 12px 0 0; text-align: center; font-size: 14px; color: #3A4A73">Have an invite code? <a href="#register" style="font-weight: 800">Create an account</a></p>
+</form>
+</section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>

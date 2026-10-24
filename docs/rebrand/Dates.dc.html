@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Dates</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&amp;family=Nunito:wght@400;600;700;800&amp;family=Shantell+Sans:wght@500;700;800&amp;display=swap">
+<style>
+body{margin:0;background:#FFF8E8}
+a{color:#1F55C9}a:hover{color:#172B70}
+:focus-visible{outline:3px solid #E0301A;outline-offset:3px}
+</style>
+</helmet>
+<div style="min-height: 100vh; background-color: #FFF8E8; background-image: linear-gradient(rgba(92, 179, 255, 0.3) 1.5px, transparent 1.5px), linear-gradient(90deg, rgba(92, 179, 255, 0.3) 1.5px, transparent 1.5px); background-size: 30px 30px; color: #172B70; font-family: 'Nunito', system-ui, sans-serif; font-size: 17px; line-height: 1.55">
+
+<header style="max-width: 1200px; margin: 0 auto; padding: 22px 24px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px">
+<a href="Main.dc.html" style="display: flex; align-items: center; gap: 10px; text-decoration: none; color: #172B70">
+<dc-import name="Icon" icon="star" size="42" sticker="true" tilt="-8" hint-size="42px,42px"></dc-import>
+<span style="font-family: 'Shantell Sans', cursive; font-weight: 800; font-size: 26px; letter-spacing: -0.5px">for sneakypea</span>
+</a>
+<nav aria-label="Main" style="display: flex; flex-wrap: wrap; gap: 4px; padding: 5px; background: #FFFFFF; border: 2px solid #172B70; border-radius: 999px">
+<sc-for list="{{ nav }}" as="n" hint-placeholder-count="4">
+<a href="{{ n.href }}" style="{{ n.style }}"><dc-import name="Icon" icon="{{ n.icon }}" size="26" hint-size="26px,26px"></dc-import><span>{{ n.label }}</span></a>
+</sc-for>
+</nav>
+<div style="display: flex; align-items: center; gap: 10px">
+<button type="button" aria-label="Notifications, 2 unread" style="position: relative; width: 48px; height: 48px; padding: 0; border-radius: 50%; border: 2px solid #172B70; background: #FFFFFF; display: flex; align-items: center; justify-content: center; cursor: pointer">
+<dc-import name="Icon" icon="bell" size="30" hint-size="30px,30px"></dc-import>
+<span style="position: absolute; top: -5px; right: -5px; min-width: 22px; height: 22px; padding: 0 5px; box-sizing: border-box; border-radius: 999px; background: #E0301A; color: #FFFFFF; font-size: 12px; font-weight: 800; display: flex; align-items: center; justify-content: center; border: 2px solid #FFF8E8">2</span>
+</button>
+<a href="#profile" style="display: flex; align-items: center; gap: 8px; min-height: 48px; box-sizing: border-box; padding: 4px 16px 4px 4px; border-radius: 999px; background: #FFFFFF; border: 2px solid #172B70; text-decoration: none; color: #172B70; font-weight: 800">
+<span style="width: 36px; height: 36px; border-radius: 50%; background: #FFE680; display: flex; align-items: center; justify-content: center; overflow: hidden"><dc-import name="Icon" icon="her" size="34" hint-size="34px,34px"></dc-import></span>
+<span>Starshine</span>
+</a>
+</div>
+</header>
+
+<main style="max-width: 1200px; margin: 0 auto; padding: 24px 24px 80px">
+<div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 24px">
+<div style="flex: 1 1 520px; min-width: 0">
+<p style="margin: 0; font-family: 'Caveat', cursive; font-weight: 700; font-size: 26px; color: #E0301A">everything we still want to do (and eat)</p>
+<h1 style="margin: 0; font-family: 'Shantell Sans', cursive; font-weight: 800; font-size: 52px; line-height: 1.05; letter-spacing: -1px">Dates &amp; roadtrips</h1>
+</div>
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px">
+<label style="display: flex; align-items: center; gap: 8px; min-height: 52px; box-sizing: border-box; padding: 0 18px; background: #FFFFFF; border: 2px solid #172B70; border-radius: 999px; min-width: 260px">
+<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#172B70" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg>
+<span style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Search dates</span>
+<input type="search" placeholder="Search places, food, plans" style="flex: 1 1 auto; min-width: 0; border: none; outline: none; background: transparent; font-family: inherit; font-size: 16px; color: #172B70">
+</label>
+<button type="button" style="display: inline-flex; align-items: center; gap: 8px; min-height: 52px; padding: 0 22px; border-radius: 999px; background: #E0301A; color: #FFFFFF; border: 2px solid #172B70; box-shadow: 4px 4px 0 #172B70; font-family: inherit; font-weight: 800; font-size: 16px; cursor: pointer">
+<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>New date</button>
+</div>
+</div>
+
+<div role="group" aria-label="Filter by status" style="display: flex; flex-wrap: wrap; gap: 10px; margin: 28px 0">
+<sc-for list="{{ filters }}" as="f" hint-placeholder-count="6">
+<button type="button" style="{{ f.style }}">{{ f.label }}</button>
+</sc-for>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 28px">
+<sc-for list="{{ dates }}" as="d" hint-placeholder-count="6">
+<article style="display: flex; flex-direction: column; background: #FFFFFF; border: 2px solid #172B70; border-radius: 26px; padding: 20px; box-shadow: 6px 6px 0 #5CB3FF">
+<div style="display: flex; align-items: flex-start; gap: 14px">
+<div style="{{ d.tile }}"><dc-import name="Icon" icon="{{ d.icon }}" size="56" hint-size="56px,56px"></dc-import></div>
+<div style="flex: 1 1 auto; min-width: 0">
+<span style="{{ d.chip }}">{{ d.status }}</span>
+<h2 style="margin: 6px 0 0; font-family: 'Shantell Sans', cursive; font-weight: 700; font-size: 21px; line-height: 1.2">{{ d.title }}</h2>
+</div>
+<button type="button" aria-label="{{ d.favLabel }}" style="flex: none; width: 44px; height: 44px; padding: 0; border: none; background: transparent; display: flex; align-items: center; justify-content: center; cursor: pointer">
+<dc-import name="Icon" icon="heart" size="{{ d.heartSize }}" hint-size="28px,28px"></dc-import>
+</button>
+</div>
+<ul style="list-style: none; margin: 16px 0 0; padding: 0; display: flex; flex-direction: column; gap: 4px; font-size: 15px; color: #3A4A73">
+<li><strong style="color: #172B70">When</strong> · {{ d.when }}</li>
+<li><strong style="color: #172B70">Where</strong> · {{ d.where }}</li>
+<li><strong style="color: #172B70">Budget</strong> · {{ d.budget }}</li>
+</ul>
+<div style="display: flex; align-items: center; gap: 10px; margin-top: 16px">
+<div style="flex: 1 1 auto; height: 12px; border-radius: 999px; background: #EEF3FB; border: 2px solid #172B70; overflow: hidden"><div style="{{ d.bar }}"></div></div>
+<span style="font-size: 14px; font-weight: 800">{{ d.steps }} steps</span>
+</div>
+<div style="display: flex; gap: 4px; margin-top: 14px; padding-top: 10px; border-top: 2px dashed #C9D6EC">
+<button type="button" aria-label="Edit" style="width: 44px; height: 44px; padding: 0; border: none; border-radius: 50%; background: transparent; color: #172B70; display: flex; align-items: center; justify-content: center; cursor: pointer"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg></button>
+<button type="button" aria-label="Duplicate" style="width: 44px; height: 44px; padding: 0; border: none; border-radius: 50%; background: transparent; color: #172B70; display: flex; align-items: center; justify-content: center; cursor: pointer"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="3"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg></button>
+<button type="button" aria-label="Archive" style="width: 44px; height: 44px; padding: 0; border: none; border-radius: 50%; background: transparent; color: #172B70; display: flex; align-items: center; justify-content: center; cursor: pointer"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="5" rx="1.5"/><path d="M5 9v9a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V9M10 13h4"/></svg></button>
+<span style="flex: 1 1 auto"></span>
+<button type="button" aria-label="Delete" style="width: 44px; height: 44px; padding: 0; border: none; border-radius: 50%; background: transparent; color: #E0301A; display: flex; align-items: center; justify-content: center; cursor: pointer"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/></svg></button>
+</div>
+</article>
+</sc-for>
+</div>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1500}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const link = 'display: flex; align-items: center; gap: 8px; min-height: 44px; box-sizing: border-box; padding: 0 16px 0 10px; border-radius: 999px; text-decoration: none; color: #172B70; font-weight: 800; font-size: 16px;';
+    const nav = [
+      { label: 'Home', icon: 'house', href: 'Main.dc.html' },
+      { label: 'Memories', icon: 'camera', href: 'Memories.dc.html' },
+      { label: 'Dates', icon: 'motmot', href: 'Dates.dc.html', active: true },
+      { label: 'Letters', icon: 'envelope', href: 'Letters.dc.html' }
+    ].map((n) => ({ ...n, style: link + (n.active ? ' background: #FF9F1C;' : '') }));
+    const chipBase = 'min-height: 44px; padding: 0 18px; border-radius: 999px; border: 2px solid #172B70; font-family: inherit; font-size: 15px; font-weight: 800; color: #172B70; cursor: pointer;';
+    const filters = ['All', 'Dreaming', 'Planning', 'Booked', 'Ready', 'Done', 'Archived'].map((l, i) => ({
+      label: l, style: chipBase + (i === 0 ? ' background: #FF9F1C;' : ' background: #FFFFFF;')
+    }));
+    const statusStyle = {
+      Dreaming: 'background: #5CB3FF; color: #172B70;',
+      Planning: 'background: #FFE680; color: #172B70;',
+      Booked: 'background: #FF9F1C; color: #172B70;',
+      Ready: 'background: #1F55C9; color: #FFFFFF;'
+    };
+    const tint = { Dreaming: '#CDE7FF', Planning: '#FFF0B3', Booked: '#FFD8A0', Ready: '#CBDBF8' };
+    const raw = [
+      { icon: 'lechon', title: 'Lechon pares night', status: 'Ready', when: 'Sat, Oct 31 · 7:00 PM', where: 'Win Pares, Sta. Maria', budget: '₱500', done: 4, total: 4, fav: true },
+      { icon: 'ticket', title: 'Makati museum hop', status: 'Booked', when: 'Sat, Nov 8 · 10:00 AM', where: 'Makati', budget: '₱800', done: 2, total: 4, fav: false },
+      { icon: 'arena', title: 'PH Arena car spotting', status: 'Planning', when: 'Any clear night', where: 'Bocaue, along NLEX', budget: '₱200 gas', done: 1, total: 3, fav: true },
+      { icon: 'bowl', title: 'Mr. B bulalo run', status: 'Planning', when: 'Next rainy day', where: 'Mr. B', budget: '₱700', done: 0, total: 2, fav: false },
+      { icon: 'mountain', title: 'Tanay → Infanta, round 2', status: 'Dreaming', when: 'Someday', where: 'Agos River', budget: '₱2,500', done: 1, total: 6, fav: true },
+      { icon: 'bed', title: 'Tagaytay staycation', status: 'Dreaming', when: 'Someday', where: 'Tagaytay', budget: '₱6,000', done: 0, total: 5, fav: false }
+    ];
+    const dates = raw.map((d) => ({
+      ...d,
+      steps: d.done + '/' + d.total,
+      chip: 'display: inline-block; padding: 2px 12px; border-radius: 999px; border: 2px solid #172B70; font-size: 13px; font-weight: 800; ' + statusStyle[d.status],
+      tile: 'flex: none; width: 72px; height: 72px; border-radius: 20px; border: 2px solid #172B70; display: flex; align-items: center; justify-content: center; background: ' + tint[d.status] + ';',
+      bar: 'height: 100%; background: #FF9F1C; width: ' + Math.round((d.done / d.total) * 100) + '%;',
+      favLabel: d.fav ? 'Remove from favorites' : 'Add to favorites',
+      heartSize: d.fav ? 30 : 22
+    }));
+    return { nav, filters, dates };
+  }
+}
+</script>
+</body>
+</html>

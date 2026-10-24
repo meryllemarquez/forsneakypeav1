@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Dates on phone</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&amp;family=Nunito:wght@400;600;700;800&amp;family=Shantell+Sans:wght@500;700;800&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#1F55C9}a:hover{color:#172B70}
+:focus-visible{outline:3px solid #E0301A;outline-offset:3px}
+</style>
+</helmet>
+<div style="position: relative; width: 390px; height: 844px; overflow: hidden; background-color: #FFF8E8; background-image: linear-gradient(rgba(92, 179, 255, 0.3) 1.5px, transparent 1.5px), linear-gradient(90deg, rgba(92, 179, 255, 0.3) 1.5px, transparent 1.5px); background-size: 26px 26px; color: #172B70; font-family: 'Nunito', system-ui, sans-serif; font-size: 15px; line-height: 1.5">
+
+<header style="display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 18px 18px 8px">
+<div>
+<p style="margin: 0; font-family: 'Caveat', cursive; font-weight: 700; font-size: 20px; color: #E0301A">everything we still want to do</p>
+<h1 style="margin: 0; font-family: 'Shantell Sans', cursive; font-weight: 800; font-size: 28px; line-height: 1.1">Dates &amp; roadtrips</h1>
+</div>
+<button type="button" aria-label="Search dates" style="flex: none; width: 44px; height: 44px; padding: 0; border-radius: 50%; border: 2px solid #172B70; background: #FFFFFF; display: flex; align-items: center; justify-content: center; color: #172B70">
+<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg>
+</button>
+</header>
+
+<div role="group" aria-label="Filter by status" style="display: flex; gap: 8px; overflow-x: auto; padding: 6px 18px 12px">
+<sc-for list="{{ filters }}" as="f" hint-placeholder-count="5">
+<button type="button" style="{{ f.style }}">{{ f.label }}</button>
+</sc-for>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 14px; padding: 0 18px">
+<sc-for list="{{ dates }}" as="d" hint-placeholder-count="3">
+<article style="background: #FFFFFF; border: 2px solid #172B70; border-radius: 22px; padding: 14px 14px 12px; box-shadow: 4px 4px 0 #5CB3FF">
+<div style="display: flex; align-items: center; gap: 12px">
+<div style="{{ d.tile }}"><dc-import name="Icon" icon="{{ d.icon }}" size="44" hint-size="44px,44px"></dc-import></div>
+<div style="flex: 1 1 auto; min-width: 0">
+<span style="{{ d.chip }}">{{ d.status }}</span>
+<h2 style="margin: 4px 0 0; font-family: 'Shantell Sans', cursive; font-weight: 700; font-size: 18px; line-height: 1.2">{{ d.title }}</h2>
+</div>
+<button type="button" aria-label="{{ d.favLabel }}" style="flex: none; width: 44px; height: 44px; padding: 0; border: none; background: transparent; display: flex; align-items: center; justify-content: center">
+<dc-import name="Icon" icon="heart" size="{{ d.heartSize }}" hint-size="26px,26px"></dc-import>
+</button>
+</div>
+<p style="margin: 10px 0 8px; font-size: 14px; color: #4A5A80">{{ d.when }} · {{ d.where }} · {{ d.budget }}</p>
+<div style="display: flex; align-items: center; gap: 10px">
+<div style="flex: 1 1 auto; height: 10px; border-radius: 999px; background: #EEF3FB; border: 1.5px solid #172B70; overflow: hidden"><div style="{{ d.bar }}"></div></div>
+<span style="font-size: 13px; font-weight: 800">{{ d.steps }}</span>
+</div>
+</article>
+</sc-for>
+</div>
+
+<a href="Dates.dc.html" style="position: absolute; right: 18px; bottom: 96px; display: flex; align-items: center; gap: 8px; min-height: 52px; padding: 0 20px; border-radius: 999px; background: #E0301A; color: #FFFFFF; border: 2px solid #172B70; box-shadow: 3px 3px 0 #172B70; font-weight: 800; text-decoration: none">
+<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>New date</a>
+
+<nav aria-label="Main" style="position: absolute; left: 0; right: 0; bottom: 0; height: 78px; box-sizing: border-box; padding: 6px 10px 12px; background: #FFFFFF; border-top: 2px solid #172B70; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr))">
+<sc-for list="{{ tabs }}" as="t" hint-placeholder-count="4">
+<a href="{{ t.href }}" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; text-decoration: none; color: #172B70; font-size: 12px; font-weight: 800">
+<span style="{{ t.pill }}"><dc-import name="Icon" icon="{{ t.icon }}" size="28" hint-size="28px,28px"></dc-import></span>
+<span>{{ t.label }}</span>
+</a>
+</sc-for>
+</nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const chipBase = 'flex: none; display: inline-block; white-space: nowrap; min-height: 40px; box-sizing: border-box; padding: 0 16px; border-radius: 999px; border: 2px solid #172B70; font-family: inherit; font-size: 14px; font-weight: 800; color: #172B70; cursor: pointer;';
+    const filters = ['All', 'Dreaming', 'Planning', 'Booked', 'Ready', 'Done'].map((l, i) => ({
+      label: l, style: chipBase + (i === 0 ? ' background: #FF9F1C;' : ' background: #FFFFFF;')
+    }));
+    const statusStyle = {
+      Dreaming: 'background: #5CB3FF; color: #172B70;',
+      Planning: 'background: #FFE680; color: #172B70;',
+      Booked: 'background: #FF9F1C; color: #172B70;',
+      Ready: 'background: #1F55C9; color: #FFFFFF;'
+    };
+    const tint = { Dreaming: '#CDE7FF', Planning: '#FFF0B3', Booked: '#FFD8A0', Ready: '#CBDBF8' };
+    const raw = [
+      { icon: 'lechon', title: 'Lechon pares night', status: 'Ready', when: 'Sat, Oct 31', where: 'Sta. Maria', budget: '₱500', done: 4, total: 4, fav: true },
+      { icon: 'ticket', title: 'Makati museum hop', status: 'Booked', when: 'Sat, Nov 8', where: 'Makati', budget: '₱800', done: 2, total: 4, fav: false },
+      { icon: 'mountain', title: 'Tanay → Infanta, round 2', status: 'Dreaming', when: 'Someday', where: 'Agos River', budget: '₱2,500', done: 1, total: 6, fav: true }
+    ];
+    const dates = raw.map((d) => ({
+      ...d,
+      steps: d.done + '/' + d.total,
+      chip: 'display: inline-block; padding: 1px 10px; border-radius: 999px; border: 2px solid #172B70; font-size: 12px; font-weight: 800; ' + statusStyle[d.status],
+      tile: 'flex: none; width: 58px; height: 58px; border-radius: 16px; border: 2px solid #172B70; display: flex; align-items: center; justify-content: center; background: ' + tint[d.status] + ';',
+      bar: 'height: 100%; background: #FF9F1C; width: ' + Math.round((d.done / d.total) * 100) + '%;',
+      favLabel: d.fav ? 'Remove from favorites' : 'Add to favorites',
+      heartSize: d.fav ? 28 : 22
+    }));
+    const pill = 'display: flex; align-items: center; justify-content: center; width: 56px; height: 34px; border-radius: 999px;';
+    const tabs = [
+      { label: 'Home', icon: 'house', href: 'HomeMobile.dc.html' },
+      { label: 'Memories', icon: 'camera', href: 'Memories.dc.html' },
+      { label: 'Dates', icon: 'motmot', href: 'DatesMobile.dc.html', active: true },
+      { label: 'Letters', icon: 'envelope', href: 'Letters.dc.html' }
+    ].map((t) => ({ ...t, pill: pill + (t.active ? ' background: #FF9F1C; border: 2px solid #172B70;' : '') }));
+    return { filters, dates, tabs };
+  }
+}
+</script>
+</body>
+</html>

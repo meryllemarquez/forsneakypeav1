@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Home on phone</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&amp;family=Nunito:wght@400;600;700;800&amp;family=Shantell+Sans:wght@500;700;800&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#1F55C9}a:hover{color:#172B70}
+:focus-visible{outline:3px solid #E0301A;outline-offset:3px}
+</style>
+</helmet>
+<div style="position: relative; width: 390px; height: 844px; overflow: hidden; background-color: #FFF8E8; background-image: radial-gradient(circle, rgba(23, 43, 112, 0.14) 1.4px, transparent 2px); background-size: 22px 22px; color: #172B70; font-family: 'Nunito', system-ui, sans-serif; font-size: 15px; line-height: 1.5">
+
+<header style="display: flex; align-items: center; justify-content: space-between; padding: 14px 18px 6px">
+<a href="Main.dc.html" style="display: flex; align-items: center; gap: 8px; text-decoration: none; color: #172B70">
+<dc-import name="Icon" icon="star" size="34" sticker="true" tilt="-8" hint-size="34px,34px"></dc-import>
+<span style="font-family: 'Shantell Sans', cursive; font-weight: 800; font-size: 20px">for sneakypea</span>
+</a>
+<button type="button" aria-label="Notifications, 2 unread" style="position: relative; width: 44px; height: 44px; padding: 0; border-radius: 50%; border: 2px solid #172B70; background: #FFFFFF; display: flex; align-items: center; justify-content: center">
+<dc-import name="Icon" icon="bell" size="26" hint-size="26px,26px"></dc-import>
+<span style="position: absolute; top: -4px; right: -4px; width: 20px; height: 20px; border-radius: 50%; background: #E0301A; color: #FFFFFF; font-size: 11px; font-weight: 800; display: flex; align-items: center; justify-content: center; border: 2px solid #FFF8E8">2</span>
+</button>
+</header>
+
+<section style="padding: 12px 18px 0">
+<p style="display: inline-flex; align-items: center; gap: 6px; margin: 0 0 12px; padding: 5px 14px 5px 8px; background: #FFFFFF; border: 2px solid #172B70; border-radius: 999px; transform: rotate(-2deg); font-family: 'Shantell Sans', cursive; font-weight: 700; font-size: 13px">
+<dc-import name="Icon" icon="sparkle" size="20" hint-size="20px,20px"></dc-import>
+<span>Day 1,000 together</span>
+</p>
+<h1 style="margin: 0; font-family: 'Shantell Sans', cursive; font-weight: 800; font-size: 34px; line-height: 1.05; letter-spacing: -0.8px">Our little world, kept in one <span style="background: linear-gradient(transparent 58%, #FF9F1C 58%, #FF9F1C 92%, transparent 92%); padding: 0 4px">place.</span></h1>
+<p style="margin: 10px 0 14px; color: #3A4A73">Hi Starshine! Motmot's tank is full. Where to next?</p>
+<div style="display: flex; gap: 10px">
+<a href="Memories.dc.html" style="flex: 1 1 0; display: flex; align-items: center; justify-content: center; min-height: 48px; border-radius: 999px; background: #E0301A; color: #FFFFFF; border: 2px solid #172B70; box-shadow: 3px 3px 0 #172B70; font-weight: 800; text-decoration: none">Memories</a>
+<a href="Dates.dc.html" style="flex: 1 1 0; display: flex; align-items: center; justify-content: center; gap: 6px; min-height: 48px; border-radius: 999px; background: #FFFFFF; color: #172B70; border: 2px solid #172B70; font-weight: 800; text-decoration: none"><dc-import name="Icon" icon="motmot" size="24" hint-size="24px,24px"></dc-import>Plan a date</a>
+</div>
+</section>
+
+<div aria-hidden="true" style="display: flex; justify-content: center; gap: 10px; padding: 18px 0 6px">
+<sc-for list="{{ stickers }}" as="s" hint-placeholder-count="5">
+<dc-import name="Icon" icon="{{ s.icon }}" size="54" sticker="true" tilt="{{ s.tilt }}" hint-size="54px,54px"></dc-import>
+</sc-for>
+</div>
+
+<section style="padding: 12px 0 0">
+<div style="display: flex; align-items: flex-end; justify-content: space-between; padding: 0 18px">
+<h2 style="margin: 0; font-family: 'Shantell Sans', cursive; font-weight: 800; font-size: 22px">Recent memories</h2>
+<a href="Memories.dc.html" style="font-weight: 800; text-decoration: none; padding: 8px 0">See all</a>
+</div>
+<div style="display: flex; gap: 14px; overflow-x: auto; padding: 8px 18px 10px">
+<sc-for list="{{ memories }}" as="c" hint-placeholder-count="3">
+<a href="Memories.dc.html" style="flex: none; width: 196px; text-decoration: none; color: #172B70; background: #FFFFFF; border: 2px solid #172B70; border-radius: 20px; overflow: hidden; box-shadow: 4px 4px 0 #5CB3FF">
+<div style="{{ c.coverStyle }}"><dc-import name="Icon" icon="{{ c.icon }}" size="72" hint-size="72px,72px"></dc-import></div>
+<div style="padding: 8px 12px 10px">
+<p style="margin: 0; font-family: 'Shantell Sans', cursive; font-weight: 700; font-size: 16px; line-height: 1.2">{{ c.title }}</p>
+<p style="margin: 2px 0 0; font-size: 13px; color: #4A5A80">{{ c.count }}</p>
+</div>
+</a>
+</sc-for>
+</div>
+</section>
+
+<a href="Dates.dc.html" style="margin: 8px 18px 0; display: flex; align-items: center; gap: 12px; padding: 10px 12px; background: #FFFFFF; border: 2px solid #172B70; border-radius: 18px; text-decoration: none; color: #172B70">
+<div style="flex: none; width: 52px; height: 56px; box-sizing: border-box; border: 2px solid #172B70; border-radius: 14px; background: #FFE680; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1">
+<span style="font-size: 11px; font-weight: 800; letter-spacing: 1px">OCT</span>
+<span style="font-family: 'Shantell Sans', cursive; font-weight: 800; font-size: 22px">31</span>
+</div>
+<div style="flex: 1 1 auto; min-width: 0">
+<p style="margin: 0; font-weight: 800">Lechon pares night</p>
+<p style="margin: 0; font-size: 13px; color: #4A5A80">Win Pares · Sta. Maria</p>
+</div>
+<span style="padding: 4px 10px; border-radius: 999px; border: 2px solid #172B70; background: #1F55C9; color: #FFFFFF; font-size: 12px; font-weight: 800">Ready</span>
+</a>
+
+<nav aria-label="Main" style="position: absolute; left: 0; right: 0; bottom: 0; height: 78px; box-sizing: border-box; padding: 6px 10px 12px; background: #FFFFFF; border-top: 2px solid #172B70; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr))">
+<sc-for list="{{ tabs }}" as="t" hint-placeholder-count="4">
+<a href="{{ t.href }}" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; text-decoration: none; color: #172B70; font-size: 12px; font-weight: 800">
+<span style="{{ t.pill }}"><dc-import name="Icon" icon="{{ t.icon }}" size="28" hint-size="28px,28px"></dc-import></span>
+<span>{{ t.label }}</span>
+</a>
+</sc-for>
+</nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const stickers = [
+      { icon: 'her', tilt: -8 }, { icon: 'tulip', tilt: 6 }, { icon: 'motmot', tilt: -3 },
+      { icon: 'dog', tilt: 8 }, { icon: 'him', tilt: -6 }
+    ];
+    const cover = 'height: 104px; border-bottom: 2px solid #172B70; display: flex; align-items: center; justify-content: center; background: ';
+    const memories = [
+      { icon: 'mountain', tint: '#5CB3FF', title: 'Tanay → Infanta', count: '38 photos' },
+      { icon: 'museum', tint: '#FFE680', title: 'Pinto Art Museum', count: '21 photos' },
+      { icon: 'motmot', tint: '#FFC76B', title: 'PH Arena nights', count: '12 photos' }
+    ].map((c) => ({ ...c, coverStyle: cover + c.tint + ';' }));
+    const pill = 'display: flex; align-items: center; justify-content: center; width: 56px; height: 34px; border-radius: 999px;';
+    const tabs = [
+      { label: 'Home', icon: 'house', href: 'Main.dc.html', active: true },
+      { label: 'Memories', icon: 'camera', href: 'Memories.dc.html' },
+      { label: 'Dates', icon: 'motmot', href: 'DatesMobile.dc.html' },
+      { label: 'Letters', icon: 'envelope', href: 'Letters.dc.html' }
+    ].map((t) => ({ ...t, pill: pill + (t.active ? ' background: #FF9F1C; border: 2px solid #172B70;' : '') }));
+    return { stickers, memories, tabs };
+  }
+}
+</script>
+</body>
+</html>
