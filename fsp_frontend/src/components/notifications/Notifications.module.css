@@ -14,7 +14,7 @@
   --nb-red-bg: #FDEFE4;
   --nb-gold: #C99A3A;
   --nb-gold-bg: #F7EFD9;
-  --nb-font-serif: Georgia, 'Iowan Old Style', 'Times New Roman', serif;
+  --nb-font-serif: var(--font-heading);
   display: inline-flex;
   align-items: center;
 }
@@ -86,7 +86,7 @@
   --nb-red-bg: #FDEFE4;
   --nb-gold: #C99A3A;
   --nb-gold-bg: #F7EFD9;
-  --nb-font-serif: Georgia, 'Iowan Old Style', 'Times New Roman', serif;
+  --nb-font-serif: var(--font-heading);
 
   position: fixed;
   top: 0;

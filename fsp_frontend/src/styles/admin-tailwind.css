@@ -21,8 +21,8 @@
 @theme {
   /* Sans for dense UI (tables, nav, forms). A separate serif is used only
      for page-title "hero" moments — see .page-title in DashboardHome etc. */
-  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-serif: Georgia, "Iowan Old Style", "Times New Roman", serif;
+  --font-sans: "Nunito", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-serif: "Shantell Sans", "Comic Sans MS", cursive;
 
   /* Japanese-inspired cream/red/gold palette — scoped to the admin tree
      only (the rest of the app keeps styles/design-tokens.css as-is). */

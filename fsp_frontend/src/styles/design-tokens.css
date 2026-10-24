@@ -1,50 +1,76 @@
+/*
+  for sneakypea v2 design tokens: the single source of truth.
+  Names say what the colour IS, not what it used to be.
+*/
 :root {
-  /* Warm cream / blush / coral / sage palette — "digital journal" redesign */
-  --color-burgundy-primary: #D97785; /* was #8C230F — now "coral-deep": primary accent, CTAs, active nav */
-  --color-burnt-red: #E38A96;        /* was #C73616 — "coral": hover state, one step lighter than primary */
-  --color-golden-ochre: #8FAE7D;     /* was #A88A2B — "sage": secondary accents, small badges/tags */
-  --color-warm-cream: #F4A9B8;       /* was #E8D7BC — "blush": pill fills, decorative accents */
-  --color-white: #FFFFFF;
+  /* Brand palette */
+  --ink: #172B70;        /* all text, outlines, offset shadows */
+  --ink-soft: #3A4A73;   /* secondary text */
+  --ink-muted: #4A5A80;  /* meta text, captions */
+  --amalfi: #1F55C9;     /* links, footer, "Ready" status */
+  --sea: #5CB3FF;        /* fills, card shadows, "Dreaming" */
+  --citrus: #FF9F1C;     /* active nav, highlights, progress bars, "Booked" */
+  --gelato: #FFE680;     /* notes, date badges, "Planning" */
+  --tomato: #E0301A;     /* primary buttons and hearts ONLY */
+  --paper: #FFF8E8;      /* page background */
+  --white: #FFFFFF;      /* cards */
 
-  /* New semantic names — use these directly in new/updated components */
-  --color-blush: #F4A9B8;
-  --color-coral: #E38A96;
-  --color-coral-deep: #D97785;
-  --color-sage: #8FAE7D;
-  --color-ink: #3E332E;
-  --color-ink-soft: #8A7568;
-  --color-surface: #FFFEFB;
-  --color-surface-sunk: #F5EAE0;
+  /* Soft tiles */
+  --sea-tint: #CDE7FF;
+  --gelato-tint: #FFF0B3;
+  --citrus-tint: #FFD8A0;
+  --amalfi-tint: #CBDBF8;
+  --citrus-cover: #FFC76B;
 
-  /* Neutrals */
-  --color-bg-main: #FBF3EA;
-  --color-text-primary: #3E332E;
-  --color-text-secondary: #8A7568;
-  --color-border: #EEDFCC;
-  --color-hover: #F5EAE0;
+  /* Fonts */
+  --font-heading: 'Shantell Sans', 'Comic Sans MS', cursive;
+  --font-body: 'Nunito', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-hand: 'Caveat', cursive;
 
-  /* Radii */
-  --radius-button: 14px;
+  /* Shape */
+  --border-width: 2px;
+  --radius-card: 24px;
+  --radius-card-lg: 28px;
   --radius-input: 14px;
-  --radius-card: 20px;
-  --radius-image: 24px;
   --radius-pill: 999px;
+  --shadow-card: 6px 6px 0 var(--sea);
+  --shadow-card-citrus: 6px 6px 0 var(--citrus);
+  --shadow-button: 4px 4px 0 var(--ink);
 
-  /* Shadows */
-  --shadow-soft: 0 8px 30px rgba(62, 51, 46, 0.07);
-  --shadow-modal: 0 20px 50px rgba(62, 51, 46, 0.2);
+  /* Focus ring (a11y): 3px tomato outline */
+  --focus-ring: 3px solid var(--tomato);
+  --focus-offset: 2px;
 
-  /* Typography */
-  --font-serif: 'Fraunces', Georgia, serif;
-  --font-sans: 'Quicksand', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-}
+  /* Minimum touch target */
+  --tap: 44px;
 
-body {
-  margin: 0;
-  padding: 0;
-  background-color: var(--color-bg-main);
-  color: var(--color-text-primary);
-  font-family: var(--font-sans);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  /*
+    Legacy aliases. Pages not yet restyled still read these old names; they
+    now resolve to the new palette. Each rebrand phase migrates a page off
+    them, and R8 deletes this block.
+  */
+  --color-burgundy-primary: var(--tomato);
+  --color-burnt-red: color-mix(in srgb, var(--tomato) 85%, var(--ink));
+  --color-golden-ochre: var(--amalfi);
+  --color-warm-cream: var(--gelato-tint);
+  --color-white: var(--white);
+  --color-blush: var(--gelato-tint);
+  --color-coral: var(--tomato);
+  --color-coral-deep: var(--tomato);
+  --color-sage: var(--amalfi);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-muted);
+  --color-surface: var(--white);
+  --color-surface-sunk: var(--paper);
+  --color-bg-main: var(--paper);
+  --color-text-primary: var(--ink);
+  --color-text-secondary: var(--ink-muted);
+  --color-border: color-mix(in srgb, var(--ink) 18%, transparent);
+  --color-hover: var(--sea-tint);
+  --radius-button: var(--radius-input);
+  --radius-image: var(--radius-card);
+  --shadow-soft: 0 8px 30px rgb(23 43 112 / 0.1);
+  --shadow-modal: 0 20px 50px rgb(23 43 112 / 0.25);
+  --font-serif: var(--font-heading);
+  --font-sans: var(--font-body);
 }

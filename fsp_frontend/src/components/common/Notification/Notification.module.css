@@ -9,7 +9,7 @@
   max-width: 380px;
   width: calc(100vw - 4rem);
   pointer-events: none;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: var(--font-body);
 }
 
 .toast {

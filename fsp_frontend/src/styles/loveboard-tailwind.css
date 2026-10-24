@@ -11,7 +11,8 @@
   /* Interface chrome (toolbar, panels, buttons, labels) — never handwriting,
      never Times New Roman. Note *content* fonts are chosen per-note from
      HANDWRITING_FONTS/PLAIN_FONTS in loveBoardConstants.js instead. */
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Nunito", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Shantell Sans", "Comic Sans MS", cursive;
 
   --font-patrick: "Patrick Hand", cursive;
   --font-caveat: "Caveat", cursive;

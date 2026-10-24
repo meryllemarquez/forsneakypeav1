@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import { ArrowLeft, MousePointer2, Hand, Undo2, Redo2, ZoomOut, ZoomIn, RotateCcw } from 'lucide-react';
+import '../styles/loveboard-fonts.css';
 import '../styles/loveboard-tailwind.css';
 
 import CorkBoard from '../components/loveBoard/CorkBoard/CorkBoard';

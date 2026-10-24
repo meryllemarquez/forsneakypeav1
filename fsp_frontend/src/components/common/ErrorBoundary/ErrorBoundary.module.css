@@ -17,7 +17,7 @@
 
 .title {
   margin: 0;
-  font-family: var(--font-serif, Georgia, serif);
+  font-family: var(--font-heading);
   font-size: 1.7rem;
   font-weight: 600;
 }
@@ -36,7 +36,7 @@
   border-radius: 999px;
   background: var(--color-coral-deep, #D97785);
   color: #fff;
-  font-family: var(--font-sans, sans-serif);
+  font-family: var(--font-body);
   font-size: 0.95rem;
   font-weight: 600;
   cursor: pointer;

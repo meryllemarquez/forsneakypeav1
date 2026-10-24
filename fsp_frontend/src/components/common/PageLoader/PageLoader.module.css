@@ -15,7 +15,7 @@
 
 .label {
   margin: 0;
-  font-family: var(--font-serif, Georgia, serif);
+  font-family: var(--font-heading);
   font-size: 1.05rem;
   color: var(--color-text-secondary, #8A7568);
 }

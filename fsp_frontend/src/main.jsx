@@ -5,13 +5,18 @@ import App from './App';
 import { queryClient } from './queries/queryClient';
 import ErrorBoundary from './components/common/ErrorBoundary/ErrorBoundary';
 import { reportWebVitals } from './utils/reportWebVitals';
+import { MotionConfig } from 'framer-motion';
+import './styles/fonts.css';
 import './styles/design-tokens.css';
+import './styles/reset.css';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
-        <App />
+        <MotionConfig reducedMotion="user">
+          <App />
+        </MotionConfig>
       </QueryClientProvider>
     </ErrorBoundary>
   </React.StrictMode>

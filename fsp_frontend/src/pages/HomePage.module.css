@@ -1,4 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&family=Fraunces:ital,opsz,wght@0,9..144,600;1,9..144,500&display=swap');
 
 .pageContainer {
   min-height: 100vh;
@@ -9,7 +8,7 @@
     radial-gradient(circle at 90% 15%, color-mix(in srgb, var(--color-sage, #8FAE7D) 10%, transparent), transparent 40%),
     var(--color-bg-main, #FBF3EA);
   color: var(--color-text-primary, #3E332E);
-  font-family: 'Quicksand', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: var(--font-body);
 }
 
 main { flex: 1; }
@@ -26,7 +25,7 @@ main { flex: 1; }
 }
 
 .emphasis {
-  font-family: 'Fraunces', Georgia, serif;
+  font-family: var(--font-heading);
   font-style: italic;
   font-weight: 500;
   color: var(--color-burgundy-primary, #D97785);
@@ -58,7 +57,7 @@ main { flex: 1; }
 }
 
 .heroHeading {
-  font-family: 'Fraunces', Georgia, serif;
+  font-family: var(--font-heading);
   font-weight: 600;
   font-size: clamp(2.3rem, 4.4vw, 3.4rem);
   line-height: 1.12;
@@ -166,7 +165,7 @@ main { flex: 1; }
 }
 
 .sectionTitle {
-  font-family: 'Fraunces', Georgia, serif;
+  font-family: var(--font-heading);
   font-weight: 600;
   font-size: clamp(1.5rem, 2.6vw, 2rem);
   margin: 0.35rem 0 0;
@@ -232,7 +231,7 @@ main { flex: 1; }
 }
 
 .memoryBody { padding: 1.1rem 1.25rem 1.35rem; }
-.memoryTitle { font-family: 'Fraunces', serif; font-weight: 600; font-size: 1.15rem; margin: 0 0 0.4rem; }
+.memoryTitle { font-family: var(--font-heading); font-weight: 600; font-size: 1.15rem; margin: 0 0 0.4rem; }
 .memoryCaption { font-size: 0.88rem; line-height: 1.55; color: var(--color-text-secondary, #8A7568); margin: 0; }
 
 /* ---------- TWO COLUMN: DATES + NOTE ---------- */
@@ -255,7 +254,7 @@ main { flex: 1; }
   border-radius: 16px;
   background: var(--color-surface-sunk, #F5EAE0);
   display: flex; flex-direction: column; align-items: center; justify-content: center;
-  font-family: 'Fraunces', serif; font-weight: 600; color: var(--color-burgundy-primary, #D97785);
+  font-family: var(--font-heading); font-weight: 600; color: var(--color-burgundy-primary, #D97785);
 }
 .dateBadgeMo { font-size: 0.62rem; font-weight: 700; letter-spacing: 0.05em; color: var(--color-sage, #8FAE7D); text-transform: uppercase; }
 .dateBadgeDay { font-size: 1.2rem; line-height: 1; }
@@ -274,7 +273,7 @@ main { flex: 1; }
 }
 .noteSparkle { position: absolute; top: 18px; right: 20px; color: var(--color-blush, #F4A9B8); }
 .noteQuote {
-  font-family: 'Fraunces', serif;
+  font-family: var(--font-heading);
   font-style: italic;
   font-size: 1.15rem;
   line-height: 1.55;
