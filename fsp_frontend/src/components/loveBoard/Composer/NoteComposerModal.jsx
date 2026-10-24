@@ -1,30 +1,43 @@
 import { useMemo, useState } from 'react';
-import { motion } from 'framer-motion';
-import { X, Pin } from 'lucide-react';
+import Button from '../../ui/Button/Button';
+import Modal from '../../ui/Modal/Modal';
 import PaperPicker from './PaperPicker';
 import MoodPicker from './MoodPicker';
 import NoteCanvasEditor from './NoteCanvasEditor';
+import { inputClass, labelClass } from '../common/lbUi';
 import { deriveSearchableContent, stringifyJsonList } from '../../../utils/noteCanvas';
 
-const STEPS = ['Choose Paper', 'Design It'];
+const STEPS = ['Choose paper', 'Design it'];
 
 function byFilename(list = []) {
   return Object.fromEntries(list.map((item) => [item.filename, item.url]));
 }
 
-export default function NoteComposerModal({ assets, onClose, onCreate, creating }) {
+const emptyForm = (assets) => ({
+  paperImage: assets?.papers?.[0]?.filename || '',
+  title: '',
+  textBoxes: [],
+  attachments: [],
+  mood: null,
+  isPrivate: false,
+});
+
+export default function NoteComposerModal({ open, assets, onClose, onCreate, creating }) {
   const [step, setStep] = useState(0);
-  const [form, setForm] = useState({
-    paperImage: assets?.papers?.[0]?.filename || '',
-    title: '',
-    textBoxes: [],
-    attachments: [],
-    mood: null,
-    isPrivate: false,
-  });
+  const [form, setForm] = useState(() => emptyForm(assets));
+
+  // Start every time the composer opens from a blank letter on step 1 (adjusted during render,
+  // so there is no flash of the previous draft).
+  const [wasOpen, setWasOpen] = useState(open);
+  if (open !== wasOpen) {
+    setWasOpen(open);
+    if (open) {
+      setStep(0);
+      setForm(emptyForm(assets));
+    }
+  }
 
   const papers = useMemo(() => byFilename(assets?.papers), [assets]);
-
   const canAdvance = step === 0 ? !!form.paperImage : true;
 
   const handleSubmit = async () => {
@@ -39,132 +52,84 @@ export default function NoteComposerModal({ assets, onClose, onCreate, creating 
     });
   };
 
+  const footer = (
+    <>
+      <Button onClick={() => setStep((s) => Math.max(0, s - 1))} disabled={step === 0 || creating}>
+        Back
+      </Button>
+      {step < STEPS.length - 1 ? (
+        <Button variant="primary" onClick={() => canAdvance && setStep((s) => s + 1)} disabled={!canAdvance}>
+          Next
+        </Button>
+      ) : (
+        <Button variant="primary" onClick={handleSubmit} disabled={creating}>
+          {creating ? 'Pinning…' : 'Pin to board'}
+        </Button>
+      )}
+    </>
+  );
+
   return (
-    <motion.div
-      className="fixed inset-0 z-[150] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      onClick={onClose}
-    >
-      <motion.div
-        className="flex max-h-[88vh] w-full max-w-3xl overflow-hidden rounded-2xl border border-[#e7d8c2]/60 bg-[#fffaf1] shadow-2xl"
-        initial={{ opacity: 0, y: 30, scale: 0.96 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        exit={{ opacity: 0, y: 20, scale: 0.97 }}
-        transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-        onClick={(e) => e.stopPropagation()}
-      >
-        {step === 0 && (
-          <div className="hidden w-64 shrink-0 flex-col items-center justify-center gap-4 bg-[#efe4d2] p-6 sm:flex">
-            <div className="relative h-56 w-52 drop-shadow-[0_12px_20px_rgba(40,25,10,0.35)]">
+    <Modal open={open} onClose={onClose} title={STEPS[step]} size="lg" locked={creating} footer={footer}>
+      <p className="m-0 mb-4 font-caveat text-2xl leading-none font-bold text-(--tomato)">
+        step {step + 1} of {STEPS.length}
+      </p>
+
+      {step === 0 && (
+        <div className="flex gap-5">
+          <div className="hidden w-56 shrink-0 flex-col items-center justify-center gap-3 rounded-2xl border-2 border-solid border-(--ink) bg-(--gelato-tint) p-4 sm:flex">
+            <div className="relative h-52 w-44">
               {papers[form.paperImage] && (
-                <img src={papers[form.paperImage]} alt="" className="absolute inset-0 h-full w-full object-fill" />
+                <img src={papers[form.paperImage]} alt="Chosen paper" className="absolute inset-0 h-full w-full object-contain drop-shadow-[3px_4px_0_rgba(23,43,112,0.25)]" />
               )}
             </div>
-            <p className="text-center text-xs text-[#8a7360]">Pick the paper, then design it on the next step.</p>
+            <p className="m-0 text-center text-sm text-(--ink-soft)">Pick the paper, then design it on the next step.</p>
           </div>
-        )}
-
-        {/* Wizard */}
-        <div className="flex flex-1 flex-col">
-          <div className="flex items-center justify-between border-b border-[#e7d8c2] px-6 py-4">
-            <div>
-              <p className="m-0 text-xs uppercase tracking-wide text-[#8a7360]">Step {step + 1} of {STEPS.length}</p>
-              <h2 className="m-0 font-serif text-lg text-[#3a2b1e]">{STEPS[step]}</h2>
-            </div>
-            <button
-              type="button"
-              onClick={onClose}
-              className="appearance-none rounded-full border-0 bg-transparent p-1.5 text-[#8a7360] transition hover:bg-black/5 hover:text-[#3a2b1e]"
-              aria-label="Close"
-            >
-              <X size={18} />
-            </button>
-          </div>
-
-          <div className="flex-1 overflow-y-auto px-6 py-5">
-            {step === 0 && (
-              <PaperPicker papers={assets?.papers} value={form.paperImage} onChange={(paperImage) => setForm((f) => ({ ...f, paperImage }))} />
-            )}
-
-            {step === 1 && (
-              <div className="space-y-5">
-                <div>
-                  <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-[#8a7360]">Title (optional)</label>
-                  <input
-                    type="text"
-                    value={form.title}
-                    onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
-                    placeholder="A little heading… (shown in Archive & Layers, not on the paper)"
-                    className="w-full rounded-lg border border-[#e2d4bf] bg-white px-3 py-2 text-sm"
-                  />
-                </div>
-
-                <NoteCanvasEditor
-                  paperUrl={papers[form.paperImage]}
-                  assets={assets}
-                  textBoxes={form.textBoxes}
-                  attachments={form.attachments}
-                  onChangeTextBoxes={(textBoxes) => setForm((f) => ({ ...f, textBoxes }))}
-                  onChangeAttachments={(attachments) => setForm((f) => ({ ...f, attachments }))}
-                />
-
-                <div>
-                  <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-[#8a7360]">Mood</label>
-                  <MoodPicker value={form.mood} onChange={(mood) => setForm((f) => ({ ...f, mood }))} />
-                </div>
-                <label className="flex items-center gap-2 text-sm text-[#4a3a2c]">
-                  <input
-                    type="checkbox"
-                    checked={form.isPrivate}
-                    onChange={(e) => setForm((f) => ({ ...f, isPrivate: e.target.checked }))}
-                  />
-                  Keep this letter private (only I can see it)
-                </label>
-              </div>
-            )}
-          </div>
-
-          <div className="flex items-center justify-between border-t border-[#e7d8c2] px-6 py-4">
-            <button
-              type="button"
-              onClick={() => setStep((s) => Math.max(0, s - 1))}
-              disabled={step === 0}
-              className="appearance-none rounded-full border-0 bg-[#ece1d2] px-4 py-2 text-sm text-[#4a3a2c] transition hover:bg-[#e2d4bf] disabled:opacity-40"
-            >
-              Back
-            </button>
-
-            {step < STEPS.length - 1 ? (
-              <button
-                type="button"
-                onClick={() => canAdvance && setStep((s) => s + 1)}
-                disabled={!canAdvance}
-                className="appearance-none rounded-full border-0 bg-[#a8391f] px-5 py-2 text-sm font-medium text-white transition hover:bg-[#8c2c16] disabled:opacity-50"
-              >
-                Next
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={handleSubmit}
-                disabled={creating}
-                className="appearance-none rounded-full border-0 bg-[#a8391f] px-5 py-2 text-sm font-medium text-white transition hover:bg-[#8c2c16] disabled:opacity-50"
-              >
-                {creating ? (
-                  'Pinning…'
-                ) : (
-                  <span className="inline-flex items-center gap-1.5">
-                    <Pin size={14} />
-                    Pin to Board
-                  </span>
-                )}
-              </button>
-            )}
+          <div className="min-w-0 flex-1">
+            <PaperPicker papers={assets?.papers} value={form.paperImage} onChange={(paperImage) => setForm((f) => ({ ...f, paperImage }))} />
           </div>
         </div>
-      </motion.div>
-    </motion.div>
+      )}
+
+      {step === 1 && (
+        <div className="space-y-5">
+          <div>
+            <label htmlFor="lb-title" className={labelClass}>Title (optional)</label>
+            <input
+              id="lb-title"
+              type="text"
+              value={form.title}
+              onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
+              placeholder="A little heading… (shown in Archive & Layers, not on the paper)"
+              className={inputClass}
+            />
+          </div>
+
+          <NoteCanvasEditor
+            paperUrl={papers[form.paperImage]}
+            assets={assets}
+            textBoxes={form.textBoxes}
+            attachments={form.attachments}
+            onChangeTextBoxes={(textBoxes) => setForm((f) => ({ ...f, textBoxes }))}
+            onChangeAttachments={(attachments) => setForm((f) => ({ ...f, attachments }))}
+          />
+
+          <div>
+            <p className={labelClass}>Mood</p>
+            <MoodPicker value={form.mood} onChange={(mood) => setForm((f) => ({ ...f, mood }))} />
+          </div>
+
+          <label className="flex min-h-11 cursor-pointer items-center gap-3 text-sm font-bold text-(--ink)">
+            <input
+              type="checkbox"
+              checked={form.isPrivate}
+              onChange={(e) => setForm((f) => ({ ...f, isPrivate: e.target.checked }))}
+              className="lb-focus size-6 accent-(--tomato)"
+            />
+            Keep this letter private (only I can see it)
+          </label>
+        </div>
+      )}
+    </Modal>
   );
 }

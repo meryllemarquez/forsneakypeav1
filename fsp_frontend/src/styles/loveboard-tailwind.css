@@ -26,9 +26,30 @@
   --font-quicksand: "Quicksand", sans-serif;
   --font-outfit: "Outfit", sans-serif;
   --font-manrope: "Manrope", sans-serif;
+}
 
-  --color-cork: #b98a5e;
-  --color-cork-dark: #8a6339;
-  --color-cork-shadow: #5a3d20;
-  --color-paper-edge: rgba(60, 40, 20, 0.25);
+/* The Love Board room: terrazzo floor, notebook-paper board. All CSS, no images. */
+.lb-room {
+  background-color: var(--gelato);
+  background-image:
+    radial-gradient(circle at 20% 30%, rgb(255 159 28 / 0.85) 0 3.5px, transparent 4.5px),
+    radial-gradient(circle at 70% 65%, rgb(92 179 255 / 0.95) 0 3px, transparent 4px),
+    radial-gradient(circle at 40% 85%, rgb(224 48 26 / 0.6) 0 2.5px, transparent 3.5px),
+    radial-gradient(circle at 85% 15%, rgb(31 85 201 / 0.7) 0 2.5px, transparent 3.5px);
+  background-size: 52px 52px, 42px 42px, 62px 62px, 34px 34px;
+}
+
+.lb-board {
+  background-color: #fffdf6;
+  background-image:
+    linear-gradient(to right, transparent 140px, rgb(224 48 26 / 0.45) 140px, rgb(224 48 26 / 0.45) 144px, transparent 144px),
+    repeating-linear-gradient(to bottom, transparent 0, transparent 54px, rgb(92 179 255 / 0.6) 54px, rgb(92 179 255 / 0.6) 58px);
+  border: 4px solid var(--ink);
+  border-radius: 40px;
+  box-shadow: 14px 14px 0 var(--sea);
+}
+
+.lb-focus:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-offset);
 }

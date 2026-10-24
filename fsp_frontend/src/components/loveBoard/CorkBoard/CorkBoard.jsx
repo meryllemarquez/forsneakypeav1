@@ -1,6 +1,6 @@
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { AnimatePresence } from 'framer-motion';
-import { Mail } from 'lucide-react';
+import Icon from '../../Icon';
 import Note from '../Note/Note';
 import Sticker from '../Sticker/Sticker';
 import { BOARD_WIDTH, BOARD_HEIGHT } from '../../../constants/loveBoardConstants';
@@ -263,10 +263,6 @@ const CorkBoard = forwardRef(function CorkBoard(
   const pins = useMemo(() => byFilename(assets?.pins), [assets]);
   const tapes = useMemo(() => byFilename(assets?.tapes), [assets]);
   const stickerImages = useMemo(() => byFilename(assets?.stickers), [assets]);
-  const backgroundUrl =
-    assets?.backgrounds?.find((bg) => bg.filename === 'newnotesbg.png')?.url ||
-    assets?.backgrounds?.[0]?.url ||
-    '/assets/love-board/backgrounds/newnotesbg.png';
 
   return (
     <div
@@ -278,21 +274,15 @@ const CorkBoard = forwardRef(function CorkBoard(
     >
       <div
         ref={innerRef}
-        className="relative shrink-0 rounded-lg shadow-[0_25px_60px_-15px_rgba(0,0,0,0.6)]"
+        className="lb-board relative shrink-0"
         style={{
           width: BOARD_WIDTH,
           height: BOARD_HEIGHT,
           transform: `scale(${scale})`,
           transformOrigin: zoomOverride == null ? 'center' : 'top left',
           transition: smoothZoom ? 'transform 180ms cubic-bezier(0.22, 1, 0.36, 1)' : 'none',
-          backgroundImage: `url(${backgroundUrl})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat',
         }}
       >
-        <div className="pointer-events-none absolute inset-0 shadow-[inset_0_0_140px_rgba(20,10,0,0.35)]" />
-
         <AnimatePresence>
           {stickers.map((sticker) => (
             <Sticker
@@ -338,9 +328,9 @@ const CorkBoard = forwardRef(function CorkBoard(
 
         {notes.length === 0 && stickers.length === 0 && (
           <div className="absolute inset-0 flex items-center justify-center">
-            <div className="flex flex-col items-center gap-2 rounded-2xl bg-black/30 px-6 py-5 text-center text-white/90 backdrop-blur-sm">
-              <Mail size={28} strokeWidth={1.5} />
-              <p className="m-0 font-caveat text-2xl">Pin your first letter to the board</p>
+            <div className="flex flex-col items-center gap-4 rounded-[48px] border-4 border-solid border-(--ink) bg-white px-16 py-12 text-center shadow-[10px_10px_0_var(--citrus)]">
+              <Icon name="envelope" size={160} sticker tilt={-6} />
+              <p className="m-0 font-caveat text-6xl leading-none font-bold text-(--tomato)">Pin your first letter to the board</p>
             </div>
           </div>
         )}

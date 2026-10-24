@@ -3,6 +3,7 @@ import { Type, Pin as PinIcon, Trash2, AlignLeft, AlignCenter, AlignRight, Bold 
 import TextBoxHandle from './TextBoxHandle';
 import AttachmentHandle from './AttachmentHandle';
 import FontPicker from './FontPicker';
+import { Chip, PillButton, RoundButton } from '../common/lbUi';
 import { NOTE_CANVAS_WIDTH, NOTE_CANVAS_HEIGHT, createTextBox, createAttachment } from '../../../utils/noteCanvas';
 import { FONT_COLOR_SWATCHES } from '../../../constants/loveBoardConstants';
 
@@ -53,34 +54,22 @@ export default function NoteCanvasEditor({ paperUrl, assets, textBoxes, attachme
 
   return (
     <div className="space-y-3">
-      <div className="flex gap-2">
-        <button
-          type="button"
-          onClick={addBlock}
-          className="inline-flex flex-1 appearance-none items-center justify-center gap-1.5 rounded-lg border-0 bg-[#ece1d2] py-2 text-xs font-medium text-[#4a3a2c] transition hover:bg-[#e2d4bf]"
-        >
-          <Type size={13} />
+      <div className="flex flex-wrap gap-2">
+        <PillButton onClick={addBlock} className="flex-1">
+          <Type size={16} strokeWidth={2.6} aria-hidden="true" />
           Add Text Box
-        </button>
-        <button
-          type="button"
-          onClick={() => addAttachment('PIN')}
-          className="inline-flex flex-1 appearance-none items-center justify-center gap-1.5 rounded-lg border-0 bg-[#ece1d2] py-2 text-xs font-medium text-[#4a3a2c] transition hover:bg-[#e2d4bf]"
-        >
-          <PinIcon size={13} />
+        </PillButton>
+        <PillButton onClick={() => addAttachment('PIN')} className="flex-1">
+          <PinIcon size={16} strokeWidth={2.6} aria-hidden="true" />
           Add Pin
-        </button>
-        <button
-          type="button"
-          onClick={() => addAttachment('TAPE')}
-          className="inline-flex flex-1 appearance-none items-center justify-center gap-1.5 rounded-lg border-0 bg-[#ece1d2] py-2 text-xs font-medium text-[#4a3a2c] transition hover:bg-[#e2d4bf]"
-        >
+        </PillButton>
+        <PillButton onClick={() => addAttachment('TAPE')} className="flex-1">
           Add Tape
-        </button>
+        </PillButton>
       </div>
 
       <div
-        className="relative mx-auto overflow-hidden rounded-lg shadow-[0_12px_24px_-8px_rgba(40,25,10,0.4)]"
+        className="relative mx-auto overflow-hidden rounded-lg border-2 border-solid border-(--ink) shadow-[5px_5px_0_var(--sea)]"
         style={{ width: NOTE_CANVAS_WIDTH, height: NOTE_CANVAS_HEIGHT }}
         onClick={() => setSelection(null)}
       >
@@ -119,14 +108,14 @@ export default function NoteCanvasEditor({ paperUrl, assets, textBoxes, attachme
       </div>
 
       {replacingId && (
-        <div className="rounded-lg border border-[#e2d4bf] bg-white p-2.5">
-          <div className="mb-1.5 flex items-center justify-between">
-            <p className="m-0 text-[11px] font-semibold tracking-wide text-[#8a7360] uppercase">Choose Replacement</p>
-            <button type="button" onClick={() => setReplacingId(null)} className="appearance-none rounded border-0 bg-transparent text-xs text-[#8a7360]">
+        <div className="rounded-2xl border-2 border-solid border-(--ink) bg-white p-3">
+          <div className="mb-2 flex items-center justify-between">
+            <p className="m-0 text-sm font-extrabold">Choose replacement</p>
+            <PillButton onClick={() => setReplacingId(null)} className="!min-h-11 !px-4">
               Done
-            </button>
+            </PillButton>
           </div>
-          <div className="grid grid-cols-6 gap-1.5">
+          <div className="grid grid-cols-4 gap-2 sm:grid-cols-6">
             {replaceOptions.map((opt) => (
               <button
                 key={opt.filename}
@@ -135,10 +124,11 @@ export default function NoteCanvasEditor({ paperUrl, assets, textBoxes, attachme
                   updateAttachment(replacingId, { image: opt.filename });
                   setReplacingId(null);
                 }}
-                className="appearance-none rounded border-0 bg-[#f4ece0] p-1"
+                className="lb-focus min-h-11 cursor-pointer appearance-none rounded-xl border-2 border-solid border-(--ink) bg-(--paper) p-1 hover:bg-(--gelato-tint)"
+                aria-label={`Use ${opt.label}`}
                 title={opt.label}
               >
-                <img src={opt.url} alt={opt.label} className="aspect-square w-full object-contain" />
+                <img src={opt.url} alt="" className="aspect-square w-full object-contain" />
               </button>
             ))}
           </div>
@@ -146,23 +136,18 @@ export default function NoteCanvasEditor({ paperUrl, assets, textBoxes, attachme
       )}
 
       {selectedBlock && (
-        <div className="space-y-2.5 rounded-lg border border-[#e2d4bf] bg-white p-3">
+        <div className="space-y-3 rounded-2xl border-2 border-solid border-(--ink) bg-white p-4">
           <div className="flex items-center justify-between">
-            <p className="m-0 text-[11px] font-semibold tracking-wide text-[#8a7360] uppercase">Text Style</p>
-            <button
-              type="button"
-              onClick={() => removeBlock(selectedBlock.id)}
-              className="appearance-none rounded border-0 bg-transparent p-1 text-[#a8391f] transition hover:bg-[#f4e1da]"
-              title="Delete text box"
-            >
-              <Trash2 size={13} />
-            </button>
+            <p className="m-0 font-caveat text-2xl leading-none font-bold text-(--tomato)">Text style</p>
+            <RoundButton label="Delete text box" onClick={() => removeBlock(selectedBlock.id)}>
+              <Trash2 size={18} strokeWidth={2.6} aria-hidden="true" />
+            </RoundButton>
           </div>
 
           <FontPicker value={selectedBlock.fontFamily} onChange={(fontFamily) => updateBlock(selectedBlock.id, { fontFamily })} />
 
           <div className="flex flex-wrap items-center gap-3">
-            <label className="text-[10px] font-semibold tracking-wide text-[#8a7360] uppercase">
+            <label className="flex min-h-11 items-center gap-2 text-sm font-extrabold">
               Size
               <input
                 type="range"
@@ -170,58 +155,56 @@ export default function NoteCanvasEditor({ paperUrl, assets, textBoxes, attachme
                 max={48}
                 value={selectedBlock.fontSize}
                 onChange={(e) => updateBlock(selectedBlock.id, { fontSize: Number(e.target.value) })}
-                className="ml-2 align-middle accent-[#a8391f]"
+                className="lb-focus h-11 accent-(--tomato)"
               />
             </label>
 
-            <button
-              type="button"
+            <Chip
+              active={selectedBlock.fontWeight === 'bold'}
               onClick={() => updateBlock(selectedBlock.id, { fontWeight: selectedBlock.fontWeight === 'bold' ? 'normal' : 'bold' })}
-              className={`appearance-none rounded border-0 p-1.5 transition ${
-                selectedBlock.fontWeight === 'bold' ? 'bg-[#a8391f] text-white' : 'bg-[#ece1d2] text-[#4a3a2c] hover:bg-[#e2d4bf]'
-              }`}
-              title="Bold"
+              aria-label="Bold"
             >
-              <Bold size={13} />
-            </button>
+              <Bold size={18} strokeWidth={2.8} aria-hidden="true" />
+            </Chip>
 
-            <div className="flex items-center gap-1 rounded border border-[#e2d4bf] p-0.5">
+            <div className="flex items-center gap-1" role="group" aria-label="Alignment">
               {[
                 { value: 'left', Icon: AlignLeft },
                 { value: 'center', Icon: AlignCenter },
                 { value: 'right', Icon: AlignRight },
               ].map(({ value, Icon }) => (
-                <button
+                <Chip
                   key={value}
-                  type="button"
+                  active={selectedBlock.align === value}
                   onClick={() => updateBlock(selectedBlock.id, { align: value })}
-                  className={`appearance-none rounded border-0 p-1 transition ${
-                    selectedBlock.align === value ? 'bg-[#a8391f] text-white' : 'text-[#8a7360] hover:bg-[#ece1d2]'
-                  }`}
+                  aria-label={`Align ${value}`}
+                  className="!px-3"
                 >
-                  <Icon size={13} />
-                </button>
-              ))}
-            </div>
-
-            <div className="flex items-center gap-1.5">
-              {FONT_COLOR_SWATCHES.map((color) => (
-                <button
-                  key={color}
-                  type="button"
-                  onClick={() => updateBlock(selectedBlock.id, { color })}
-                  style={{ backgroundColor: color }}
-                  className={`h-5 w-5 appearance-none rounded-full border-0 ${
-                    selectedBlock.color === color ? 'ring-2 ring-[#a8391f] ring-offset-1' : ''
-                  }`}
-                />
+                  <Icon size={18} strokeWidth={2.6} aria-hidden="true" />
+                </Chip>
               ))}
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-4">
-            <label className="text-[10px] font-semibold tracking-wide text-[#8a7360] uppercase">
-              Line Height
+          <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Text colour">
+            {FONT_COLOR_SWATCHES.map((color) => (
+              <button
+                key={color}
+                type="button"
+                onClick={() => updateBlock(selectedBlock.id, { color })}
+                style={{ backgroundColor: color }}
+                aria-label={`Text colour ${color}`}
+                aria-pressed={selectedBlock.color === color}
+                className={`lb-focus size-11 cursor-pointer appearance-none rounded-full border-2 border-solid border-(--ink) ${
+                  selectedBlock.color === color ? 'shadow-[0_0_0_3px_white,0_0_0_5px_var(--ink)]' : ''
+                }`}
+              />
+            ))}
+          </div>
+
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-1">
+            <label className="flex min-h-11 items-center gap-2 text-sm font-extrabold">
+              Line height
               <input
                 type="range"
                 min={1}
@@ -229,11 +212,11 @@ export default function NoteCanvasEditor({ paperUrl, assets, textBoxes, attachme
                 step={0.1}
                 value={selectedBlock.lineHeight ?? 1.3}
                 onChange={(e) => updateBlock(selectedBlock.id, { lineHeight: Number(e.target.value) })}
-                className="ml-2 align-middle accent-[#a8391f]"
+                className="lb-focus h-11 accent-(--tomato)"
               />
             </label>
-            <label className="text-[10px] font-semibold tracking-wide text-[#8a7360] uppercase">
-              Letter Spacing
+            <label className="flex min-h-11 items-center gap-2 text-sm font-extrabold">
+              Letter spacing
               <input
                 type="range"
                 min={-1}
@@ -241,7 +224,7 @@ export default function NoteCanvasEditor({ paperUrl, assets, textBoxes, attachme
                 step={0.5}
                 value={selectedBlock.letterSpacing ?? 0}
                 onChange={(e) => updateBlock(selectedBlock.id, { letterSpacing: Number(e.target.value) })}
-                className="ml-2 align-middle accent-[#a8391f]"
+                className="lb-focus h-11 accent-(--tomato)"
               />
             </label>
           </div>
@@ -249,7 +232,7 @@ export default function NoteCanvasEditor({ paperUrl, assets, textBoxes, attachme
       )}
 
       {selectedAttachment && (
-        <p className="m-0 text-center text-[11px] text-[#8a7360]">Drag to move, use the corner handle to resize, or the top handle to rotate.</p>
+        <p className="m-0 text-center text-sm text-(--ink-soft)">Drag to move, use the corner handle to resize, or the top handle to rotate.</p>
       )}
     </div>
   );

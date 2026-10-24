@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { AnimatePresence } from 'framer-motion';
 import { ArrowLeft, MousePointer2, Hand, Undo2, Redo2, ZoomOut, ZoomIn, RotateCcw } from 'lucide-react';
 import '../styles/loveboard-fonts.css';
 import '../styles/loveboard-tailwind.css';
@@ -512,8 +511,8 @@ export default function LoveLettersPage() {
   };
 
   return (
-    <div className="fixed inset-0 flex flex-col bg-[#1c140c] font-sans text-[#3a2b1e]">
-      <header className="z-[110] flex items-center justify-between gap-2 overflow-x-auto border-0 border-b-2 border-solid border-(--ink) bg-(--white) px-3 py-3 text-(--ink) sm:gap-4 sm:px-6">
+    <div className="lb-room fixed inset-0 flex flex-col font-sans text-(--ink)">
+      <header className="z-[110] flex flex-wrap items-center justify-between gap-2 border-0 border-b-2 border-solid border-(--ink) bg-(--white) px-3 py-3 text-(--ink) sm:gap-4 sm:px-6">
         <div className="flex shrink-0 items-center gap-3 sm:gap-4">
           <button
             type="button"
@@ -531,7 +530,7 @@ export default function LoveLettersPage() {
           </div>
         </div>
 
-        <div role="toolbar" aria-label="Board tools" className="flex shrink-0 items-center gap-1 sm:gap-1.5">
+        <div role="toolbar" aria-label="Board tools" className="flex flex-wrap items-center gap-1 sm:gap-1.5">
           <HeaderIconButton label="Select" active={activeTool === 'select'} onClick={() => setActiveTool('select')}>
             <MousePointer2 size={20} strokeWidth={2.4} />
           </HeaderIconButton>
@@ -565,12 +564,13 @@ export default function LoveLettersPage() {
 
       <main className="relative flex-1 overflow-hidden">
         {loading && (
-          <div className="absolute inset-0 z-[130] flex items-center justify-center bg-[#1c140c]/80 text-[#f4ece0]">
-            Loading your board…
+          <div className="absolute inset-0 z-[130] flex items-center justify-center bg-(--paper)/85" role="status" aria-live="polite">
+            <p className="m-0 rounded-full border-2 border-solid border-(--ink) bg-white px-6 py-2 font-serif text-lg font-bold">Loading your board…</p>
           </div>
         )}
         {error && (
-          <div className="absolute top-4 left-1/2 z-[130] -translate-x-1/2 rounded-lg bg-red-100 px-4 py-2 text-sm text-red-700 shadow">
+          <div role="alert" className="absolute top-4 left-1/2 z-[130] flex -translate-x-1/2 items-center gap-3 rounded-2xl border-2 border-solid border-(--ink) bg-(--citrus-tint) px-4 py-2 text-sm font-bold text-(--ink)">
+            <Icon name="bell" size={28} />
             {error}
           </div>
         )}
@@ -663,31 +663,24 @@ export default function LoveLettersPage() {
         />
       </main>
 
-      <AnimatePresence>
-        {composerOpen && (
-          <NoteComposerModal
-            assets={assets}
-            creating={creating}
-            onClose={() => setComposerOpen(false)}
-            onCreate={handleCreateNote}
-          />
-        )}
-      </AnimatePresence>
+      <NoteComposerModal
+        open={composerOpen}
+        assets={assets}
+        creating={creating}
+        onClose={() => setComposerOpen(false)}
+        onCreate={handleCreateNote}
+      />
 
-      <AnimatePresence>
-        {readerNote && (
-          <NoteReaderModal
-            note={readerNote}
-            assets={assets}
-            saving={readerSaving}
-            onClose={() => setReaderNoteId(null)}
-            onSave={handleSaveNoteEdit}
-            onToggleFavorite={handleToggleFavorite}
-            onToggleArchive={handleToggleArchive}
-            onDelete={() => requestDeleteNote(readerNote)}
-          />
-        )}
-      </AnimatePresence>
+      <NoteReaderModal
+        note={readerNote || null}
+        assets={assets}
+        saving={readerSaving}
+        onClose={() => setReaderNoteId(null)}
+        onSave={handleSaveNoteEdit}
+        onToggleFavorite={handleToggleFavorite}
+        onToggleArchive={handleToggleArchive}
+        onDelete={() => requestDeleteNote(readerNote)}
+      />
 
       <ConfirmDialog
         open={!!confirmState}

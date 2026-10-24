@@ -49,7 +49,7 @@ export const ATTACHMENT_TYPES = {
   NONE: 'NONE',
 };
 
-export const FONT_COLOR_SWATCHES = ['#2b2b2b', '#5b3a29', '#8c230f', '#1f4d3d', '#2a3d66', '#6b3f6b'];
+export const FONT_COLOR_SWATCHES = ['#2b2b2b', '#172B70', '#1F55C9', '#E0301A', '#1f4d3d', '#6b3f6b'];
 
 // The board is a large scrollable canvas — notes/stickers get a randomized
 // spot within it so nothing is ever perfectly aligned.

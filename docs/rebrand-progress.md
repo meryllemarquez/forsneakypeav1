@@ -2,7 +2,7 @@
 
 Branch: `rebrand` (from `main`, pushed). Never merge to `main` without the owner saying so.
 Design reference: `docs/rebrand/*.dc.html` (HTML mockups with sample content). Logo options: `docs/brand/`.
-Frontend lives in `fsp_frontend`. Last finished phase: **R5** (commit `afba248`). Next: **R6 Love Board**.
+Frontend lives in `fsp_frontend`. Last finished phase: **R6** (see git log). Next: **R7 Landing, Profile, Admin**.
 
 ## Phase commits (exact titles)
 
@@ -42,6 +42,8 @@ Commits end with `Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>`. Ne
 **R4 Memories**: albums grid, gallery (favorite/highlight always visible, 44px), lightbox (one panel layout), album form with doodle picker, Calendar Dump restyled (PNG export verified inline and fullscreen; reposition drag verified on desktop and touch). Album doodle: stored in the existing `iconStyle` text column as `doodle:<name>`; anything else (legacy `camera`) means automatic keyword pick (`src/utils/doodleFor.js`, full icon kit).
 
 **R5 Dates**: map-grid page, stats, status + category chips, cards with doodle tile and quick actions, drawer (shared `Modal` `placement="right"`), checklist, celebration banner, 15-field form. **Backend change (additive):** `iconStyle` added to `HomeSummaryDTO.FolderCard` + tests; the frontend falls back to the keyword pick when the field is missing. Merging `rebrand` therefore also deploys the backend.
+
+**R6 Love Board**: terrazzo room + CSS notebook board (no `newnotesbg.png`/`notesbg.jpg`, deleted), white header from R2, ink toolbar pill with a tomato "Write a letter" button (grid of 4 on phones), drawers (`DrawerPanel` in `components/loveBoard/common/lbUi.jsx`: stickers, layers, archive; Escape closes, non-modal), search card, composer and reader on the shared `Modal` (always mounted, `open` prop), 44px controls, handles recoloured. Paper/pin/tape/sticker PNGs shrunk in place by `scripts/optimize-loveboard-assets.mjs` (same names and aspect, 16.6 MB -> 0.36 MB; originals are in git history). Text-colour swatches in the composer changed to the new palette (saved letters keep their stored colours). Fixed: the sticker popover lost its counter-scale (framer-motion overwrote the CSS transform).
 
 ## Decisions and conventions
 

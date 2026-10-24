@@ -1,20 +1,27 @@
 import { motion } from 'framer-motion';
-import { Mail, Sparkles, ImagePlus, Search, Heart, Archive, Scissors, Layers } from 'lucide-react';
+import { Archive, Layers, Scissors, Search } from 'lucide-react';
+import Icon from '../../Icon';
 
-function ToolbarButton({ label, Icon, active, disabled, onClick }) {
+// One action in the ink pill: a white disc holding the icon, plus a label (hidden on phones).
+function ToolbarButton({ label, active, disabled, onClick, children }) {
   return (
     <motion.button
       type="button"
       onClick={onClick}
       disabled={disabled}
+      aria-label={label}
+      aria-pressed={active === undefined ? undefined : active}
       title={disabled ? `${label} (coming soon)` : label}
-      whileHover={disabled ? undefined : { y: -1 }}
-      whileTap={disabled ? undefined : { scale: 0.92 }}
-      className={`flex shrink-0 appearance-none flex-col items-center gap-1 rounded-xl border-0 px-3 py-2 text-[10.5px] font-medium tracking-wide transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-30 ${
-        active ? 'bg-[#a8391f] text-white shadow-inner' : 'bg-transparent text-[#f4ece0]/85 hover:bg-white/10 hover:text-[#f4ece0] disabled:hover:bg-transparent'
-      }`}
+      whileTap={disabled ? undefined : { scale: 0.94 }}
+      className="lb-focus flex min-h-12 shrink-0 cursor-pointer appearance-none items-center gap-2 rounded-full border-0 bg-transparent py-0 pr-2 pl-1.5 text-[15px] font-extrabold text-white transition-colors hover:not-disabled:bg-white/10 disabled:cursor-not-allowed disabled:opacity-40 sm:pr-4"
     >
-      <Icon size={18} strokeWidth={1.9} className={active && label === 'Favorites' ? 'fill-white/20' : ''} />
+      <span
+        className={`flex size-[34px] shrink-0 items-center justify-center rounded-full text-(--ink) ${
+          active ? 'bg-(--citrus)' : 'bg-white'
+        }`}
+      >
+        {children}
+      </span>
       <span className="hidden sm:block">{label}</span>
     </motion.button>
   );
@@ -36,21 +43,44 @@ export default function BoardToolbar({
 }) {
   return (
     <motion.div
-      className="fixed bottom-5 left-1/2 z-[110] flex max-w-[calc(100vw-1.5rem)] -translate-x-1/2 items-center gap-1 overflow-x-auto rounded-2xl border border-white/10 bg-[#2c2016]/85 px-2 py-2 shadow-[0_20px_50px_-12px_rgba(0,0,0,0.65)] backdrop-blur-xl"
+      role="toolbar"
+      aria-label="Board actions"
+      className="fixed bottom-4 left-1/2 z-[110] grid w-max max-w-[calc(100vw-1rem)] -translate-x-1/2 grid-cols-4 justify-items-center gap-1 rounded-[28px] bg-(--ink) p-2 shadow-[4px_4px_0_var(--sea)] sm:bottom-6 sm:flex sm:items-center sm:justify-center sm:gap-1.5 sm:rounded-full"
       initial={{ y: 40, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ delay: 0.2, type: 'spring', stiffness: 260, damping: 24 }}
     >
-      <ToolbarButton label="Add Letter" Icon={Mail} onClick={onWriteLetter} />
-      <ToolbarButton label="Add Sticker" Icon={Sparkles} active={stickerLibraryOpen} onClick={onToggleStickerLibrary} />
-      <ToolbarButton label="Upload Photo" Icon={ImagePlus} disabled />
-      <div className="mx-1 h-8 w-px shrink-0 bg-white/15" />
-      <ToolbarButton label="Search" Icon={Search} active={searchOpen} onClick={onToggleSearch} />
-      <ToolbarButton label="Favorites" Icon={Heart} active={favoritesOnly} onClick={onToggleFavorites} />
-      <ToolbarButton label="Archived" Icon={Archive} onClick={onOpenArchive} />
-      <ToolbarButton label="Layers" Icon={Layers} active={layersOpen} onClick={onToggleLayers} />
-      <div className="mx-1 h-8 w-px shrink-0 bg-white/15" />
-      <ToolbarButton label="Decorate" Icon={Scissors} active={decorateMode} onClick={onToggleDecorateMode} />
+      <button
+        type="button"
+        onClick={onWriteLetter}
+        aria-label="Write a letter"
+        className="lb-focus flex min-h-12 shrink-0 cursor-pointer appearance-none items-center gap-2 rounded-full border-2 border-solid border-white bg-(--tomato) py-0 pr-3 pl-2.5 text-base font-extrabold text-white sm:pr-5"
+      >
+        <Icon name="envelope" size={30} />
+        <span className="hidden sm:block">Write a letter</span>
+      </button>
+
+      <ToolbarButton label="Add Sticker" active={stickerLibraryOpen} onClick={onToggleStickerLibrary}>
+        <Icon name="sparkle" size={26} />
+      </ToolbarButton>
+      <ToolbarButton label="Upload Photo" disabled>
+        <Icon name="camera" size={26} />
+      </ToolbarButton>
+      <ToolbarButton label="Search" active={searchOpen} onClick={onToggleSearch}>
+        <Search size={18} strokeWidth={2.8} aria-hidden="true" />
+      </ToolbarButton>
+      <ToolbarButton label="Favorites" active={favoritesOnly} onClick={onToggleFavorites}>
+        <Icon name="heart" size={26} />
+      </ToolbarButton>
+      <ToolbarButton label="Archived" onClick={onOpenArchive}>
+        <Archive size={18} strokeWidth={2.8} aria-hidden="true" />
+      </ToolbarButton>
+      <ToolbarButton label="Layers" active={layersOpen} onClick={onToggleLayers}>
+        <Layers size={18} strokeWidth={2.8} aria-hidden="true" />
+      </ToolbarButton>
+      <ToolbarButton label="Decorate" active={decorateMode} onClick={onToggleDecorateMode}>
+        <Scissors size={18} strokeWidth={2.8} aria-hidden="true" />
+      </ToolbarButton>
     </motion.div>
   );
 }

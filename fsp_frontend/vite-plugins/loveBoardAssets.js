@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 // Virtual module that exposes every image found under
-// public/assets/love-board/{backgrounds,papers,pins,tapes,stickers} — scanned
+// public/assets/love-board/{papers,pins,tapes,stickers} — scanned
 // from disk on every load(), never hardcoded. Dropping a new PNG into any of
 // those folders makes it show up automatically: on rebuild in production, and
 // after a refresh in dev (the watcher below triggers a full reload so the
@@ -10,7 +10,7 @@ import path from 'node:path';
 const VIRTUAL_ID = 'virtual:love-board-manifest';
 const RESOLVED_VIRTUAL_ID = '\0' + VIRTUAL_ID;
 
-const CATEGORIES = ['backgrounds', 'papers', 'pins', 'tapes', 'stickers'];
+const CATEGORIES = ['papers', 'pins', 'tapes', 'stickers'];
 const IMAGE_EXTENSION_PATTERN = /\.(png|jpg|jpeg|webp|gif|svg)$/i;
 
 function toLabel(filename) {

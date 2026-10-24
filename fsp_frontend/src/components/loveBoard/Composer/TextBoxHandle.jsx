@@ -151,7 +151,7 @@ export default function TextBoxHandle({ block, scale = 1, isSelected, isEditing,
       ) : (
         <div
           className={`h-full w-full overflow-hidden p-1 break-words whitespace-pre-wrap ${
-            isSelected ? 'outline-2 outline-dashed outline-[#a8391f]/60' : ''
+            isSelected ? 'outline-2 outline-dashed outline-(--tomato)' : ''
           }`}
           style={textStyle}
         >
@@ -161,10 +161,10 @@ export default function TextBoxHandle({ block, scale = 1, isSelected, isEditing,
 
       {isSelected && !isEditing && (
         <>
-          <div className="pointer-events-none absolute inset-0 rounded-sm ring-2 ring-[#a8391f]/70" />
+          <div className="pointer-events-none absolute inset-0 rounded-sm ring-2 ring-(--tomato)" />
 
           <div
-            className="pointer-events-none absolute top-0 left-1/2 h-5 w-px bg-[#a8391f]/70"
+            className="pointer-events-none absolute top-0 left-1/2 h-5 w-px bg-(--tomato)"
             style={{ transform: 'translate(-50%, -100%)' }}
           />
           <button
@@ -174,7 +174,7 @@ export default function TextBoxHandle({ block, scale = 1, isSelected, isEditing,
             className="absolute top-0 left-1/2 flex h-8 w-8 -translate-x-1/2 cursor-grab appearance-none items-center justify-center border-0 bg-transparent active:cursor-grabbing"
             style={{ transform: 'translate(-50%, calc(-100% - 20px))', touchAction: 'none' }}
           >
-            <span className="h-4 w-4 rounded-full border border-[#a8391f]/50 bg-white shadow" />
+            <span className="h-4 w-4 rounded-full border border-(--ink) bg-white shadow" />
           </button>
 
           {['tl', 'tr', 'bl', 'br'].map((corner) => (
@@ -191,7 +191,7 @@ export default function TextBoxHandle({ block, scale = 1, isSelected, isEditing,
                 touchAction: 'none',
               }}
             >
-              <span className="h-2.5 w-2.5 rounded-sm border border-[#a8391f] bg-white shadow" />
+              <span className="h-2.5 w-2.5 rounded-sm border border-(--ink) bg-white shadow" />
             </button>
           ))}
         </>

@@ -51,10 +51,19 @@ export default function Note({ note, paperUrl, pins, tapes, boardScale = 1, panM
         y,
       }}
       onPointerDown={panMode ? undefined : onPointerDown}
-      whileHover={panMode || isDragging ? undefined : { scale: 1.03, boxShadow: '0 22px 32px -10px rgba(40,25,10,0.45)' }}
+      role="button"
+      tabIndex={panMode ? -1 : 0}
+      aria-label={`Open letter${note.title ? `: ${note.title}` : note.content ? `: ${note.content.slice(0, 40)}` : ''}`}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onOpen?.(note);
+        }
+      }}
+      whileHover={panMode || isDragging ? undefined : { scale: 1.03, boxShadow: '0 22px 32px -10px rgba(23,43,112,0.35)' }}
       animate={
         isDragging
-          ? { scale: 1.06, opacity: 1, boxShadow: '0 30px 45px -12px rgba(40, 25, 10, 0.55)' }
+          ? { scale: 1.06, opacity: 1, boxShadow: '0 30px 45px -12px rgba(23, 43, 112, 0.4)' }
           : { scale: 1, opacity: 1, boxShadow: '0 0px 0px rgba(0,0,0,0)' }
       }
       initial={{ scale: 0.4, opacity: 0 }}
@@ -62,17 +71,17 @@ export default function Note({ note, paperUrl, pins, tapes, boardScale = 1, panM
       transition={{ type: 'spring', stiffness: 300, damping: 22 }}
     >
       <div
-        className="relative h-full w-full drop-shadow-[0_10px_18px_rgba(40,25,10,0.35)]"
+        className="relative h-full w-full drop-shadow-[0_10px_18px_rgba(23,43,112,0.3)]"
         style={{ zIndex: isTop ? 2 : 1 }}
       >
         <NoteCanvasPreview note={note} paperUrl={paperUrl} pins={pins} tapes={tapes} scale={NOTE_BOARD_SCALE} />
 
         {note.isFavorite && (
-          <Heart size={16} className="absolute top-2 right-2 fill-[#a8391f] text-[#a8391f] drop-shadow" />
+          <Heart size={16} aria-label="Favorite" className="absolute top-2 right-2 fill-(--tomato) text-(--tomato) drop-shadow" />
         )}
 
         {MoodIcon && (
-          <MoodIcon size={15} className="absolute bottom-1.5 left-1/2 -translate-x-1/2 text-[#3a2b1e]/70 drop-shadow" />
+          <MoodIcon size={15} className="absolute bottom-1.5 left-1/2 -translate-x-1/2 text-(--ink)/70 drop-shadow" />
         )}
       </div>
     </motion.div>

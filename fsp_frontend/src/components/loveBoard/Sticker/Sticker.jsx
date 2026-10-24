@@ -169,7 +169,7 @@ export default function Sticker({
         />
         {sticker.isLocked && (
           <span
-            className="absolute -top-1 -right-1 rounded-full bg-white/90 p-0.5 text-[#4a3a2c] shadow"
+            className="absolute -top-1 -right-1 rounded-full bg-white/90 p-0.5 text-(--ink) shadow"
             style={{ transform: `scale(${chromeScale})`, transformOrigin: 'top right' }}
           >
             <Lock size={11} strokeWidth={2.25} />
@@ -196,7 +196,7 @@ export default function Sticker({
                 touchAction: 'none',
               }}
             >
-              <span className="flex h-5 w-5 items-center justify-center rounded-full border border-[#a8391f]/30 bg-white text-[#a8391f] shadow">
+              <span className="flex h-5 w-5 items-center justify-center rounded-full border border-(--ink) bg-white text-(--tomato) shadow">
                 <RotateCw size={11} strokeWidth={2.25} />
               </span>
             </button>
@@ -224,12 +224,12 @@ export default function Sticker({
                   touchAction: 'none',
                 }}
               >
-                <span className="h-3 w-3 rounded-sm border border-[#a8391f] bg-white shadow" />
+                <span className="h-3 w-3 rounded-sm border border-(--ink) bg-white shadow" />
               </button>
             ))}
 
             {/* Selection outline */}
-            <div className="pointer-events-none absolute inset-0 rounded-md ring-2 ring-[#a8391f]/70" />
+            <div className="pointer-events-none absolute inset-0 rounded-md ring-2 ring-(--tomato)" />
           </>
         )}
       </div>
@@ -237,20 +237,20 @@ export default function Sticker({
       <AnimatePresence>
         {isSelected && interactive && (
           <motion.div
-            className="absolute top-full left-1/2 z-50 mt-3 w-48 -translate-x-1/2 rounded-2xl border border-white/10 bg-[#2c2016]/95 p-2 text-white shadow-2xl backdrop-blur-md"
-            style={{ transform: `translateX(-50%) scale(${chromeScale})`, transformOrigin: 'top center' }}
-            initial={{ opacity: 0, y: -6, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -6, scale: 0.95 }}
+            className="absolute top-full left-1/2 z-50 mt-3 w-56 rounded-3xl border-2 border-solid border-white bg-(--ink) p-2 text-white shadow-[4px_4px_0_var(--sea)]"
+            style={{ x: '-50%', scale: chromeScale, transformOrigin: 'top center' }}
+            initial={{ opacity: 0, y: -6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -6 }}
             onClick={(e) => e.stopPropagation()}
             onPointerDown={(e) => e.stopPropagation()}
           >
-            <div className="grid grid-cols-3 gap-1 text-[10px] font-medium">
-              <PopoverAction icon={<BringToFront size={13} />} label="Front" onClick={() => onBringToFront?.(sticker.id)} />
-              <PopoverAction icon={<SendToBack size={13} />} label="Back" onClick={() => onSendBackward?.(sticker.id)} />
-              <PopoverAction icon={<Copy size={13} />} label="Copy" onClick={() => onDuplicate?.(sticker)} />
-              <PopoverAction icon={<Lock size={13} />} label="Lock" onClick={() => onToggleLock?.(sticker)} />
-              <PopoverAction danger icon={<Trash2 size={13} />} label="Delete" onClick={() => onDelete?.(sticker)} />
+            <div className="grid grid-cols-3 gap-1 text-xs font-extrabold">
+              <PopoverAction icon={<BringToFront size={18} strokeWidth={2.6} />} label="Front" onClick={() => onBringToFront?.(sticker.id)} />
+              <PopoverAction icon={<SendToBack size={18} strokeWidth={2.6} />} label="Back" onClick={() => onSendBackward?.(sticker.id)} />
+              <PopoverAction icon={<Copy size={18} strokeWidth={2.6} />} label="Copy" onClick={() => onDuplicate?.(sticker)} />
+              <PopoverAction icon={<Lock size={18} strokeWidth={2.6} />} label="Lock" onClick={() => onToggleLock?.(sticker)} />
+              <PopoverAction danger icon={<Trash2 size={18} strokeWidth={2.6} />} label="Delete" onClick={() => onDelete?.(sticker)} />
             </div>
           </motion.div>
         )}
@@ -259,15 +259,16 @@ export default function Sticker({
       {decorateMode && sticker.isLocked && (
         <button
           type="button"
-          className="absolute -top-2 -right-2 appearance-none rounded-full border-0 bg-white p-1 text-[#4a3a2c] shadow transition hover:bg-[#f4ece0]"
+          className="absolute -top-2 -right-2 flex size-11 appearance-none items-center justify-center rounded-full border-2 border-solid border-(--ink) bg-white p-0 text-(--ink) transition hover:bg-(--gelato)"
           style={{ transform: `scale(${chromeScale})`, transformOrigin: 'top right' }}
           onClick={(e) => {
             e.stopPropagation();
             onToggleLock?.(sticker);
           }}
           title="Unlock sticker"
+          aria-label="Unlock sticker"
         >
-          <Unlock size={11} strokeWidth={2.25} />
+          <Unlock size={18} strokeWidth={2.6} aria-hidden="true" />
         </button>
       )}
     </motion.div>
@@ -279,8 +280,8 @@ function PopoverAction({ icon, label, onClick, danger }) {
     <button
       type="button"
       onClick={onClick}
-      className={`flex flex-col items-center gap-1 appearance-none rounded-lg border-0 py-2 transition ${
-        danger ? 'bg-red-500/80 hover:bg-red-500' : 'bg-white/10 hover:bg-white/20'
+      className={`flex min-h-11 cursor-pointer flex-col items-center justify-center gap-0.5 appearance-none rounded-xl border-0 py-1.5 text-white transition ${
+        danger ? 'bg-(--tomato) hover:brightness-110' : 'bg-white/15 hover:bg-white/25'
       }`}
     >
       {icon}
