@@ -1,0 +1,43 @@
+.chip {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  padding: 5px 14px;
+  border: var(--border-width) solid var(--ink);
+  border-radius: var(--radius-pill);
+  font-size: 0.875rem;
+  font-weight: 800;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.dreaming {
+  background: var(--sea);
+  color: var(--ink);
+}
+
+.planning {
+  background: var(--gelato);
+  color: var(--ink);
+}
+
+.booked {
+  background: var(--citrus);
+  color: var(--ink);
+}
+
+.ready {
+  background: var(--amalfi);
+  color: var(--white);
+}
+
+.completed {
+  background: var(--ink);
+  color: var(--white);
+}
+
+.cancelled {
+  background: var(--white);
+  color: var(--ink-muted);
+  text-decoration: line-through;
+}

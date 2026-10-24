@@ -1,8 +1,10 @@
 // Regenerates the logo mark and every favicon from the one source drawing.
 //   npm run build:icons
-// Source:  ../docs/brand/logo-2-star-and-junebug.svg
-// Outputs: src/assets/brand/logo-mark.svg (SVGO-optimised, same drawing)
-//          public/favicon.svg, favicon-32.png, apple-touch-icon.png (180, on paper), icon-512.png
+// Sources: ../docs/brand/logo-2-star-and-junebug.svg   (full mark: star + june bug)
+//          ../docs/brand/favicon-smiling-star.svg      (the star alone, for tiny sizes)
+// Outputs: src/assets/brand/logo-mark.svg (SVGO-optimised full mark)
+//          public/favicon.svg, favicon-32.png        (smiling star: the june bug turns to mush that small)
+//          public/apple-touch-icon.png (180), icon-512.png (full mark, on paper)
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -11,24 +13,24 @@ import { optimize } from 'svgo';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const source = path.resolve(root, '../docs/brand/logo-2-star-and-junebug.svg');
+const starSource = path.resolve(root, '../docs/brand/favicon-smiling-star.svg');
 const PAPER = '#FFF8E8';
 
-const { data: svg } = optimize(fs.readFileSync(source, 'utf8'), {
+const svgoConfig = {
   multipass: true,
-  plugins: [
-    { name: 'preset-default', params: { overrides: { removeViewBox: false } } },
-    'removeDimensions',
-  ],
-});
+  plugins: [{ name: 'preset-default', params: { overrides: { removeViewBox: false } } }, 'removeDimensions'],
+};
+const { data: svg } = optimize(fs.readFileSync(source, 'utf8'), svgoConfig);
+const { data: starSvg } = optimize(fs.readFileSync(starSource, 'utf8'), svgoConfig);
 
 fs.mkdirSync(path.join(root, 'src/assets/brand'), { recursive: true });
 fs.writeFileSync(path.join(root, 'src/assets/brand/logo-mark.svg'), svg);
-fs.writeFileSync(path.join(root, 'public/favicon.svg'), svg);
+fs.writeFileSync(path.join(root, 'public/favicon.svg'), starSvg);
 
-const render = (px, density = 600) => sharp(Buffer.from(svg), { density }).resize(px, px, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } });
+const render = (px, markSvg = svg, density = 600) => sharp(Buffer.from(markSvg), { density }).resize(px, px, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } });
 
 // Transparent tab icon.
-await render(32).png().toFile(path.join(root, 'public/favicon-32.png'));
+await render(32, starSvg).png().toFile(path.join(root, 'public/favicon-32.png'));
 
 // iOS / PWA icons sit on the paper colour with a little breathing room.
 async function onPaper(size, file) {
