@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { createPortal } from 'react-dom';
-import { motion, AnimatePresence } from 'framer-motion';
-import { fadeIn, scaleIn } from '../../constants/animations';
+import Modal from '../ui/Modal/Modal';
+import Button from '../ui/Button/Button';
 import styles from './AvatarCropModal.module.css';
 
 // Fixed output resolution — also used as the live canvas's internal pixel
@@ -133,74 +132,63 @@ export default function AvatarCropModal({ file, onCancel, onConfirm }) {
     }
   };
 
-  return createPortal(
-    <AnimatePresence>
-      <div className={styles.overlayWrapper}>
-        <motion.div className={styles.backdrop} onClick={onCancel} {...fadeIn} />
-        <motion.div className={styles.modalCard} {...scaleIn} role="dialog" aria-modal="true" aria-label="Crop profile picture">
-          <div className={styles.header}>
-            <h3>Adjust Your Photo</h3>
-            <button className={styles.closeBtn} onClick={onCancel} aria-label="Cancel">✕</button>
+  return (
+    <Modal
+      open
+      onClose={onCancel}
+      title="Adjust your photo"
+      size="sm"
+      locked={isSaving}
+      footer={
+        <>
+          <Button onClick={onCancel} disabled={isSaving}>
+            Cancel
+          </Button>
+          <Button variant="primary" onClick={handleConfirm} disabled={!imageReady || isSaving}>
+            {isSaving ? 'Saving…' : 'Use photo'}
+          </Button>
+        </>
+      }
+    >
+      <div className={styles.cropViewport}>
+        {imageReady ? (
+          <canvas
+            ref={canvasRef}
+            width={CANVAS_SIZE}
+            height={CANVAS_SIZE}
+            className={styles.canvas}
+            aria-label="Drag to move your photo inside the square"
+            onPointerDown={handlePointerDown}
+            onPointerMove={handlePointerMove}
+            onPointerUp={handlePointerUp}
+            onPointerLeave={handlePointerUp}
+          />
+        ) : (
+          <div className={styles.loadingState}>
+            <span className={styles.spinner} />
           </div>
-
-          <div className={styles.cropViewport}>
-            {imageReady ? (
-              <canvas
-                ref={canvasRef}
-                width={CANVAS_SIZE}
-                height={CANVAS_SIZE}
-                className={styles.canvas}
-                onPointerDown={handlePointerDown}
-                onPointerMove={handlePointerMove}
-                onPointerUp={handlePointerUp}
-                onPointerLeave={handlePointerUp}
-              />
-            ) : (
-              <div className={styles.loadingState}>
-                <span className={styles.spinner} />
-              </div>
-            )}
-          </div>
-
-          {error && <p className={styles.errorText}>{error}</p>}
-
-          <div className={styles.zoomRow}>
-            <span className={styles.zoomLabel}>Zoom</span>
-            <input
-              type="range"
-              min={MIN_ZOOM}
-              max={MAX_ZOOM}
-              step={0.01}
-              value={zoom}
-              onChange={handleZoomChange}
-              disabled={!imageReady}
-              className={styles.zoomSlider}
-            />
-          </div>
-
-          <div className={styles.footer}>
-            <motion.button
-              className={styles.cancelBtn}
-              onClick={onCancel}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.97 }}
-              disabled={isSaving}
-            >
-              Cancel
-            </motion.button>
-            <motion.button
-              className={styles.confirmBtn}
-              onClick={handleConfirm}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.97 }}
-              disabled={!imageReady || isSaving}
-            >
-              {isSaving ? <span className={styles.btnSpinner} /> : 'Use Photo'}
-            </motion.button>
-          </div>
-        </motion.div>
+        )}
       </div>
-    </AnimatePresence>,
-    document.body
+
+      {error && (
+        <p className={styles.errorText} role="alert">
+          {error}
+        </p>
+      )}
+
+      <label className={styles.zoomRow}>
+        <span className={styles.zoomLabel}>Zoom</span>
+        <input
+          type="range"
+          min={MIN_ZOOM}
+          max={MAX_ZOOM}
+          step={0.01}
+          value={zoom}
+          onChange={handleZoomChange}
+          disabled={!imageReady}
+          className={styles.zoomSlider}
+        />
+      </label>
+    </Modal>
   );
 }

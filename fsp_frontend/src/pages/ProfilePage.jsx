@@ -1,12 +1,14 @@
 import { useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { ArrowLeft, Camera, Check, Palette, Trash2, UserRound } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { useNotification } from '../hooks/useNotification';
 import { useProfile } from '../queries/queries';
 import { useProfileMutations } from '../queries/mutations';
 import { uploadProfileAvatar, deleteProfileAvatar } from '../api/supabaseClient';
-import { ACCENT_COLORS, EMOJI_OPTIONS, DEFAULT_ACCENT_COLOR, getAccentHex } from '../constants/profileOptions';
+import { ACCENT_COLORS, EMOJI_OPTIONS, DEFAULT_ACCENT_COLOR, getAccent } from '../constants/profileOptions';
+import Icon from '../components/Icon';
 import AvatarCropModal from '../components/profile/AvatarCropModal';
 import ConfirmDialog from '../components/ui/ConfirmDialog/ConfirmDialog';
 import AnniversaryCounter from '../components/profile/AnniversaryCounter';
@@ -14,57 +16,13 @@ import Navbar from '../components/layout/Navbar/Navbar';
 import Footer from '../components/layout/Footer/Footer';
 import styles from './ProfilePage.module.css';
 
-const ArrowLeftIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <line x1="19" y1="12" x2="5" y2="12"></line>
-    <polyline points="12 19 5 12 12 5"></polyline>
-  </svg>
-);
-
-const CameraIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
-    <circle cx="12" cy="13" r="4"></circle>
-  </svg>
-);
-
-const TrashIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <polyline points="3 6 5 6 21 6"></polyline>
-    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-  </svg>
-);
-
-const CheckIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-    <polyline points="20 6 9 17 4 12"></polyline>
-  </svg>
-);
-
-const UserIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-    <circle cx="12" cy="7" r="4"></circle>
-  </svg>
-);
-
-const PaletteIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <circle cx="13.5" cy="6.5" r=".5" fill="currentColor"></circle>
-    <circle cx="17.5" cy="10.5" r=".5" fill="currentColor"></circle>
-    <circle cx="8.5" cy="7.5" r=".5" fill="currentColor"></circle>
-    <circle cx="6.5" cy="12.5" r=".5" fill="currentColor"></circle>
-    <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"></path>
-  </svg>
-);
-
-const AlertIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
-    <line x1="12" y1="9" x2="12" y2="13"></line>
-    <line x1="12" y1="17" x2="12.01" y2="17"></line>
-  </svg>
-);
+const line = { strokeWidth: 2.6, 'aria-hidden': true };
+const ArrowLeftIcon = () => <ArrowLeft size={20} {...line} />;
+const CameraIcon = () => <Camera size={20} {...line} />;
+const TrashIcon = () => <Trash2 size={18} {...line} />;
+const CheckIcon = () => <Check size={20} strokeWidth={3.4} aria-hidden="true" />;
+const UserIcon = () => <UserRound size={22} {...line} />;
+const PaletteIcon = () => <Palette size={22} {...line} />;
 
 const MAX_AVATAR_BYTES = 5 * 1024 * 1024;
 const ALLOWED_AVATAR_TYPES = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'];
@@ -190,7 +148,7 @@ export default function ProfilePage() {
         avatarUrl: updated.avatarUrl,
       });
       setSaveSuccess(true);
-      addToast('Profile updated ✨', 'success');
+      addToast('Profile updated, love.', 'success');
       setTimeout(() => setSaveSuccess(false), 1800);
     } catch (err) {
       if (err?.response?.status === 401) {
@@ -240,7 +198,7 @@ export default function ProfilePage() {
       if (previousStoragePath) {
         deleteProfileAvatar(previousStoragePath).catch(() => {});
       }
-      addToast('Profile picture updated ✨', 'success');
+      addToast('Profile picture updated, love.', 'success');
       setPendingCropFile(null);
     } catch (err) {
       if (err?.response?.status === 401) {
@@ -294,7 +252,7 @@ export default function ProfilePage() {
       <div className={styles.page}>
         <Navbar />
         <div className={styles.centerState}>
-          <AlertIcon />
+          <Icon name="bell" size={56} sticker tilt={-6} />
           <p>{loadError}</p>
           <button className={styles.retryBtn} onClick={loadProfile}>Try Again</button>
         </div>
@@ -302,11 +260,11 @@ export default function ProfilePage() {
     );
   }
 
-  const accentHex = getAccentHex(form.accentColor);
+  const accent = getAccent(form.accentColor);
   const initial = (form.name || user?.username || '?').trim().charAt(0).toUpperCase();
 
   return (
-    <div className={styles.page} style={{ '--accent': accentHex }}>
+    <div className={styles.page} style={{ '--user-accent': accent.hex, '--user-accent-ink': accent.ink }}>
       <Navbar />
 
       <div className={styles.pageHead}>
@@ -399,7 +357,7 @@ export default function ProfilePage() {
               </div>
               <textarea
                 id="profile-bio"
-                placeholder="Forever grateful for every adventure together ❤️"
+                placeholder="Forever grateful for every adventure together"
                 value={form.bio}
                 maxLength={BIO_MAX}
                 disabled={isSaving}
@@ -419,7 +377,7 @@ export default function ProfilePage() {
                 </span>
                 <div>
                   <h2 className={styles.cardTitle}>Appearance</h2>
-                  <p className={styles.cardSubtitle}>Customize your theme and accent icon.</p>
+                  <p className={styles.cardSubtitle}>Pick the color of your avatar ring and your highlighted tab.</p>
                 </div>
               </div>
             </div>
@@ -428,16 +386,18 @@ export default function ProfilePage() {
 
             <div className={styles.formGroup}>
               <div className={styles.formLabelRow}>
-                <label className={styles.fieldLabel}>Accent Color</label>
+                <span className={styles.fieldLabel} id="profile-accent-label">Accent color</span>
               </div>
-              <div className={styles.swatchGrid}>
+              <div className={styles.swatchGrid} role="radiogroup" aria-labelledby="profile-accent-label">
                 {ACCENT_COLORS.map((color) => (
                   <motion.button
                     key={color.key}
                     type="button"
                     className={`${styles.swatch} ${form.accentColor === color.key ? styles.swatchActive : ''}`}
-                    style={{ backgroundColor: color.hex }}
+                    style={{ backgroundColor: color.hex, color: color.ink }}
                     title={color.label}
+                    role="radio"
+                    aria-checked={form.accentColor === color.key}
                     aria-label={color.label}
                     disabled={isSaving}
                     onClick={() => updateField('accentColor', color.key)}
@@ -452,15 +412,17 @@ export default function ProfilePage() {
 
             <div className={styles.formGroup}>
               <div className={styles.formLabelRow}>
-                <label className={styles.fieldLabel}>Favorite Emoji</label>
+                <span className={styles.fieldLabel} id="profile-emoji-label">Favorite emoji</span>
               </div>
-              <div className={styles.emojiGrid}>
+              <div className={styles.emojiGrid} role="group" aria-labelledby="profile-emoji-label">
                 {EMOJI_OPTIONS.map((emoji) => (
                   <motion.button
                     key={emoji}
                     type="button"
                     className={`${styles.emojiOption} ${form.favoriteEmoji === emoji ? styles.emojiActive : ''}`}
                     disabled={isSaving}
+                    aria-pressed={form.favoriteEmoji === emoji}
+                    aria-label={`Favorite emoji ${emoji}`}
                     onClick={() => updateField('favoriteEmoji', form.favoriteEmoji === emoji ? '' : emoji)}
                     whileHover={{ scale: 1.15 }}
                     whileTap={{ scale: 0.9 }}
@@ -543,6 +505,7 @@ export default function ProfilePage() {
         {isDirty && (
           <motion.div
             className={styles.actionFooter}
+            style={{ x: '-50%' }}
             initial={{ y: 90, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 90, opacity: 0 }}

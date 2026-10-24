@@ -74,3 +74,24 @@ export async function deleteProfileAvatar(storagePath) {
     throw new Error(error.message);
   }
 }
+// Best-effort removal of photo files after "delete all albums". The backend only deletes the
+// database rows (it has no storage key), so this runs in the browser with the public key and
+// only works if the bucket's policy allows deletes. Returns the paths that could NOT be removed.
+export async function removeMemoryFiles(paths = []) {
+  const failed = [];
+  for (let i = 0; i < paths.length; i += 100) {
+    const chunk = paths.slice(i, i + 100);
+    try {
+      const { data, error } = await supabase.storage.from('memories-storage').remove(chunk);
+      if (error) {
+        failed.push(...chunk);
+      } else {
+        const removed = new Set((data || []).map((item) => item.name));
+        failed.push(...chunk.filter((path) => !removed.has(path)));
+      }
+    } catch {
+      failed.push(...chunk);
+    }
+  }
+  return failed;
+}

@@ -42,9 +42,47 @@ export default function DataTable({ columns, rows, getRowKey, loading, emptyTitl
     return <EmptyState icon={Inbox} title={emptyTitle} description={emptyDescription} />;
   }
 
+  const isActions = (col) => col.key === 'actions' || /^actions$/i.test(col.label || '');
+  const [titleCol, ...restCols] = columns;
+  const infoCols = restCols.filter((c) => !isActions(c));
+  const actionCols = restCols.filter(isActions);
+
   return (
-    <div className="overflow-hidden rounded-card border border-(--color-admin-border) bg-(--color-admin-surface) shadow-soft">
-      <div className="max-h-[65vh] overflow-auto">
+    <>
+      {/* Phones: one card per row, so nothing is cut off and nothing needs sideways scrolling. */}
+      <ul className="m-0 flex list-none flex-col gap-3 p-0 md:hidden">
+        {sortedRows.map((row) => (
+          <li
+            key={getRowKey(row)}
+            onClick={onRowClick ? () => onRowClick(row) : undefined}
+            className={`rounded-card border border-(--color-admin-border) bg-(--color-admin-surface) p-4 shadow-soft ${onRowClick ? 'cursor-pointer' : ''}`}
+          >
+            <div className="text-base font-bold break-words text-(--color-admin-text)">
+              {titleCol.render ? titleCol.render(row) : (row[titleCol.key] ?? '—')}
+            </div>
+            {infoCols.length > 0 && (
+              <dl className="m-0 mt-2.5 grid grid-cols-[minmax(5.5rem,auto)_1fr] items-center gap-x-3 gap-y-2 text-sm">
+                {infoCols.map((col) => (
+                  <div key={col.key} className="contents">
+                    <dt className="text-xs font-bold tracking-wide text-(--color-admin-text-muted) uppercase">{col.label}</dt>
+                    <dd className="m-0 min-w-0 break-words text-(--color-admin-text)">
+                      {col.render ? col.render(row) : (row[col.key] ?? '—')}
+                    </dd>
+                  </div>
+                ))}
+              </dl>
+            )}
+            {actionCols.map((col) => (
+              <div key={col.key} className="mt-3 flex flex-wrap items-center gap-2 border-0 border-t border-dashed border-(--color-admin-border)/40 pt-3">
+                {col.render ? col.render(row) : null}
+              </div>
+            ))}
+          </li>
+        ))}
+      </ul>
+
+      <div className="hidden overflow-hidden rounded-card border border-(--color-admin-border) bg-(--color-admin-surface) shadow-soft md:block">
+        <div className="max-h-[65vh] overflow-auto">
         <table className="w-full min-w-[640px] border-collapse text-left text-[13px]">
           <thead>
             <tr className="bg-(--color-admin-surface-2)">
@@ -90,5 +128,6 @@ export default function DataTable({ columns, rows, getRowKey, loading, emptyTitl
         </table>
       </div>
     </div>
+    </>
   );
 }

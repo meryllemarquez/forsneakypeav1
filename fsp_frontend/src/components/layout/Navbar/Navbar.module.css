@@ -38,7 +38,8 @@
 }
 
 .navLink[aria-current='page'] {
-  background: var(--citrus);
+  background: var(--user-accent, var(--citrus));
+  color: var(--user-accent-ink, var(--ink));
 }
 
 .right {
@@ -108,6 +109,7 @@ a.avatarChip:hover {
   justify-content: center;
   overflow: hidden;
   background: var(--gelato);
+  border: 3px solid var(--user-accent, var(--citrus));
   border-radius: 50%;
 }
 

@@ -36,7 +36,7 @@ export const TAPE_COLORS = [
 export const STICKER_GROUPS = [
   { id: 'starshine', label: 'Starshine', icons: ['her', 'star', 'film', 'videocam', 'tulip', 'daisy', 'mic', 'vinyl', 'cassette', 'dog', 'matcha'] },
   { id: 'junebug', label: 'Junebug', icons: ['him', 'car', 'rc', 'camera', 'motmot', 'wheel', 'jorts', 'meme', 'tree', 'cookie'] },
-  { id: 'us', label: 'Us', icons: ['plane', 'utensils', 'pin', 'mountain', 'sun', 'museum', 'ticket', 'bed', 'arena', 'claw', 'ferris', 'ball', 'plush', 'lechon', 'bowl', 'yogurt', 'fries', 'churro', 'lasagna', 'pizza', 'donut'] },
+  { id: 'us', label: 'Us', icons: ['plane', 'utensils', 'pin', 'mountain', 'sun', 'museum', 'ticket', 'bed', 'arena', 'claw', 'ferris', 'ball', 'plush', 'chimken', 'rorry', 'lechon', 'bowl', 'yogurt', 'fries', 'churro', 'lasagna', 'pizza', 'donut'] },
   { id: 'app', label: 'App', icons: ['house', 'envelope', 'bell', 'heart', 'sparkle'] },
 ];
 

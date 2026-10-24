@@ -69,5 +69,11 @@ export const memoryService = {
   updateHighlightPosition: async (folderId, positionX, positionY) => {
     const res = await api.patch(`/memories/folders/${folderId}/calendar-highlight/position`, { positionX, positionY });
     return res.data;
-  }
+  },
+
+  // DELETE /memories/all: hard-deletes the whole section (both accounts). Returns what was removed.
+  deleteAll: async () => {
+    const res = await api.delete('/memories/all');
+    return res.data;
+  },
 };

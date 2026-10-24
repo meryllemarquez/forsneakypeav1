@@ -63,6 +63,7 @@ export function useMemoryMutations() {
     createFolder: useAction(memoryService.createFolder, { onSuccess: refreshMemories }),
     updateFolder: useAction(memoryService.updateFolder, { onSuccess: refreshMemories }),
     deleteFolder: useAction(memoryService.deleteFolder, { onSuccess: refreshMemories }),
+    deleteAll: useAction(memoryService.deleteAll, { onSuccess: refreshMemories }),
     addPhotoToFolder: useAction(memoryService.addPhotoToFolder, { onSuccess: refreshMemories }),
     updatePhoto: useAction(memoryService.updatePhoto, { onSuccess: refreshMemories }),
     deletePhoto: useAction(memoryService.deletePhoto, { onSuccess: refreshMemories }),
@@ -83,6 +84,7 @@ export function useDateMutations() {
     createDate: useAction(dateService.createDate, { onSuccess: refreshDates }),
     updateDate: useAction(dateService.updateDate, { onSuccess: refreshDates }),
     deleteDate: useAction(dateService.deleteDate, { onSuccess: refreshDates }),
+    deleteAll: useAction(dateService.deleteAll, { onSuccess: refreshDates }),
     archiveDate: useAction(dateService.archiveDate, { onSuccess: refreshDates }),
     unarchiveDate: useAction(dateService.unarchiveDate, { onSuccess: refreshDates }),
     duplicateDate: useAction(dateService.duplicateDate, { onSuccess: refreshDates }),
@@ -122,6 +124,14 @@ export function useLoveBoardMutations() {
       onError: () => invalidate(queryClient, keyFamilies.loveStickers),
     }),
     deleteSticker: useAction(loveBoardService.deleteSticker),
+    deleteAll: useAction(loveBoardService.deleteAll, {
+      onSuccess: () =>
+        Promise.all([
+          invalidate(queryClient, keyFamilies.loveNotes),
+          invalidate(queryClient, keyFamilies.loveStickers),
+          invalidate(queryClient, keyFamilies.home),
+        ]),
+    }),
   };
 }
 

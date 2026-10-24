@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, MousePointer2, Hand, Undo2, Redo2, ZoomOut, ZoomIn, RotateCcw } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import '../styles/loveboard-fonts.css';
 import '../styles/loveboard-tailwind.css';
 
 import CorkBoard from '../components/loveBoard/CorkBoard/CorkBoard';
 import BoardToolbar from '../components/loveBoard/Toolbar/BoardToolbar';
+import BoardMenu from '../components/loveBoard/Toolbar/BoardMenu';
 import SearchFilterPanel from '../components/loveBoard/Toolbar/SearchFilterPanel';
 import StickerLibrary from '../components/loveBoard/StickerLibrary/StickerLibrary';
 import ArchiveDrawer from '../components/loveBoard/Archive/ArchiveDrawer';
@@ -13,6 +14,8 @@ import LayerPanel from '../components/loveBoard/Layers/LayerPanel';
 import NoteComposerModal from '../components/loveBoard/Composer/NoteComposerModal';
 import NoteReaderModal from '../components/loveBoard/Note/NoteReaderModal';
 import ConfirmDialog from '../components/ui/ConfirmDialog/ConfirmDialog';
+import DeleteAllDialog from '../components/ui/DeleteAllDialog/DeleteAllDialog';
+import { useNotification } from '../hooks/useNotification';
 
 import Icon from '../components/Icon';
 import { useLoveNotes, useLoveStickers, useCacheSetter } from '../queries/queries';
@@ -42,8 +45,12 @@ export default function LoveLettersPage() {
   const error = notesQuery.isError || stickersQuery.isError ? 'Unable to load the board. Please check your connection.' : '';
   const {
     createNote, updateNote, deleteNote, updateNotePosition,
-    createSticker, updateSticker, deleteSticker,
+    createSticker, updateSticker, deleteSticker, deleteAll: deleteAllBoard,
   } = useLoveBoardMutations();
+  const { addToast } = useNotification();
+  const [deleteAllOpen, setDeleteAllOpen] = useState(false);
+  const [deleteAllBusy, setDeleteAllBusy] = useState(false);
+  const [deleteAllError, setDeleteAllError] = useState('');
 
   const [decorateMode, setDecorateMode] = useState(false);
   const [selectedStickerId, setSelectedStickerId] = useState(null);
@@ -498,6 +505,26 @@ export default function LoveLettersPage() {
     else handleSendStickerBackward(item.id);
   };
 
+  // "Delete all letters and stickers": the backend hard-deletes both lists for both accounts.
+  const handleDeleteAll = async () => {
+    setDeleteAllBusy(true);
+    setDeleteAllError('');
+    try {
+      await deleteAllBoard();
+      historyRef.current = { past: [], future: [] };
+      setCanUndo(false);
+      setCanRedo(false);
+      setReaderNoteId(null);
+      setSelectedStickerId(null);
+      setDeleteAllOpen(false);
+      addToast('All letters and stickers deleted.', 'success');
+    } catch (err) {
+      setDeleteAllError(err?.response?.data?.message || 'Could not delete everything. Please try again.');
+    } finally {
+      setDeleteAllBusy(false);
+    }
+  };
+
   const clearFilters = () => {
     setQuery('');
     setAuthorFilter(null);
@@ -525,36 +552,32 @@ export default function LoveLettersPage() {
           </div>
         </div>
 
-        <div role="toolbar" aria-label="Board tools" className="flex flex-wrap items-center gap-1 sm:gap-1.5">
-          <HeaderIconButton label="Select" active={activeTool === 'select'} onClick={() => setActiveTool('select')}>
-            <MousePointer2 size={20} strokeWidth={2.4} />
-          </HeaderIconButton>
-          <HeaderIconButton label="Hand Tool" active={activeTool === 'hand'} onClick={() => setActiveTool('hand')}>
-            <Hand size={20} strokeWidth={2.4} />
-          </HeaderIconButton>
-
-          <div className="mx-0.5 h-6 w-0.5 shrink-0 bg-(--ink)/25" />
-
-          <HeaderIconButton label="Undo (Ctrl+Z)" disabled={!canUndo} onClick={handleUndo}>
-            <Undo2 size={20} strokeWidth={2.4} />
-          </HeaderIconButton>
-          <HeaderIconButton label="Redo (Ctrl+Shift+Z)" disabled={!canRedo} onClick={handleRedo}>
-            <Redo2 size={20} strokeWidth={2.4} />
-          </HeaderIconButton>
-
-          <div className="mx-0.5 h-6 w-0.5 shrink-0 bg-(--ink)/25" />
-
-          <HeaderIconButton label="Zoom out" onClick={() => boardRef.current?.zoomOut()}>
-            <ZoomOut size={20} strokeWidth={2.4} />
-          </HeaderIconButton>
-          <span className="w-10 shrink-0 text-center text-sm font-extrabold tabular-nums sm:w-12" aria-live="polite">{zoomPercent}%</span>
-          <HeaderIconButton label="Zoom in" onClick={() => boardRef.current?.zoomIn()}>
-            <ZoomIn size={20} strokeWidth={2.4} />
-          </HeaderIconButton>
-          <HeaderIconButton label="Reset View" onClick={() => boardRef.current?.resetView()}>
-            <RotateCcw size={20} strokeWidth={2.4} />
-          </HeaderIconButton>
-        </div>
+        <BoardMenu
+          activeTool={activeTool}
+          onToolChange={setActiveTool}
+          canUndo={canUndo}
+          canRedo={canRedo}
+          onUndo={handleUndo}
+          onRedo={handleRedo}
+          zoomPercent={zoomPercent}
+          onZoomIn={() => boardRef.current?.zoomIn()}
+          onZoomOut={() => boardRef.current?.zoomOut()}
+          onResetView={() => boardRef.current?.resetView()}
+          favoritesOnly={favoritesOnly}
+          onToggleFavorites={() => setFavoritesOnly((v) => !v)}
+          layersOpen={layersOpen}
+          onToggleLayers={() => {
+            setStickerLibraryOpen(false);
+            setLayersOpen((v) => !v);
+          }}
+          onOpenArchive={() => setArchiveOpen(true)}
+          decorateMode={decorateMode}
+          onToggleDecorate={handleToggleDecorateMode}
+          onDeleteAll={() => {
+            setDeleteAllError('');
+            setDeleteAllOpen(true);
+          }}
+        />
       </header>
 
       <main className="relative flex-1 overflow-hidden">
@@ -642,16 +665,6 @@ export default function LoveLettersPage() {
           }}
           searchOpen={searchOpen}
           onToggleSearch={() => setSearchOpen((v) => !v)}
-          favoritesOnly={favoritesOnly}
-          onToggleFavorites={() => setFavoritesOnly((v) => !v)}
-          onOpenArchive={() => setArchiveOpen(true)}
-          layersOpen={layersOpen}
-          onToggleLayers={() => {
-            setStickerLibraryOpen(false);
-            setLayersOpen((v) => !v);
-          }}
-          decorateMode={decorateMode}
-          onToggleDecorateMode={handleToggleDecorateMode}
         />
       </main>
 
@@ -672,6 +685,15 @@ export default function LoveLettersPage() {
         onDelete={() => requestDeleteNote(readerNote)}
       />
 
+      <DeleteAllDialog
+        open={deleteAllOpen}
+        what="letters and stickers"
+        busy={deleteAllBusy}
+        error={deleteAllError}
+        onConfirm={handleDeleteAll}
+        onClose={() => setDeleteAllOpen(false)}
+      />
+
       <ConfirmDialog
         open={!!confirmState}
         title={confirmState?.title}
@@ -682,23 +704,5 @@ export default function LoveLettersPage() {
         onClose={closeConfirm}
       />
     </div>
-  );
-}
-
-function HeaderIconButton({ children, label, active, disabled, onClick }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      disabled={disabled}
-      title={label}
-      aria-label={label}
-      aria-pressed={active === undefined ? undefined : active}
-      className={`inline-flex size-11 shrink-0 cursor-pointer appearance-none items-center justify-center rounded-[14px] border-2 border-solid p-0 text-(--ink) transition active:scale-90 disabled:cursor-not-allowed disabled:opacity-40 disabled:active:scale-100 ${
-        active ? 'border-(--ink) bg-(--citrus)' : 'border-(--ink) bg-(--white) hover:bg-(--sea-tint) disabled:hover:bg-(--white)'
-      }`}
-    >
-      {children}
-    </button>
   );
 }

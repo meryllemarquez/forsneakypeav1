@@ -1,275 +1,218 @@
+/* Landing: the cozy scene fills the screen, the title and the login card sit on top of it. */
 
-/* Fullscreen Background & Container */
-.heroContainer {
+.page {
   position: fixed;
   inset: 0;
-  background: url('/landingbg.png') center/cover no-repeat;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow-x: hidden;
+  height: 100vh;
+  height: 100dvh;
+  z-index: 10;
+  overflow-x: clip;
   overflow-y: auto;
+  background: linear-gradient(#CDE7FF, #FFF0B3);
+  color: var(--ink);
   font-family: var(--font-body);
-  margin: 0;
-  padding: 0;
-  z-index: 10;
 }
 
-/* Ambient Dark Overlay */
-.darkOverlay {
-  position: absolute;
+.sceneLayer {
+  position: fixed;
   inset: 0;
-  background: linear-gradient(
-    135deg,
-    rgba(10, 10, 14, 0.4) 0%,
-    rgba(0, 0, 0, 0.6) 100%
-  );
-  z-index: 1;
+  z-index: 0;
+  overflow: hidden;
+  background: linear-gradient(#8FC7F7, #CFE6F7 45%, #FFEBC0 75%, #FFD7A6);
 }
 
-/* Main Container Layout */
-.mainContentLayout {
+.layout {
   position: relative;
-  z-index: 10;
-  width: 100%;
-  max-width: 1240px;
-  padding: 0 3rem;
+  z-index: 1;
   display: flex;
-  align-items: center;
-}
-
-/* Centered Initial Layout */
-.layoutCentered {
-  justify-content: center;
-}
-
-/* Split Active Layout */
-.layoutActive {
-  justify-content: space-between;
-}
-
-/* Left Side Hero Typography */
-.heroContent {
-  display: flex;
-  flex-direction: column;
-}
-
-.heroContentCenter {
-  align-items: center;
-  text-align: center;
-  max-width: 850px;
-}
-
-.heroContentLeft {
   align-items: flex-start;
-  text-align: left;
-  max-width: 580px;
+  justify-content: center;
+  gap: 48px;
+  max-width: 1200px;
+  min-height: 100%;
+  margin: 0 auto;
+  padding: clamp(32px, 9vh, 96px) 32px 32px;
+  box-sizing: border-box;
+  pointer-events: none;
 }
 
-/* "FOR SNEAKYPEA." Bold Title */
-.coupleTitle {
+.layout > * {
+  pointer-events: auto;
+}
+
+.hero {
+  flex: 1 1 0;
+  position: relative;
+  max-width: 560px;
+  padding: 8px 4px;
+}
+
+/* a soft cream glow behind the title and button so they stay readable over the scene */
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: -30px -40px;
+  z-index: -1;
+  background: radial-gradient(closest-side, rgb(255 248 232 / 0.85), rgb(255 248 232 / 0));
+}
+
+.layoutCentered .hero {
+  text-align: center;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 14px;
+  padding: 6px 16px 6px 8px;
+  background: var(--white);
+  border: var(--border-width) solid var(--ink);
+  border-radius: var(--radius-pill);
   font-family: var(--font-heading);
-  color: #E8D7BC;
-  font-size: clamp(4.8rem, 11.5vw, 9.8rem);
-  font-weight: 400;
-  letter-spacing: 0.035em;
-  line-height: 0.9;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+.title {
   margin: 0;
-  text-transform: uppercase;
-  text-shadow: 0 12px 35px rgba(0, 0, 0, 0.55);
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: clamp(2.2rem, 5.6vw, 4rem);
+  line-height: 0.98;
+  letter-spacing: -1.5px;
+  text-shadow: 3px 3px 0 var(--white);
 }
 
 .subtitle {
-  color: rgba(255, 255, 255, 0.9);
-  font-size: clamp(1.05rem, 1.6vw, 1.3rem);
-  font-weight: 400;
-  line-height: 1.6;
-  margin-top: 1.2rem;
-  margin-bottom: 2.2rem;
-  letter-spacing: -0.01em;
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+  margin: 16px 0 26px;
+  font-family: var(--font-hand);
+  font-weight: 700;
+  font-size: clamp(1.4rem, 2.6vw, 1.9rem);
+  line-height: 1.1;
+  color: var(--ink);
+  text-shadow: 2px 2px 0 var(--white);
 }
 
-/* Pill CTA Button */
-.welcomePillCta {
+.cta {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  gap: 12px;
-  background-color: #8C230F;
-  color: #ffffff;
-  padding: 16px 38px;
-  border: none;
-  border-radius: 999px;
-  font-size: 1rem;
-  font-weight: 600;
+  gap: 10px;
+  min-height: 52px;
+  padding: 0 30px;
+  background: var(--tomato);
+  color: var(--white);
+  border: var(--border-width) solid var(--ink);
+  border-radius: var(--radius-pill);
+  box-shadow: var(--shadow-button);
+  font-family: inherit;
+  font-size: 1.0625rem;
+  font-weight: 800;
   cursor: pointer;
-  box-shadow: 0 12px 35px rgba(140, 35, 15, 0.45);
-  transition: transform 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease;
 }
 
-.welcomePillCta:hover {
-  background-color: #a02812;
-  transform: translateY(-2px);
-  box-shadow: 0 16px 40px rgba(140, 35, 15, 0.6);
+.cta:hover {
+  transform: translate(-1px, -1px);
 }
 
-.ctaIcon {
-  font-size: 1.15rem;
-  transition: transform 0.3s ease;
-}
-
-.welcomePillCta:hover .ctaIcon {
-  transform: translateX(4px);
-}
-
-/* ======================================================= */
-/* DARK FROSTED GLASSMorphism MODAL (EXACT FROM IMAGE)      */
-/* ======================================================= */
-.modalGlassCard {
+/* The login card */
+.card {
   position: relative;
+  flex: 0 0 auto;
   width: 100%;
   max-width: 420px;
-  /* Dark translucent frosted glass background matching uploaded image */
-  background: rgba(18, 18, 26, 0.48);
-  backdrop-filter: blur(28px) saturate(180%);
-  -webkit-backdrop-filter: blur(28px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  box-shadow: 0 35px 70px rgba(0, 0, 0, 0.5),
-              inset 0 1px 0 rgba(255, 255, 255, 0.2);
-  border-radius: 22px;
-  padding: 42px 36px;
-  box-sizing: border-box;
-  color: #ffffff;
+  padding: 36px 32px 28px;
+  background: var(--white);
+  border: var(--border-width) solid var(--ink);
+  border-radius: var(--radius-card-lg);
+  box-shadow: var(--shadow-card);
 }
 
 .closeBtn {
   position: absolute;
-  top: 18px;
-  right: 18px;
-  background: transparent;
-  border: none;
-  color: rgba(255, 255, 255, 0.7);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 8px;
-  border-radius: 50%;
-  transition: color 0.2s ease, background-color 0.2s ease;
-}
-
-.closeBtn:hover {
-  color: #ffffff;
-  background-color: rgba(255, 255, 255, 0.1);
-}
-
-.modalHeader {
-  text-align: center;
-  margin-bottom: 28px;
-}
-
-.iconHeaderWrapper {
+  top: 10px;
+  right: 10px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 50px;
-  height: 50px;
-  background-color: rgba(255, 255, 255, 0.1);
+  width: var(--tap);
+  height: var(--tap);
+  padding: 0;
+  background: transparent;
+  color: var(--ink);
+  border: none;
   border-radius: 50%;
-  margin-bottom: 12px;
+  cursor: pointer;
 }
 
-.modalTitle {
-  font-size: 1.8rem;
-  font-weight: 700;
-  color: #ffffff;
-  margin: 0 0 6px 0;
-  letter-spacing: -0.02em;
+.closeBtn:hover {
+  background: var(--sea-tint);
 }
 
-.modalSubtitle {
-  font-size: 0.875rem;
-  color: rgba(255, 255, 255, 0.7);
+.header {
+  margin-bottom: 22px;
+  text-align: center;
+}
+
+.title2 {
+  margin: 0 0 6px;
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 1.9rem;
+  line-height: 1.1;
+}
+
+.lead {
   margin: 0;
+  color: var(--ink-muted);
+  font-size: 0.95rem;
 }
 
-/* Minimal Underline/Clean Glass Form Fields */
 .form {
   display: flex;
   flex-direction: column;
 }
 
-.fieldGroup {
+.field {
   display: flex;
   flex-direction: column;
-  margin-bottom: 22px;
+  gap: 6px;
+  margin-bottom: 16px;
 }
 
-.inputLabel {
-  font-size: 0.8rem;
-  color: rgba(255, 255, 255, 0.8);
-  margin-bottom: 6px;
+.field label {
+  font-weight: 800;
+  font-size: 0.9rem;
 }
 
-.fieldGroup input,
-.fieldGroup select {
-  height: 48px;
-  border: none;
-  border-bottom: 1.5px solid rgba(255, 255, 255, 0.35);
-  background: rgba(255, 255, 255, 0.05);
-  padding: 0 12px;
-  font-size: 0.95rem;
-  font-family: inherit;
-  color: #ffffff;
-  outline: none;
-  transition: border-color 0.25s ease, background 0.25s ease;
-  border-radius: 6px 6px 0 0;
-  box-sizing: border-box;
-}
-
-.fieldGroup input:focus,
-.fieldGroup select:focus {
-  border-bottom-color: #ffffff;
-  background: rgba(255, 255, 255, 0.12);
-}
-
-.fieldGroup input::placeholder {
-  color: rgba(255, 255, 255, 0.55);
-}
-
-.fieldGroup select option {
-  background: #181820;
-  color: #ffffff;
-}
-
-.masterPinInput {
-  text-align: center;
-  letter-spacing: 0.45em;
-  font-size: 1.4rem !important;
-  font-weight: 600;
-}
-
-/* Solid White "Log In" Button (Exact from image) */
-.primaryBtn {
+.field input {
   width: 100%;
-  height: 50px;
-  background: #ffffff;
-  color: #121218;
-  font-size: 0.98rem;
-  font-weight: 700;
-  border-radius: 12px;
-  border: none;
-  cursor: pointer;
-  margin-top: 10px;
-  transition: background-color 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+  min-height: 48px;
+  padding: 0 16px;
+  background: var(--white);
+  color: var(--ink);
+  border: var(--border-width) solid var(--ink);
+  border-radius: var(--radius-input);
+  font-family: inherit;
+  font-size: 1rem;
 }
 
-.primaryBtn:hover:not(:disabled) {
-  background-color: #f0f0f5;
-  transform: translateY(-1px);
-  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.4);
+.field input::placeholder {
+  color: var(--ink-muted);
+}
+
+.primaryBtn {
+  min-height: 52px;
+  margin-top: 6px;
+  background: var(--tomato);
+  color: var(--white);
+  border: var(--border-width) solid var(--ink);
+  border-radius: var(--radius-pill);
+  box-shadow: var(--shadow-button);
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 800;
+  cursor: pointer;
 }
 
 .primaryBtn:disabled {
@@ -277,80 +220,178 @@
   cursor: not-allowed;
 }
 
-/* Secondary Actions */
-.secondaryActions {
+.secondary {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  margin-top: 24px;
-}
-
-.footerText {
-  font-size: 0.85rem;
-  color: rgba(255, 255, 255, 0.7);
+  gap: 4px 8px;
+  margin-top: 16px;
+  font-size: 0.9375rem;
 }
 
 .textLink {
+  min-height: var(--tap);
+  padding: 0 8px;
   background: transparent;
+  color: var(--ink);
   border: none;
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: #ffffff;
-  cursor: pointer;
-  padding: 0;
   font-family: inherit;
-  transition: opacity 0.2s ease;
+  font-size: inherit;
+  font-weight: 800;
   text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
 }
 
-.textLink:hover {
-  opacity: 0.8;
-}
-
-/* Custom Phrase Error Message */
-.errorMessage {
-  background-color: rgba(199, 54, 22, 0.25);
-  border: 1px solid rgba(248, 113, 113, 0.5);
-  color: #fca5a5;
-  padding: 12px 16px;
-  border-radius: 12px;
-  font-size: 0.85rem;
-  text-align: center;
-  margin-bottom: 20px;
+.message {
+  margin-bottom: 16px;
+  padding: 12px 14px;
+  background: var(--citrus-tint);
+  color: var(--ink);
+  border: var(--border-width) solid var(--ink);
+  border-radius: 16px;
+  font-size: 0.9375rem;
+  font-weight: 700;
   line-height: 1.4;
-  backdrop-filter: blur(10px);
 }
 
-/* Mobile Responsive */
-@media (max-width: 900px) {
-  .mainContentLayout {
+/* Phones and portrait tablets: title up top, login as a bottom sheet. */
+@media (max-width: 900px) and (orientation: portrait) {
+  .layout {
     flex-direction: column;
-    justify-content: center;
-    gap: 1.5rem;
-    padding: 2rem 1.5rem;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 16px;
+    max-width: 100%;
+    min-height: 100%;
+    padding: calc(env(safe-area-inset-top) + 92px) 20px calc(env(safe-area-inset-bottom) + 16px);
   }
 
-  .heroContentLeft {
-    align-items: center;
+  .hero {
+    flex: none;
+    width: 100%;
+    max-width: 440px;
     text-align: center;
   }
 
-  .layoutActive .coupleTitle {
-    font-size: clamp(2.4rem, 9vw, 3.5rem);
+  .title {
+    font-size: clamp(2rem, 10.5vw, 3.2rem);
+    line-height: 1;
   }
 
-  .layoutActive .subtitle {
-    margin-top: 0.6rem;
-    margin-bottom: 0;
+  .subtitle {
+    margin: 10px 0 20px;
+    font-size: clamp(1.3rem, 5.6vw, 1.7rem);
   }
 
-  .modalGlassCard {
-    max-width: 100%;
-    padding: 28px 22px;
+  .cta {
+    width: 100%;
+    max-width: 320px;
+    min-height: 52px;
+    justify-content: center;
   }
 
-  .fieldGroup {
+  .layoutCard .title {
+    font-size: clamp(1.7rem, 8vw, 2.4rem);
+  }
+
+  .layoutCard .subtitle {
+    display: none;
+  }
+
+  .scrim {
+    position: fixed;
+    inset: 0;
+    z-index: 2;
+    background: rgb(23 43 112 / 0.28);
+  }
+
+  .card {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: var(--kb, 0px);
+    z-index: 3;
+    width: auto;
+    max-width: none;
+    max-height: calc(var(--vvh, 100dvh) - 16px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 30px 20px calc(20px + env(safe-area-inset-bottom));
+    border-width: var(--border-width) 0 0;
+    border-radius: 28px 28px 0 0;
+    box-shadow: 0 -5px 0 var(--sea);
+  }
+
+  /* a little grab handle, like any bottom sheet */
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    width: 44px;
+    height: 5px;
+    margin-left: -22px;
+    background: var(--sea);
+    border-radius: 3px;
+  }
+
+  .closeBtn {
+    top: 6px;
+    right: 6px;
+  }
+
+  .header {
     margin-bottom: 16px;
+  }
+
+  .field {
+    margin-bottom: 14px;
+  }
+
+  /* 16px fields so iOS doesn't zoom in on focus */
+  .field input {
+    min-height: 50px;
+    font-size: 16px;
+  }
+
+  .primaryBtn {
+    min-height: 52px;
+  }
+}
+
+/* Short wide screens (a phone on its side): everything tighter, the page scrolls if it must. */
+@media (max-height: 500px) and (orientation: landscape) {
+  .layout {
+    gap: 24px;
+    padding: 14px 24px 14px;
+  }
+
+  .title {
+    font-size: clamp(1.8rem, 5vw, 2.6rem);
+  }
+
+  .subtitle {
+    margin: 6px 0 12px;
+    font-size: 1.3rem;
+  }
+
+  .card {
+    max-width: 380px;
+    padding: 22px 22px 16px;
+  }
+
+  .header {
+    margin-bottom: 12px;
+  }
+
+  .field {
+    margin-bottom: 10px;
+  }
+
+  .field input,
+  .primaryBtn {
+    font-size: 16px;
   }
 }

@@ -36,6 +36,6 @@
 }
 
 .tab[aria-current='page'] .pill {
-  background: var(--citrus);
+  background: var(--user-accent, var(--citrus));
   border-color: var(--ink);
 }

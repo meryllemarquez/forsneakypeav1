@@ -65,4 +65,10 @@ export const dateService = {
       : await api.delete(`/dates/${id}/favorite`);
     return res.data?.data;
   },
+
+  // DELETE /dates/all: hard-deletes the whole section (both accounts). Returns what was removed.
+  deleteAll: async () => {
+    const res = await api.delete('/dates/all');
+    return res.data;
+  },
 };

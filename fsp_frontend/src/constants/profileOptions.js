@@ -1,17 +1,23 @@
-// Keys here must match ALLOWED_ACCENT_COLORS in ProfileService.java exactly.
+// Keys here must match ALLOWED_ACCENT_COLORS in ProfileService.java exactly. Only the colours and
+// labels are ours: the choice colours your avatar ring and your highlighted tab (`ink` is the text
+// colour that stays readable on that colour).
 export const ACCENT_COLORS = [
-  { key: 'soft-pink', label: 'Soft Pink', hex: '#F3C6D3' },
-  { key: 'rose', label: 'Rose', hex: '#C73616' },
-  { key: 'lavender', label: 'Lavender', hex: '#B9A6DB' },
-  { key: 'cream', label: 'Cream', hex: '#E8D7BC' },
-  { key: 'sky-blue', label: 'Sky Blue', hex: '#8FC1E3' },
-  { key: 'sage-green', label: 'Sage Green', hex: '#A3B18A' },
+  { key: 'soft-pink', label: 'Peach', hex: '#FFD8A0', ink: '#172B70' },
+  { key: 'rose', label: 'Citrus', hex: '#FF9F1C', ink: '#172B70' },
+  { key: 'lavender', label: 'Periwinkle', hex: '#CBDBF8', ink: '#172B70' },
+  { key: 'cream', label: 'Gelato', hex: '#FFE680', ink: '#172B70' },
+  { key: 'sky-blue', label: 'Sea', hex: '#5CB3FF', ink: '#172B70' },
+  { key: 'sage-green', label: 'Amalfi', hex: '#1F55C9', ink: '#FFFFFF' },
 ];
 
 export const DEFAULT_ACCENT_COLOR = 'rose';
 
+export function getAccent(key) {
+  return ACCENT_COLORS.find((c) => c.key === key) || ACCENT_COLORS.find((c) => c.key === DEFAULT_ACCENT_COLOR);
+}
+
 export function getAccentHex(key) {
-  return ACCENT_COLORS.find((c) => c.key === key)?.hex || ACCENT_COLORS[1].hex;
+  return getAccent(key).hex;
 }
 
 export const EMOJI_OPTIONS = ['❤️', '🌸', '🐻', '✨', '🫶', '🌙', '💕', '🧸'];

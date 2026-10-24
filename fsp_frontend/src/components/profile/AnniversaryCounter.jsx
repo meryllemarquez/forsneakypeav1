@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
+import Icon from '../Icon';
 import { getDaysTogether } from '../../constants/relationship';
 import styles from './AnniversaryCounter.module.css';
 
@@ -28,7 +29,9 @@ export default function AnniversaryCounter() {
     <motion.div className={styles.card} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}>
       <span className={styles.label}>Together for</span>
       <span className={styles.value}>{displayValue.toLocaleString()}</span>
-      <span className={styles.unit}>Days ❤️</span>
+      <span className={styles.unit}>
+        days <Icon name="heart" size={26} />
+      </span>
     </motion.div>
   );
 }

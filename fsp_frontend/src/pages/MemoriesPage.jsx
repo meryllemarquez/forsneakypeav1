@@ -17,15 +17,17 @@ import {
 import { memoryService } from '../services/memoryService';
 import { useFolders } from '../queries/queries';
 import { useMemoryMutations } from '../queries/mutations';
-import { uploadToSupabaseStorage } from '../api/supabaseClient';
+import { uploadToSupabaseStorage, removeMemoryFiles } from '../api/supabaseClient';
+import { useNotification } from '../hooks/useNotification';
 import { useScrollLock } from '../hooks/useScrollLock';
-import { doodleToIconStyle, resolveAlbumIcon, storedDoodle } from '../utils/doodleFor';
+import { albumCoverUrl, buildIconStyle, parseIconStyle, resolveAlbumIcon } from '../utils/doodleFor';
 import Icon, { ICON_NAMES } from '../components/Icon';
 import Navbar from '../components/layout/Navbar/Navbar';
 import Footer from '../components/layout/Footer/Footer';
 import Button from '../components/ui/Button/Button';
 import Modal from '../components/ui/Modal/Modal';
 import ConfirmDialog from '../components/ui/ConfirmDialog/ConfirmDialog';
+import DeleteAllDialog from '../components/ui/DeleteAllDialog/DeleteAllDialog';
 import CalendarView from '../components/memories/CalendarDump/CalendarView';
 import form from '../components/ui/FormControls.module.css';
 import styles from './MemoriesPage.module.css';
@@ -95,6 +97,10 @@ export default function MemoriesPage() {
   const loading = foldersQuery.isPending;
   const loadError = foldersQuery.isError ? 'Unable to load albums. Please check backend connection.' : '';
   const memoryMutations = useMemoryMutations();
+  const { addToast } = useNotification();
+  const [deleteAllOpen, setDeleteAllOpen] = useState(false);
+  const [deleteAllBusy, setDeleteAllBusy] = useState(false);
+  const [deleteAllError, setDeleteAllError] = useState('');
   const [selectedFolder, setSelectedFolder] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -111,6 +117,8 @@ export default function MemoriesPage() {
   // Modals state
   const [isFolderModalOpen, setIsFolderModalOpen] = useState(false);
   const [editingFolder, setEditingFolder] = useState(null);
+  // Photos of the album being edited, so one can be picked as its cover.
+  const [coverChoices, setCoverChoices] = useState([]);
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [uploadError, setUploadError] = useState('');
 
@@ -316,8 +324,13 @@ export default function MemoriesPage() {
   // Open Create / Edit Folder Modal
   const openFolderModal = (folder = null) => {
     setErrorMessage('');
+    setCoverChoices([]);
     if (folder) {
       setEditingFolder(folder);
+      memoryService
+        .getFolderById(folder.id)
+        .then((full) => setCoverChoices(full?.photos || []))
+        .catch(() => {});
       setFolderForm({
         name: folder.name || '',
         description: folder.description || '',
@@ -528,6 +541,30 @@ export default function MemoriesPage() {
     });
   };
 
+  // "Delete all albums": the backend removes every album and photo row for both accounts and
+  // hands back the storage paths; the files are then removed from the bucket on a best-effort basis.
+  const handleDeleteAll = async () => {
+    setDeleteAllBusy(true);
+    setDeleteAllError('');
+    try {
+      const result = await memoryMutations.deleteAll();
+      setSelectedFolder(null);
+      closeLightbox();
+      setDeleteAllOpen(false);
+      const leftBehind = await removeMemoryFiles(result?.storagePaths ?? []);
+      if (leftBehind.length > 0) {
+        console.warn('Photo files that stayed in storage:', leftBehind);
+        addToast(`All albums deleted. ${leftBehind.length} photo file(s) could not be removed from storage and stay there.`, 'error', 9000);
+      } else {
+        addToast('All albums and photos deleted.', 'success');
+      }
+    } catch (err) {
+      setDeleteAllError(err?.response?.data?.message || 'Could not delete everything. Please try again.');
+    } finally {
+      setDeleteAllBusy(false);
+    }
+  };
+
   // Filtered Folders based on Search
   const filteredFolders = useMemo(() => {
     return folders.filter((f) =>
@@ -543,7 +580,8 @@ export default function MemoriesPage() {
 
   const closeFolderModal = () => setIsFolderModalOpen(false);
   const closeUploadModal = () => setIsUploadModalOpen(false);
-  const pickedDoodle = storedDoodle(folderForm.iconStyle);
+  const { doodle: pickedDoodle, cover: coverOn } = parseIconStyle(folderForm.iconStyle);
+  const setLook = (patch) => setFolderForm((f) => ({ ...f, iconStyle: buildIconStyle({ ...parseIconStyle(f.iconStyle), ...patch }) }));
   const showHighlightControls = !!(selectedFolder?.isCalendarHighlight && selectedFolder?.eventDate);
 
   // Same panel for portrait (sidebar) and landscape (bottom bar) photos.
@@ -666,11 +704,11 @@ export default function MemoriesPage() {
                   <article key={folder.id} className={styles.folderCard}>
                     <div
                       className={styles.cover}
-                      style={folder.coverImageUrl ? undefined : { background: COVER_TINTS[i % COVER_TINTS.length] }}
+                      style={albumCoverUrl(folder) ? undefined : { background: COVER_TINTS[i % COVER_TINTS.length] }}
                       onClick={(e) => openAlbumFromCard(folder, e)}
                     >
-                      {folder.coverImageUrl ? (
-                        <img src={folder.coverImageUrl} alt="" className={styles.coverImage} loading="lazy" decoding="async" />
+                      {albumCoverUrl(folder) ? (
+                        <img src={albumCoverUrl(folder)} alt="" className={styles.coverImage} loading="lazy" decoding="async" />
                       ) : (
                         <Icon name={resolveAlbumIcon(folder)} size={96} className={styles.coverIcon} />
                       )}
@@ -828,7 +866,25 @@ export default function MemoriesPage() {
             )}
           </motion.div>
         )}
+        {viewMode === 'albums' && !selectedFolder && !loading && folders.length > 0 && (
+          <div className={styles.dangerZone}>
+            <p className={styles.dangerText}>Start over? This removes every album and photo for both of us.</p>
+            <Button onClick={() => { setDeleteAllError(''); setDeleteAllOpen(true); }}>
+              <Trash2 size={18} strokeWidth={2.6} aria-hidden="true" />
+              Delete all albums
+            </Button>
+          </div>
+        )}
       </main>
+
+      <DeleteAllDialog
+        open={deleteAllOpen}
+        what="albums and photos"
+        busy={deleteAllBusy}
+        error={deleteAllError}
+        onConfirm={handleDeleteAll}
+        onClose={() => setDeleteAllOpen(false)}
+      />
 
       {/* MODAL 1: CREATE / EDIT ALBUM */}
       <Modal open={isFolderModalOpen} onClose={closeFolderModal} title={editingFolder ? 'Edit memory album' : 'Create new album'} locked={submitting}>
@@ -867,7 +923,7 @@ export default function MemoriesPage() {
                 role="radio"
                 aria-checked={!pickedDoodle}
                 className={`${styles.doodleOption} ${styles.doodleAuto} ${!pickedDoodle ? styles.doodleActive : ''}`}
-                onClick={() => setFolderForm({ ...folderForm, iconStyle: doodleToIconStyle(null) })}
+                onClick={() => setLook({ doodle: null })}
               >
                 <Icon name={resolveAlbumIcon({ name: folderForm.name })} size={30} />
                 Automatic
@@ -881,13 +937,58 @@ export default function MemoriesPage() {
                   aria-label={name}
                   title={name}
                   className={`${styles.doodleOption} ${pickedDoodle === name ? styles.doodleActive : ''}`}
-                  onClick={() => setFolderForm({ ...folderForm, iconStyle: doodleToIconStyle(name) })}
+                  onClick={() => setLook({ doodle: name })}
                 >
                   <Icon name={name} size={32} />
                 </button>
               ))}
             </div>
           </fieldset>
+
+          <div className={form.switchRow}>
+            <label className={form.switch}>
+              <input
+                type="checkbox"
+                checked={coverOn}
+                onChange={(e) => setLook({ cover: e.target.checked })}
+                aria-label="Use a photo as cover"
+              />
+              <span className={form.switchTrack}><span className={form.switchThumb} /></span>
+            </label>
+            <div className={form.switchText}>
+              <p className={form.switchTitle}>Use a photo as cover</p>
+              <p className={form.hint}>
+                Off by default: the album shows its doodle, so photos stay private inside the album.
+              </p>
+            </div>
+          </div>
+
+          {coverOn && (
+            <fieldset className={styles.fieldset}>
+              <legend className={form.label}>Cover photo</legend>
+              {coverChoices.length === 0 ? (
+                <p className={form.hint}>
+                  {editingFolder ? 'This album has no photos yet.' : 'Add photos after creating the album.'} The first photo you add becomes the cover.
+                </p>
+              ) : (
+                <div className={styles.coverGrid} role="radiogroup" aria-label="Cover photo">
+                  {coverChoices.map((photo, index) => (
+                    <button
+                      key={photo.id}
+                      type="button"
+                      role="radio"
+                      aria-checked={folderForm.coverImageUrl === photo.photoUrl}
+                      aria-label={`Photo ${index + 1}${photo.caption ? `: ${photo.caption}` : ''}`}
+                      className={`${styles.coverOption} ${folderForm.coverImageUrl === photo.photoUrl ? styles.coverOptionActive : ''}`}
+                      onClick={() => setFolderForm((f) => ({ ...f, coverImageUrl: photo.photoUrl }))}
+                    >
+                      <img src={photo.photoUrl} alt="" loading="lazy" />
+                    </button>
+                  ))}
+                </div>
+              )}
+            </fieldset>
+          )}
 
           <fieldset className={styles.fieldset}>
             <legend className={form.label}>Accent color</legend>

@@ -58,4 +58,10 @@ export const loveBoardService = {
   deleteSticker: async (id) => {
     await api.delete(`/love-board/stickers/${id}`);
   },
+
+  // DELETE /love-board/all: hard-deletes the whole section (both accounts). Returns what was removed.
+  deleteAll: async () => {
+    const res = await api.delete('/love-board/all');
+    return res.data;
+  },
 };

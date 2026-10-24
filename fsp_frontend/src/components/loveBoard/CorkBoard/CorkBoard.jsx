@@ -41,7 +41,6 @@ const CorkBoard = forwardRef(function CorkBoard(
   const pendingScrollRef = useRef(null);
   const [autoFitScale, setAutoFitScale] = useState(1);
   const [zoomOverride, setZoomOverride] = useState(null);
-  const [smoothZoom, setSmoothZoom] = useState(true);
 
   const panMode = activeTool === 'hand';
   const scale = zoomOverride ?? autoFitScale;
@@ -55,9 +54,11 @@ const CorkBoard = forwardRef(function CorkBoard(
 
   // Zoom-to-fit by default: the board is a fixed logical BOARD_WIDTH x
   // BOARD_HEIGHT canvas that scales down (never up, to keep the background
-  // crisp) to always fit inside its container, centered by the flex
-  // wrapper below. A manual zoomOverride (set via wheel/pinch/toolbar) opts
-  // out of auto-fit and switches the container to a scrollable/pannable view.
+  // crisp) to always fit inside its container. A sizing wrapper takes the
+  // board's *scaled* size and is centered with auto margins, so it stays
+  // centered when it is smaller than the container and scrolls from its top
+  // left edge when it is bigger. A manual zoomOverride (wheel/pinch/menu)
+  // opts out of auto-fit and makes the container scrollable/pannable.
   useEffect(() => {
     const container = scrollRef.current;
     if (!container) return undefined;
@@ -79,6 +80,12 @@ const CorkBoard = forwardRef(function CorkBoard(
     onZoomChange?.(Math.round(scale * 100));
   }, [scale, onZoomChange]);
 
+  // Where the (scaled) board's top left sits inside the container when it is smaller than it.
+  const centeringOffset = (container, s) => ({
+    left: Math.max(0, (container.clientWidth - BOARD_WIDTH * s) / 2),
+    top: Math.max(0, (container.clientHeight - BOARD_HEIGHT * s) / 2),
+  });
+
   // Applies any scroll position queued by zoomTo synchronously after the
   // DOM reflects the new scale/overflow mode but before paint, so there's
   // no visible flash at the wrong scroll offset.
@@ -96,7 +103,7 @@ const CorkBoard = forwardRef(function CorkBoard(
   // Anchor-preserving zoom: whatever board point sits under (anchorClientX,
   // anchorClientY) stays under that same screen point after the scale
   // change, instead of always recentering on the board's middle.
-  const zoomTo = useCallback((nextScale, anchorClientX, anchorClientY, { animate = false } = {}) => {
+  const zoomTo = useCallback((nextScale, anchorClientX, anchorClientY) => {
     const container = scrollRef.current;
     if (!container) return;
     const clamped = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, nextScale));
@@ -108,19 +115,16 @@ const CorkBoard = forwardRef(function CorkBoard(
     const vx = (anchorClientX ?? rect.left + rect.width / 2) - rect.left;
     const vy = (anchorClientY ?? rect.top + rect.height / 2) - rect.top;
 
-    // Auto-fit mode has no real scroll offset (it's centered via flexbox) —
-    // compute the equivalent offset so the anchor math has a valid starting
-    // point when a gesture first switches into manual zoom.
-    const currentScrollLeft =
-      currentOverride == null ? Math.max(0, (BOARD_WIDTH * currentScale - container.clientWidth) / 2) : container.scrollLeft;
-    const currentScrollTop =
-      currentOverride == null ? Math.max(0, (BOARD_HEIGHT * currentScale - container.clientHeight) / 2) : container.scrollTop;
+    // The board point under the anchor, then the scroll that keeps it there at the new scale.
+    const before = centeringOffset(container, currentScale);
+    const after = centeringOffset(container, clamped);
+    const boardX = (container.scrollLeft + vx - before.left) / currentScale;
+    const boardY = (container.scrollTop + vy - before.top) / currentScale;
 
     pendingScrollRef.current = {
-      left: (currentScrollLeft + vx) * (clamped / currentScale) - vx,
-      top: (currentScrollTop + vy) * (clamped / currentScale) - vy,
+      left: boardX * clamped + after.left - vx,
+      top: boardY * clamped + after.top - vy,
     };
-    setSmoothZoom(animate);
     setZoomOverride(clamped);
   }, []);
   const zoomToRef = useRef(zoomTo);
@@ -131,11 +135,10 @@ const CorkBoard = forwardRef(function CorkBoard(
   useImperativeHandle(ref, () => ({
     resetView: () => {
       pendingScrollRef.current = null;
-      setSmoothZoom(true);
       setZoomOverride(null);
     },
-    zoomIn: () => zoomTo((scaleStateRef.current.zoomOverride ?? scaleStateRef.current.autoFitScale) + ZOOM_STEP, undefined, undefined, { animate: true }),
-    zoomOut: () => zoomTo((scaleStateRef.current.zoomOverride ?? scaleStateRef.current.autoFitScale) - ZOOM_STEP, undefined, undefined, { animate: true }),
+    zoomIn: () => zoomTo((scaleStateRef.current.zoomOverride ?? scaleStateRef.current.autoFitScale) + ZOOM_STEP),
+    zoomOut: () => zoomTo((scaleStateRef.current.zoomOverride ?? scaleStateRef.current.autoFitScale) - ZOOM_STEP),
   }));
 
   // Ctrl/Cmd+wheel (and trackpad pinch, which browsers report as ctrl+wheel)
@@ -150,7 +153,7 @@ const CorkBoard = forwardRef(function CorkBoard(
       e.preventDefault();
       const currentScale = scaleStateRef.current.zoomOverride ?? scaleStateRef.current.autoFitScale;
       const factor = Math.exp(-e.deltaY * 0.0025);
-      zoomToRef.current(currentScale * factor, e.clientX, e.clientY, { animate: false });
+      zoomToRef.current(currentScale * factor, e.clientX, e.clientY);
     };
 
     container.addEventListener('wheel', onWheel, { passive: false });
@@ -189,7 +192,7 @@ const CorkBoard = forwardRef(function CorkBoard(
         e.preventDefault();
         const [a, b] = Array.from(pointers.values());
         const dist = Math.hypot(a.x - b.x, a.y - b.y) || 1;
-        zoomToRef.current(pinch.startScale * (dist / pinch.startDist), pinch.midClientX, pinch.midClientY, { animate: false });
+        zoomToRef.current(pinch.startScale * (dist / pinch.startDist), pinch.midClientX, pinch.midClientY);
       }
     };
     const onPointerEnd = (e) => {
@@ -258,20 +261,20 @@ const CorkBoard = forwardRef(function CorkBoard(
   return (
     <div
       ref={scrollRef}
-      className={`relative flex h-full w-full items-center justify-center ${zoomOverride == null ? 'overflow-hidden' : 'overflow-auto'}`}
+      className={`relative flex h-full w-full ${zoomOverride == null ? 'overflow-hidden' : 'overflow-auto'}`}
       style={{ cursor: panMode ? 'grab' : 'default', touchAction: 'none', overscrollBehavior: 'contain' }}
       onPointerDown={handlePanPointerDown}
       onClick={() => decorateMode && onSelectSticker?.(null)}
     >
+      <div className="relative m-auto shrink-0" style={{ width: BOARD_WIDTH * scale, height: BOARD_HEIGHT * scale }}>
       <div
         ref={innerRef}
-        className="lb-board relative shrink-0"
+        className="lb-board absolute top-0 left-0"
         style={{
           width: BOARD_WIDTH,
           height: BOARD_HEIGHT,
           transform: `scale(${scale})`,
-          transformOrigin: zoomOverride == null ? 'center' : 'top left',
-          transition: smoothZoom ? 'transform 180ms cubic-bezier(0.22, 1, 0.36, 1)' : 'none',
+          transformOrigin: 'top left',
         }}
       >
         <AnimatePresence>
@@ -321,6 +324,7 @@ const CorkBoard = forwardRef(function CorkBoard(
             </div>
           </div>
         )}
+      </div>
       </div>
     </div>
   );

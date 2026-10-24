@@ -30,7 +30,9 @@ const RULES = [
   [/cassette|mixtape/i, 'cassette'],
   [/dog|zizi|loafie|zoey|tato|cooper/i, 'dog'],
   [/skyrie|\bball\b/i, 'ball'],
-  [/plush|chimken|rorry/i, 'plush'],
+  [/chimken/i, 'chimken'],
+  [/rorry|octopus/i, 'rorry'],
+  [/plush|junebug|avocado/i, 'plush'],
   [/tulip|flower/i, 'tulip'],
   [/daisy|garden/i, 'daisy'],
   [/sunrise|sunset|summer|\bsun\b/i, 'sun'],
@@ -53,17 +55,37 @@ const pick = (text, fallback) => findDoodle(text) || fallback;
 export const albumIcon = (name) => pick(name, 'camera');
 export const dateIcon = (title, location) => pick(`${title || ''} ${location || ''}`, 'ticket');
 
-// An album's doodle: the one picked in the album form when there is one, else the keyword pick.
-// The pick is stored in the existing `iconStyle` text column as "doodle:<name>". Anything else
-// (the legacy default "camera", or empty) means "automatic".
-const OVERRIDE_PREFIX = 'doodle:';
-
-export function storedDoodle(iconStyle) {
-  if (typeof iconStyle !== 'string' || !iconStyle.startsWith(OVERRIDE_PREFIX)) return null;
-  const name = iconStyle.slice(OVERRIDE_PREFIX.length);
-  return ICON_NAMES.includes(name) ? name : null;
+// An album's look is kept in the existing `iconStyle` text column (no backend change):
+//   "doodle:<name>"   the doodle picked in the album form
+//   "cover"           the album opted in to showing a photo as its cover
+// joined with "|" (for example "doodle:plane|cover"). Anything else, including the legacy default
+// "camera", means "automatic doodle, no photo cover". Albums are private by default: a photo
+// shows as the cover only when "cover" is present.
+export function parseIconStyle(iconStyle) {
+  const parts = typeof iconStyle === 'string' ? iconStyle.split('|') : [];
+  let doodle = null;
+  let cover = false;
+  for (const part of parts) {
+    if (part.startsWith('doodle:')) {
+      const name = part.slice('doodle:'.length);
+      if (ICON_NAMES.includes(name)) doodle = name;
+    } else if (part === 'cover') {
+      cover = true;
+    }
+  }
+  return { doodle, cover };
 }
 
-export const doodleToIconStyle = (name) => (name ? `${OVERRIDE_PREFIX}${name}` : 'camera');
+export function buildIconStyle({ doodle = null, cover = false } = {}) {
+  const parts = [];
+  if (doodle) parts.push(`doodle:${doodle}`);
+  if (cover) parts.push('cover');
+  return parts.length > 0 ? parts.join('|') : 'camera';
+}
+
+export const storedDoodle = (iconStyle) => parseIconStyle(iconStyle).doodle;
+
+// The photo to show as an album's cover, or null (the doodle tile is shown instead).
+export const albumCoverUrl = (folder) => (parseIconStyle(folder?.iconStyle).cover && folder?.coverImageUrl) || null;
 
 export const resolveAlbumIcon = (folder) => storedDoodle(folder?.iconStyle) || albumIcon(folder?.name);

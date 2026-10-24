@@ -1,23 +1,28 @@
-// Ported 1:1 from docs/rebrand/Icon.dc.html (viewBox 0 0 64 64). Do not edit by hand.
+// HAND-EDITED NOW. Started as a port of docs/rebrand/Icon.dc.html (viewBox 0 0 64 64), but the
+// motmot, plush, ball (Skyrie), chimken and rorry drawings were redrawn by hand. Do NOT regenerate
+// this file from Icon.dc.html: that would overwrite them.
 // The wrapping <svg> (fill none, ink stroke 2.6, round caps/joins) lives in Icon.jsx.
+
+// Rorry's body outline, shared with the landing scene (it draws both sides of the reversible plush).
+export const RORRY_BODY =
+  'M13 34 C13 12 51 12 51 34 C51 42 55 48 51 54 C48 58 44 54 43 49 C42 56 36 58 34 52 C33 58 27 58 26 52 C24 57 18 58 15 54 C11 48 13 42 13 34 Z';
 
 export const GLYPHS = {
   motmot: (
     <>
-      <circle cx="18" cy="48" r="7" fill="#5CB3FF" stroke="none" />
-      <circle cx="49" cy="48" r="7" fill="#5CB3FF" stroke="none" />
-      <path d="M11 44 C11 37 19 34 27 37 H42 L46 44 Z" fill="#E0301A" stroke="none" />
-      <rect x="24" y="30" width="15" height="5" rx="2.5" fill="#FF9F1C" stroke="none" />
-      <circle cx="16" cy="46" r="7" />
-      <circle cx="47" cy="46" r="7" />
-      <circle cx="16" cy="46" r="1.4" />
-      <circle cx="47" cy="46" r="1.4" />
-      <path d="M9 42 C9 35 18 32 26 35 H41" />
-      <path d="M41 35 L45 19 M41 35 L47 46" />
-      <path d="M41 19 H51" />
-      <rect x="22" y="28" width="15" height="5" rx="2.5" />
-      <path d="M24 42 H39" />
-      <circle cx="49" cy="25" r="2.2" />
+      <circle cx="16" cy="47" r="8" fill="#5CB3FF" />
+      <circle cx="50" cy="47" r="8" fill="#5CB3FF" />
+      <circle cx="16" cy="47" r="2" fill="#172B70" />
+      <circle cx="50" cy="47" r="2" fill="#172B70" />
+      <path d="M5 42 C5 34 12 31 22 31 L31 33 L29 41 H5 Z" fill="#E0301A" />
+      <path d="M28 41 H40 L39 45 H27 Z" fill="#E0301A" />
+      <path d="M40 43 L37 22 C37 19 41 19 43 22 L48 38 L47 44 Z" fill="#E0301A" />
+      <path d="M13 28 H30 C32 28 32 31 30 31 H13 C11 31 11 28 13 28 Z" fill="#172B70" />
+      <path d="M43 22 L52 45" />
+      <path d="M39 17 H48 M41 17 L42 21" />
+      <circle cx="52" cy="25" r="2.6" fill="#FFE680" />
+      <path d="M46 39 C50 35 58 37 58 42" fill="#E0301A" />
+      <path d="M7 46 H19" />
     </>
   ),
   camera: (
@@ -126,24 +131,71 @@ export const GLYPHS = {
   ),
   plush: (
     <>
-      <circle cx="34" cy="38" r="18" fill="#FF9F1C" stroke="none" />
-      <circle cx="32" cy="36" r="18" />
-      <path d="M19 38 C14 35 14 44 21 45" />
-      <path d="M44 31 L52 33.5 L44 37 Z" fill="#E0301A" />
-      <circle cx="38" cy="30" r="1.8" fill="#172B70" />
-      <path d="M29 18 C29 12 33 12 33 16 M33 18 C35 13 39 14 37 18" />
-      <path d="M26 54 v5 M38 54 v5" />
-      <circle cx="41" cy="40" r="2.6" fill="#E0301A" stroke="none" opacity="0.5" />
+      <path d="M32 9 V4" stroke="#8B5A2B" strokeWidth="3.4" />
+      <path d="M32 9 C42 9 46 23 50 36 C54 50 44 58 32 58 C20 58 10 50 14 36 C18 23 22 9 32 9 Z" fill="#7FB35A" />
+      <ellipse cx="32" cy="45" rx="13" ry="11" fill="#FFF3C4" stroke="none" />
+      <circle cx="32" cy="46" r="6" fill="#8B5A2B" />
+      <ellipse cx="10.5" cy="40" rx="3.4" ry="2.4" fill="#8B5A2B" />
+      <ellipse cx="53.5" cy="40" rx="3.4" ry="2.4" fill="#8B5A2B" />
+      <ellipse cx="23" cy="58.5" rx="4" ry="2.4" fill="#8B5A2B" />
+      <ellipse cx="41" cy="58.5" rx="4" ry="2.4" fill="#8B5A2B" />
+      <circle cx="26" cy="27" r="1.7" fill="#172B70" />
+      <circle cx="38" cy="27" r="1.7" fill="#172B70" />
+      <circle cx="22" cy="31" r="2.6" fill="#FF8FA3" stroke="none" opacity="0.8" />
+      <circle cx="42" cy="31" r="2.6" fill="#FF8FA3" stroke="none" opacity="0.8" />
+      <path d="M29 31 c1.2 1.8 4.8 1.8 6 0" />
     </>
   ),
   ball: (
     <>
-      <circle cx="34" cy="34" r="22" fill="#5CB3FF" stroke="none" />
-      <circle cx="32" cy="32" r="22" />
-      <path d="M10 32 C20 25 44 25 54 32" />
-      <path d="M32 10 C25 20 25 44 32 54" />
-      <path d="M42 40 L44 44 L48 44.5 L45 47 L46 51 L42 49 L38 51 L39 47 L36 44.5 L40 44 Z" fill="#FF9F1C" strokeWidth="1.8" />
-      <path d="M18 20 C20 17 23 15 26 14" stroke="#FFFFFF" strokeWidth="3" />
+      <circle cx="14" cy="31" r="7" fill="#FFFFFF" />
+      <circle cx="50" cy="31" r="7" fill="#FFFFFF" />
+      <circle cx="14" cy="31" r="3.4" fill="#FFB3C7" stroke="none" />
+      <circle cx="50" cy="31" r="3.4" fill="#FFB3C7" stroke="none" />
+      <circle cx="32" cy="38" r="20" fill="#FFFFFF" />
+      <circle cx="13" cy="44" r="6" fill="#FFFFFF" />
+      <circle cx="51" cy="44" r="6" fill="#FFFFFF" />
+      <circle cx="32" cy="38" r="19" fill="#FFFFFF" stroke="none" />
+      <circle cx="13" cy="44" r="5" fill="#FFFFFF" stroke="none" />
+      <circle cx="51" cy="44" r="5" fill="#FFFFFF" stroke="none" />
+      <ellipse cx="24.5" cy="40" rx="4.4" ry="3.8" fill="#FFB3C7" />
+      <ellipse cx="39.5" cy="40" rx="4.4" ry="3.8" fill="#FFB3C7" />
+      <circle cx="24.5" cy="40" r="1.7" fill="#172B70" />
+      <circle cx="39.5" cy="40" r="1.7" fill="#172B70" />
+      <ellipse cx="32" cy="46" rx="3.2" ry="2.5" fill="#172B70" />
+      <path d="M28 50 Q32 53.5 36 50" />
+      <path d="M12 31 C12 4 52 4 52 31 Z" fill="#FF8FB1" />
+      <path d="M12 31 C12 11 52 11 52 31 Z" fill="#FFE680" />
+      <path d="M12 31 C12 17 52 17 52 31 Z" fill="#3FB8AF" />
+      <path d="M12 31 C12 23 52 23 52 31 Z" fill="#FFC53D" />
+      <rect x="10" y="29" width="44" height="6" rx="3" fill="#FFC53D" />
+      <circle cx="32" cy="7" r="4.4" fill="#FF8FB1" />
+      <path d="M21 16 C23 12 27 10 30 10" stroke="#FFFFFF" strokeWidth="2.4" />
+    </>
+  ),
+  chimken: (
+    <>
+      <path d="M17 12 L14 6" stroke="#8B5A2B" strokeWidth="3.4" />
+      <ellipse cx="32" cy="34" rx="28" ry="15" fill="#7FB35A" />
+      <ellipse cx="29" cy="40" rx="19" ry="8" fill="#FFF3C4" stroke="none" />
+      <circle cx="27" cy="41" r="4.2" fill="#8B5A2B" />
+      <ellipse cx="46" cy="51" rx="3.6" ry="2.4" fill="#8B5A2B" />
+      <ellipse cx="18" cy="51" rx="3.6" ry="2.4" fill="#8B5A2B" />
+      <ellipse cx="56" cy="39" rx="2.4" ry="3.2" fill="#8B5A2B" />
+      <circle cx="46" cy="30" r="1.6" fill="#172B70" />
+      <circle cx="54" cy="30" r="1.6" fill="#172B70" />
+      <circle cx="43" cy="35" r="2.3" fill="#FF8FA3" stroke="none" opacity="0.8" />
+      <circle cx="57" cy="35" r="2.3" fill="#FF8FA3" stroke="none" opacity="0.8" />
+      <path d="M48 34 c1 1.6 3 1.6 4 0" />
+    </>
+  ),
+  rorry: (
+    <>
+      <path d="M13 34 C13 12 51 12 51 34 C51 42 55 48 51 54 C48 58 44 54 43 49 C42 56 36 58 34 52 C33 58 27 58 26 52 C24 57 18 58 15 54 C11 48 13 42 13 34 Z" fill="#3FB8AF" />
+      <path d="M20 26 L29 29 M44 26 L35 29" />
+      <circle cx="25" cy="33" r="1.8" fill="#172B70" />
+      <circle cx="39" cy="33" r="1.8" fill="#172B70" />
+      <path d="M26 43 Q32 38 38 43" />
     </>
   ),
   mountain: (

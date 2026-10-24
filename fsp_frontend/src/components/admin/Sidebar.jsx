@@ -62,7 +62,7 @@ export default function Sidebar({ onNavigate, onLogout, collapsed = false, onTog
         {!collapsed && (
           <div className="min-w-0">
             <p className="m-0 truncate text-[13px] font-semibold tracking-tight">Admin Console</p>
-            <p className="m-0 truncate text-[11px] text-white/50">For Sneakypea</p>
+            <p className="m-0 truncate text-[11px] text-white/75">For Sneakypea</p>
           </div>
         )}
       </div>
@@ -87,7 +87,7 @@ export default function Sidebar({ onNavigate, onLogout, collapsed = false, onTog
                     `group relative flex items-center gap-2.5 rounded-button px-3 py-2 text-[13px] font-medium no-underline transition-colors ${
                       isActive
                         ? 'bg-white/10 text-white'
-                        : 'text-white/70 hover:bg-(--color-admin-sidebar-hover) hover:text-white'
+                        : 'text-white/85 hover:bg-(--color-admin-sidebar-hover) hover:text-white'
                     }`
                   }
                 >
@@ -118,7 +118,7 @@ export default function Sidebar({ onNavigate, onLogout, collapsed = false, onTog
           <button
             type="button"
             onClick={onToggleCollapse}
-            className="hidden w-full appearance-none items-center gap-2.5 rounded-button border-0 bg-transparent px-3 py-2 text-[13px] font-medium text-white/60 transition hover:bg-(--color-admin-sidebar-hover) hover:text-white lg:flex"
+            className="hidden w-full appearance-none items-center gap-2.5 rounded-button border-0 bg-transparent px-3 py-2 text-[13px] font-medium text-white/80 transition hover:bg-(--color-admin-sidebar-hover) hover:text-white lg:flex"
           >
             {collapsed ? <ChevronsRight size={16} strokeWidth={2} /> : <ChevronsLeft size={16} strokeWidth={2} />}
             {!collapsed && <span>Collapse</span>}
@@ -128,7 +128,7 @@ export default function Sidebar({ onNavigate, onLogout, collapsed = false, onTog
           type="button"
           onClick={onLogout}
           title={collapsed ? 'Logout' : undefined}
-          className="flex w-full appearance-none items-center gap-2.5 rounded-button border-0 bg-transparent px-3 py-2 text-[13px] font-medium text-white/60 transition hover:bg-(--color-admin-sidebar-hover) hover:text-white"
+          className="flex w-full appearance-none items-center gap-2.5 rounded-button border-0 bg-transparent px-3 py-2 text-[13px] font-medium text-white/80 transition hover:bg-(--color-admin-sidebar-hover) hover:text-white"
         >
           <LogOut size={16} strokeWidth={2} />
           {!collapsed && 'Logout'}

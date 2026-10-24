@@ -34,6 +34,8 @@ import Navbar from '../components/layout/Navbar/Navbar';
 import Button from '../components/ui/Button/Button';
 import Modal from '../components/ui/Modal/Modal';
 import ConfirmDialog from '../components/ui/ConfirmDialog/ConfirmDialog';
+import DeleteAllDialog from '../components/ui/DeleteAllDialog/DeleteAllDialog';
+import { useNotification } from '../hooks/useNotification';
 import StatusChip from '../components/ui/StatusChip/StatusChip';
 import form from '../components/ui/FormControls.module.css';
 import styles from './DatesPage.module.css';
@@ -361,6 +363,10 @@ export default function DatesPage() {
   const { data: categories = [] } = useDateCategories();
   const dateMutations = useDateMutations();
   const checklistMutations = useChecklistMutations();
+  const { addToast } = useNotification();
+  const [deleteAllOpen, setDeleteAllOpen] = useState(false);
+  const [deleteAllBusy, setDeleteAllBusy] = useState(false);
+  const [deleteAllError, setDeleteAllError] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
 
   const [statusFilter, setStatusFilter] = useState('ALL');
@@ -499,6 +505,21 @@ export default function DatesPage() {
       setErrorMessage('Something went wrong. Please try again.');
     } finally {
       setConfirmBusy(false);
+    }
+  };
+
+  const handleDeleteAll = async () => {
+    setDeleteAllBusy(true);
+    setDeleteAllError('');
+    try {
+      await dateMutations.deleteAll();
+      setDrawerOpen(false);
+      setDeleteAllOpen(false);
+      addToast('All dates and checklists deleted.', 'success');
+    } catch (err) {
+      setDeleteAllError(err?.response?.data?.message || 'Could not delete everything. Please try again.');
+    } finally {
+      setDeleteAllBusy(false);
     }
   };
 
@@ -992,7 +1013,25 @@ export default function DatesPage() {
         ) : (
           <ul className={styles.dateGrid}>{filteredDates.map(renderCard)}</ul>
         )}
+        {!loading && dates.length > 0 && (
+          <div className={styles.dangerZone}>
+            <p className={styles.dangerText}>Start over? This removes every date and checklist for both of us.</p>
+            <Button onClick={() => { setDeleteAllError(''); setDeleteAllOpen(true); }}>
+              <TrashIcon />
+              Delete all dates
+            </Button>
+          </div>
+        )}
       </main>
+
+      <DeleteAllDialog
+        open={deleteAllOpen}
+        what="dates and checklists"
+        busy={deleteAllBusy}
+        error={deleteAllError}
+        onConfirm={handleDeleteAll}
+        onClose={() => setDeleteAllOpen(false)}
+      />
 
       {/* DETAIL DRAWER */}
       <Modal

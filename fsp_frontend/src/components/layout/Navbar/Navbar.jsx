@@ -5,6 +5,7 @@ import { useAuth } from '../../../hooks/useAuth';
 import { useMediaQuery } from '../../../hooks/useMediaQuery';
 import { NAV_ITEMS, PHONE_NAV_QUERY } from '../../../constants/nav';
 import { avatarDoodle } from '../../../utils/avatar';
+import { getAccent } from '../../../constants/profileOptions';
 import Icon from '../../Icon';
 import Logo from '../Logo/Logo';
 import TabBar from '../TabBar/TabBar';
@@ -92,6 +93,19 @@ export default function Navbar() {
   const isCouple = user?.role === 'ROLE_USER';
   const isAdmin = user?.role === 'ROLE_ADMIN';
   const displayName = user?.name || user?.username || (isAdmin ? 'Admin' : 'You');
+
+  // The user's accent colour (Profile > Appearance) colours the avatar ring and the highlighted
+  // tab. It is published on the root element so the tab bar can read it too.
+  const accent = getAccent(user?.accentColor);
+  useEffect(() => {
+    const root = document.documentElement;
+    root.style.setProperty('--user-accent', accent.hex);
+    root.style.setProperty('--user-accent-ink', accent.ink);
+    return () => {
+      root.style.removeProperty('--user-accent');
+      root.style.removeProperty('--user-accent-ink');
+    };
+  }, [accent.hex, accent.ink]);
 
   // Leaves room above the bottom tab bar on phones (see reset.css).
   useEffect(() => {

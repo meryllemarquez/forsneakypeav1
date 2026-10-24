@@ -24,44 +24,47 @@
   --font-sans: "Nunito", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-serif: "Shantell Sans", "Comic Sans MS", cursive;
 
-  /* Japanese-inspired cream/red/gold palette — scoped to the admin tree
-     only (the rest of the app keeps styles/design-tokens.css as-is). */
-  --color-admin-bg: #f3ead6;
-  --color-admin-surface: #fbf6ea;
-  --color-admin-surface-2: #f3ead6;
-  --color-admin-border: #e3d5b0;
-  --color-admin-text: #4a3a22;
-  --color-admin-text-muted: #8a7a5c;
-  --color-admin-text-faint: #b3a582;
+  /* The shared design tokens (styles/design-tokens.css), under the names the admin utilities use.
+     Calmer than the couple pages: ink outlines, no stickers, line icons only. */
+  --color-admin-bg: var(--paper);
+  --color-admin-surface: var(--white);
+  --color-admin-surface-2: color-mix(in srgb, var(--sea-tint) 55%, var(--white));
+  --color-admin-border: var(--ink);
+  --color-admin-text: var(--ink);
+  --color-admin-text-muted: var(--ink-muted);
+  --color-admin-text-faint: #5b6a8f;
 
-  /* Warm dark-brown sidebar (not neutral black) so the rail still reads
-     as part of this palette rather than a generic dark-mode admin shell. */
-  --color-admin-sidebar: #4a3a22;
-  --color-admin-sidebar-hover: #5c4930;
+  --color-admin-sidebar: var(--ink);
+  --color-admin-sidebar-hover: var(--amalfi);
 
-  /* Primary accent: warm vermillion red, with a light red-tinted "soft"
-     background for active/unread states. */
-  --color-admin-accent: #b23b24;
-  --color-admin-accent-soft: #fdefe4;
-  --color-admin-golden: #c99a3a;
-  --color-admin-golden-soft: #f7efd9;
-  --color-admin-cream: #e3d5b0;
+  --color-admin-accent: var(--amalfi);
+  --color-admin-accent-soft: var(--sea-tint);
+  --color-admin-golden: var(--citrus);
+  --color-admin-golden-soft: var(--gelato-tint);
+  --color-admin-cream: var(--gelato);
 
-  /* Danger stays a distinct deep maroon so delete/error states don't
-     visually collide with the (now red) primary accent. Success/warning
-     stay standard green/amber — universal meaning independent of brand. */
-  --color-admin-danger: #7a2618;
-  --color-admin-danger-soft: #f5e3de;
-  --color-admin-success: #3f7a4e;
-  --color-admin-success-soft: #e8f1e7;
-  --color-admin-warning: #b8801f;
-  --color-admin-warning-soft: #f7ecd6;
+  /* Danger is a darker tomato so text on its soft tint stays readable. */
+  --color-admin-danger: color-mix(in srgb, var(--tomato) 78%, var(--ink));
+  --color-admin-danger-soft: var(--citrus-tint);
+  --color-admin-success: var(--amalfi);
+  --color-admin-success-soft: var(--amalfi-tint);
+  --color-admin-warning: var(--ink);
+  --color-admin-warning-soft: var(--gelato-tint);
 
-  /* Same corner-radius/shadow rhythm as HomePage.module.css cards —
-     Tailwind v4 auto-generates rounded-card/rounded-button/shadow-soft/
-     shadow-modal utilities from these theme tokens. */
   --radius-card: 20px;
   --radius-button: 14px;
-  --shadow-soft: 0 8px 30px rgba(74, 58, 34, 0.06);
-  --shadow-modal: 0 20px 50px rgba(74, 58, 34, 0.18);
+  --shadow-soft: 3px 3px 0 var(--sea-tint);
+  --shadow-modal: 6px 6px 0 var(--sea);
+}
+
+/* Touch targets: every button, field and nav link in the admin is at least 44px. */
+.admin-shell button,
+.admin-shell select,
+.admin-shell input:not([type='checkbox']):not([type='radio']),
+.admin-shell nav a {
+  min-height: 44px;
+}
+
+.admin-shell button {
+  min-width: 44px;
 }

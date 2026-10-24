@@ -420,6 +420,25 @@
   font-weight: 700;
 }
 
+.dangerZone {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 48px;
+  padding: 16px 20px;
+  background: var(--white);
+  border: var(--border-width) dashed var(--ink);
+  border-radius: 22px;
+}
+
+.dangerText {
+  margin: 0;
+  font-weight: 700;
+  color: var(--ink-soft);
+}
+
 /* ---------- Drawer ---------- */
 
 .drawerBody {
@@ -840,23 +859,20 @@
   }
 
   .stats {
-    display: flex;
-    gap: 12px;
-    margin-right: -18px;
-    padding: 0 18px 8px 0;
-    overflow-x: auto;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+    padding: 0 0 8px;
   }
 
   .statCard {
-    flex: none;
-    min-width: 132px;
+    min-width: 0;
+    padding-inline: 12px;
   }
 
   .filterRow {
-    flex-wrap: nowrap;
-    margin-right: -18px;
-    padding-right: 18px;
-    overflow-x: auto;
+    flex-wrap: wrap;
+    gap: 8px;
   }
 
   .filterChip {

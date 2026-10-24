@@ -62,3 +62,12 @@
     padding-bottom: calc(78px + env(safe-area-inset-bottom));
   }
 }
+
+/* No visible scrollbars anywhere (pages, panels, modals); scrolling itself still works. */
+* {
+  scrollbar-width: none;
+}
+
+*::-webkit-scrollbar {
+  display: none;
+}

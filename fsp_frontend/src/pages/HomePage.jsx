@@ -5,7 +5,7 @@ import { useAuth } from '../hooks/useAuth';
 import { useHomeSummary } from '../queries/queries';
 import { getDaysTogether, ANNIVERSARY_LABEL } from '../constants/relationship';
 import { HOME_GREETINGS } from '../constants/homeGreetings';
-import { dateIcon, resolveAlbumIcon } from '../utils/doodleFor';
+import { albumCoverUrl, dateIcon, resolveAlbumIcon } from '../utils/doodleFor';
 import Icon from '../components/Icon';
 import Navbar from '../components/layout/Navbar/Navbar';
 import Footer from '../components/layout/Footer/Footer';
@@ -190,9 +190,9 @@ export default function HomePage() {
             <div className={styles.memoryGrid}>
               {featuredFolders.map((folder, i) => (
                 <Link key={folder.id} to={`/memories?folderId=${folder.id}`} className={styles.memoryCard}>
-                  <div className={styles.memoryCover} style={folder.coverImageUrl ? undefined : { background: COVER_TINTS[i % COVER_TINTS.length] }}>
-                    {folder.coverImageUrl ? (
-                      <img src={folder.coverImageUrl} alt="" className={styles.coverImg} loading="lazy" decoding="async" />
+                  <div className={styles.memoryCover} style={albumCoverUrl(folder) ? undefined : { background: COVER_TINTS[i % COVER_TINTS.length] }}>
+                    {albumCoverUrl(folder) ? (
+                      <img src={albumCoverUrl(folder)} alt="" className={styles.coverImg} loading="lazy" decoding="async" />
                     ) : (
                       <Icon name={resolveAlbumIcon(folder)} size={108} className={styles.coverIcon} />
                     )}
