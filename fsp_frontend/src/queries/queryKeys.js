@@ -10,6 +10,7 @@ export const queryKeys = {
   menuItems: () => ['menu-items'],
   wheels: () => ['wheels'],
   wheelSpins: (id) => ['wheel-spins', id],
+  pets: () => ['pets'],
   bouquets: () => ['bouquets'],
   bouquet: (id) => ['bouquets', id],
   notifications: () => ['notifications'],
@@ -29,6 +30,7 @@ export const keyFamilies = {
   wheels: ['wheels'],
   wheelSpins: ['wheel-spins'],
   bouquets: ['bouquets'],
+  pets: ['pets'],
   notifications: ['notifications'],
   profile: ['profile'],
 };

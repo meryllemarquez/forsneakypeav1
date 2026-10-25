@@ -7,6 +7,7 @@ import { loveBoardService } from '../services/loveBoardService';
 import { profileService } from '../services/profileService';
 import { menuService } from '../services/menuService';
 import { wheelService } from '../services/wheelService';
+import { petService } from '../services/petService';
 import { bouquetService } from '../services/bouquetService';
 import { keyFamilies, queryKeys } from './queryKeys';
 
@@ -45,6 +46,7 @@ import { keyFamilies, queryKeys } from './queryKeys';
  *                                             order); reverts + refetches on failure
  * wheel:  createWheel / updateWheel           wheels (cache set to the saved wheel)
  * wheel:  deleteWheel                         wheels (row removed optimistically), wheel-spins
+ * pets:   act                                (returned pet merged into the cache, no refetch)
  * wheel:  addSpin / setSpinAccepted /         wheel-spins
  *   clearSpins
  * bouquet: create / update / delete /         bouquets (all, including single bouquets);
@@ -241,5 +243,19 @@ export function useProfileMutations() {
     updateProfile: useAction(profileService.updateProfile, { onSuccess: saveProfile }),
     updateAvatar: useAction(profileService.updateAvatar, { onSuccess: saveProfile }),
     removeAvatar: useAction(profileService.removeAvatar, { onSuccess: saveProfile }),
+  };
+}
+
+export function usePetMutations() {
+  const queryClient = useQueryClient();
+  const key = queryKeys.pets();
+  // The response carries the fresh pet, so merge it into the list instead of invalidating.
+  const mergePet = ({ pet }) =>
+    queryClient.setQueryData(key, (prev) =>
+      prev ? { ...prev, pets: prev.pets.map((p) => (p.id === pet.id ? pet : p)) } : prev,
+    );
+
+  return {
+    act: useAction(petService.act, { onSuccess: mergePet }),
   };
 }

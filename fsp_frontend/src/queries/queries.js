@@ -6,6 +6,7 @@ import { loveBoardService } from '../services/loveBoardService';
 import { menuService } from '../services/menuService';
 import { wheelService } from '../services/wheelService';
 import { bouquetService } from '../services/bouquetService';
+import { petService } from '../services/petService';
 import { notificationService } from '../services/notificationService';
 import { profileService } from '../services/profileService';
 import { homeService } from '../services/homeService';
@@ -162,5 +163,16 @@ export function useHomeSummary(today) {
     queryKey: queryKeys.homeSummary(today),
     queryFn: () => homeService.getSummary(today),
     staleTime: 45 * SECOND,
+  });
+}
+
+// ---- Pets & babies --------------------------------------------------------------------
+// Stats are computed server-side from timestamps, so a focus refetch is all the freshness needed.
+export function usePets() {
+  return useQuery({
+    queryKey: queryKeys.pets(),
+    queryFn: () => petService.getPets(),
+    staleTime: 60 * SECOND,
+    refetchOnWindowFocus: true,
   });
 }
