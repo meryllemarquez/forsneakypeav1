@@ -1,0 +1,179 @@
+.root {
+  --wheel-size: min(88vw, 340px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  color: var(--ink);
+}
+
+.tools {
+  display: flex;
+  justify-content: flex-end;
+  width: var(--wheel-size);
+  max-width: 100%;
+}
+
+.stage {
+  position: relative;
+  width: var(--wheel-size);
+  aspect-ratio: 1;
+  margin-top: 14px;
+}
+
+.rotor {
+  position: absolute;
+  inset: 0;
+  will-change: transform;
+}
+
+.svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.ring {
+  fill: var(--outline);
+}
+
+.stud {
+  fill: var(--gelato);
+}
+
+.slice {
+  stroke: var(--outline);
+  stroke-width: 2;
+  stroke-linejoin: round;
+}
+
+.sliceWinner {
+  stroke-width: 4;
+}
+
+.label {
+  font-family: var(--font-heading);
+  font-weight: 800;
+  pointer-events: none;
+  user-select: none;
+}
+
+.empty {
+  fill: var(--white);
+  stroke: var(--outline);
+  stroke-width: 2;
+  stroke-dasharray: 6 6;
+}
+
+.emptyText {
+  font-family: var(--font-hand);
+  font-size: 24px;
+  fill: var(--ink-muted);
+  text-anchor: middle;
+}
+
+.doodles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.doodle {
+  position: absolute;
+  width: 9%;
+  height: 9%;
+}
+
+.hub {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 11%;
+  height: 11%;
+  margin: -5.5% 0 0 -5.5%;
+  border: var(--border-width) solid var(--outline);
+  border-radius: 50%;
+  background: var(--gelato);
+  color: var(--on-bright);
+  pointer-events: none;
+}
+
+.pointer {
+  position: absolute;
+  top: -16px;
+  left: 50%;
+  z-index: 2;
+  width: 28px;
+  height: 34px;
+  margin-left: -14px;
+  pointer-events: none;
+  transform-origin: 50% 18%;
+}
+
+.pointer svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.pointerBody {
+  fill: var(--gelato);
+  stroke: var(--outline);
+  stroke-width: 2.5;
+  stroke-linejoin: round;
+}
+
+.pointerPin {
+  fill: var(--outline);
+}
+
+.confetti {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.piece {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+}
+
+.spinWrap {
+  width: 100%;
+  max-width: 420px;
+}
+
+.root .spin {
+  width: 100%;
+  min-height: 56px;
+  font-family: var(--font-heading);
+  font-size: 1.25rem;
+}
+
+.hint {
+  margin: 0;
+  font-family: var(--font-hand);
+  font-size: 1.25rem;
+  color: var(--ink-muted);
+  text-align: center;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
