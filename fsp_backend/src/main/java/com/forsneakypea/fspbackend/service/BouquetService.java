@@ -44,9 +44,10 @@ public class BouquetService {
             "kraft", "sea-dots", "citrus-stripes", "gelato-gingham", "cloud-white", "amalfi-stars");
     static final Set<String> RIBBON_STYLES = Set.of("bow", "band", "none");
     static final Set<String> RIBBON_COLORS = Set.of("sea", "citrus", "gelato", "amalfi", "white", "pink");
-    static final Set<String> FLOWERS = Set.of("tulip", "daisy", "rose", "sunflower", "babysbreath", "lily", "leaf");
+    static final Set<String> FLOWERS = Set.of("tulip", "daisy", "rose", "sunflower", "babysbreath", "lily",
+            "leaf", "fern", "eucalyptus");
     static final Set<String> TINTS = Set.of(
-            "pink", "white", "sea", "citrus", "gelato", "amalfi",
+            "pink", "white", "green", "sea", "citrus", "gelato", "amalfi",
             "sea-tint", "citrus-tint", "gelato-tint", "amalfi-tint");
     static final Set<String> PAPERS = Set.of("gelato", "sea", "citrus", "lined");
 

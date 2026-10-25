@@ -1,0 +1,107 @@
+.tray {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+
+/* ~200px on phones, the panel scrolls on its own */
+.panel {
+  max-height: 200px;
+  overflow-y: auto;
+  padding: 4px 2px 8px;
+  overscroll-behavior: contain;
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.wraps {
+  flex-wrap: wrap;
+}
+
+.full {
+  margin: 0 0 8px;
+  font-family: var(--font-hand);
+  font-size: 1.15rem;
+  color: var(--ink-soft);
+}
+
+.flowers {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.flowerCell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.flowerTile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  width: 100%;
+  min-height: var(--tap, 44px);
+  padding: 6px 4px;
+  background: var(--surface);
+  color: var(--ink);
+  border: var(--border-width, 2px) solid var(--outline);
+  border-radius: var(--radius-input, 14px);
+  font-family: var(--font-body);
+  cursor: pointer;
+  transition: transform 120ms ease, background-color 120ms ease;
+}
+
+.flowerTile:hover {
+  background: var(--sea-tint);
+}
+
+.flowerTile:active {
+  transform: translate(2px, 2px);
+}
+
+.flowerTile:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-offset, 2px);
+}
+
+.flowerTile[aria-disabled='true'] {
+  opacity: 0.55;
+}
+
+.flowerName {
+  font-size: 0.8rem;
+  font-weight: 700;
+  line-height: 1.1;
+  text-align: center;
+}
+
+.tints {
+  justify-content: center;
+}
+
+@media (min-width: 900px) {
+  .panel {
+    max-height: none;
+    overflow: visible;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flowerTile {
+    transition: none;
+  }
+}
