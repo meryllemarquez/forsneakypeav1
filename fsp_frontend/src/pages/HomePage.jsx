@@ -10,6 +10,7 @@ import Icon from '../components/Icon';
 import Navbar from '../components/layout/Navbar/Navbar';
 import Footer from '../components/layout/Footer/Footer';
 import StatusChip from '../components/ui/StatusChip/StatusChip';
+import UsualOrdersCounter from '../components/home/UsualOrdersCounter/UsualOrdersCounter';
 import styles from './HomePage.module.css';
 
 const ArrowRight = () => (
@@ -38,20 +39,6 @@ const PHONE_STICKERS = [
 ];
 
 const COVER_TINTS = ['var(--sea)', 'var(--gelato)', 'var(--citrus-cover)'];
-
-// Static for now (see the design): the snacks we always end up ordering.
-const USUAL_ORDERS = [
-  { icon: 'matcha', label: 'matcha (her)' },
-  { icon: 'cookie', label: 'cookies & cream (him)' },
-  { icon: 'yogurt', label: 'Yowell' },
-  { icon: 'fries', label: 'yogurt + fries' },
-  { icon: 'churro', label: 'churros' },
-  { icon: 'lasagna', label: 'lasagna' },
-  { icon: 'pizza', label: "Angel's spinach" },
-  { icon: 'donut', label: 'Alcapone & Boston creme' },
-  { icon: 'lechon', label: 'lechon pares' },
-  { icon: 'bowl', label: 'Mr. B bulalo' },
-];
 
 // 'YYYY-MM-DD' in the viewer's local time zone (toISOString would give the UTC date).
 function localDateString(date = new Date()) {
@@ -305,14 +292,7 @@ export default function HomePage() {
             <p className={styles.ordersHand}>for when we can&rsquo;t decide</p>
             <br />
             <h2 id="home-orders" className={styles.ordersTitle}>Our usual orders</h2>
-            <ul className={styles.ordersList}>
-              {USUAL_ORDERS.map((o) => (
-                <li key={o.label} className={styles.orderItem}>
-                  <Icon name={o.icon} size={68} />
-                  <span>{o.label}</span>
-                </li>
-              ))}
-            </ul>
+            <UsualOrdersCounter />
           </div>
         </section>
       </main>
