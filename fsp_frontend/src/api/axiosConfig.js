@@ -4,6 +4,29 @@ import axios from 'axios';
 const rawBaseURL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api/v1';
 const baseURL = rawBaseURL.replace(/\/+$/, '');
 
+// Signed media links come back as "/api/v1/media/..." when the server does not know its public origin.
+// Browsers would resolve those against the frontend (localhost:5173, Vercel), so point them at the API.
+const apiOrigin = (() => {
+  try {
+    return new URL(baseURL, window.location.origin).origin;
+  } catch {
+    return '';
+  }
+})();
+
+export function absolutizeMediaUrls(value) {
+  if (!apiOrigin) return value;
+  if (typeof value === 'string') {
+    return value.startsWith('/api/v1/media/') ? apiOrigin + value : value;
+  }
+  if (Array.isArray(value)) {
+    for (let i = 0; i < value.length; i += 1) value[i] = absolutizeMediaUrls(value[i]);
+  } else if (value && typeof value === 'object' && Object.getPrototypeOf(value) === Object.prototype) {
+    for (const key of Object.keys(value)) value[key] = absolutizeMediaUrls(value[key]);
+  }
+  return value;
+}
+
 const api = axios.create({
   baseURL,
   headers: {
@@ -46,6 +69,11 @@ api.interceptors.request.use(
   },
   (error) => Promise.reject(error)
 );
+
+api.interceptors.response.use((response) => {
+  absolutizeMediaUrls(response.data);
+  return response;
+});
 
 // Response Interceptor: Detailed Debugging + centralized session-expiry handling.
 api.interceptors.response.use(

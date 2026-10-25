@@ -4,6 +4,7 @@ import com.forsneakypea.fspbackend.dto.CalendarEntryDTO;
 import com.forsneakypea.fspbackend.dto.FolderDTO;
 import com.forsneakypea.fspbackend.dto.FolderRequestDTO;
 import com.forsneakypea.fspbackend.dto.PhotoDTO;
+import com.forsneakypea.fspbackend.dto.request.AddPhotosBatchRequest;
 import com.forsneakypea.fspbackend.entity.User;
 import com.forsneakypea.fspbackend.service.MemoryService;
 import jakarta.validation.Valid;
@@ -73,6 +74,14 @@ public class MemoryController {
                 payload.getLocation(),
                 currentUserId
         ));
+    }
+
+    @PostMapping("/folders/{folderId}/photos/batch")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<java.util.Map<String, Object>> addPhotosToFolder(
+            @PathVariable UUID folderId,
+            @Valid @RequestBody AddPhotosBatchRequest request) {
+        return ResponseEntity.ok(memoryService.addPhotosToFolder(folderId, request.getItems(), getCurrentUserId()));
     }
 
     @PutMapping("/photos/{photoId}")

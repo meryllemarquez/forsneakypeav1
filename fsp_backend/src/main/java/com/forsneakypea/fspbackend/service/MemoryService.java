@@ -4,6 +4,7 @@ package com.forsneakypea.fspbackend.service;
 import com.forsneakypea.fspbackend.exception.BadRequestException;
 import com.forsneakypea.fspbackend.exception.NotFoundException;
 import com.forsneakypea.fspbackend.dto.CalendarConflictDTO;
+import com.forsneakypea.fspbackend.dto.request.AddPhotosBatchRequest;
 import com.forsneakypea.fspbackend.dto.CalendarEntryDTO;
 import com.forsneakypea.fspbackend.dto.FolderDTO;
 import com.forsneakypea.fspbackend.dto.FolderRequestDTO;
@@ -20,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -70,6 +72,7 @@ public class MemoryService {
         return mapFolderToDTO(folder);
     }
 
+    private static final java.util.regex.Pattern DRIVE_ID = java.util.regex.Pattern.compile("^[A-Za-z0-9_-]{10,100}$");
     private static final String DEFAULT_ACCENT = "#FF9F1C";
     private static final java.util.regex.Pattern HEX_COLOR = java.util.regex.Pattern.compile("^#[0-9A-Fa-f]{6}$");
 
@@ -300,6 +303,59 @@ public class MemoryService {
         MemoryFolder folder = folderRepository.findById(folderId)
                 .orElseThrow(() -> new NotFoundException("Folder not found"));
 
+        MemoryPhoto photo = createPhoto(folder, driveFileId, caption, location, userId);
+        activityLogService.log(userId, "MEMORY_PHOTO_UPLOADED", RelatedEntityType.MEMORY_PHOTO, photo.getId());
+        notificationService.notifyOthers(userId, NotificationType.GALLERY_UPLOAD, folder.getName(),
+                RelatedEntityType.MEMORY_PHOTO, photo.getId());
+
+        return mapPhotoToDTO(photo);
+    }
+
+    /**
+     * Adds up to 20 already-uploaded photos in one request. Photos that fail validation are reported
+     * in {@code failed} and do not stop the rest. The partner gets ONE notification, not one per photo.
+     */
+    @Transactional
+    public Map<String, Object> addPhotosToFolder(UUID folderId, List<AddPhotosBatchRequest.Item> items, Long userId) {
+        if (items == null || items.isEmpty()) {
+            throw new BadRequestException("Add at least one photo.");
+        }
+        if (items.size() > AddPhotosBatchRequest.MAX_ITEMS) {
+            throw new BadRequestException("You can add up to " + AddPhotosBatchRequest.MAX_ITEMS + " photos at a time.");
+        }
+        MemoryFolder folder = folderRepository.findById(folderId)
+                .orElseThrow(() -> new NotFoundException("Folder not found"));
+
+        List<PhotoDTO> added = new ArrayList<>();
+        List<Map<String, String>> failed = new ArrayList<>();
+        Set<String> seen = new HashSet<>();
+        MemoryPhoto first = null;
+        for (AddPhotosBatchRequest.Item item : items) {
+            String id = item == null ? null : item.getDriveFileId();
+            try {
+                if (id == null || !DRIVE_ID.matcher(id).matches()) {
+                    throw new BadRequestException("The uploaded photo is missing.");
+                }
+                if (!seen.add(id)) {
+                    throw new BadRequestException("That photo was already added.");
+                }
+                MemoryPhoto photo = createPhoto(folder, id, item.getCaption(), item.getLocation(), userId);
+                if (first == null) first = photo;
+                added.add(mapPhotoToDTO(photo));
+            } catch (BadRequestException e) {
+                failed.add(Map.of("driveFileId", id == null ? "" : id, "reason", e.getMessage()));
+            }
+        }
+        if (first != null) {
+            activityLogService.log(userId, "MEMORY_PHOTO_UPLOADED", RelatedEntityType.MEMORY_PHOTO, first.getId());
+            notificationService.notifyOthers(userId, NotificationType.GALLERY_UPLOAD, folder.getName(),
+                    RelatedEntityType.MEMORY_PHOTO, first.getId());
+        }
+        return Map.of("added", added, "failed", failed);
+    }
+
+    /** Validates and saves one photo row (and makes it the album cover when the album has none). */
+    private MemoryPhoto createPhoto(MemoryFolder folder, String driveFileId, String caption, String location, Long userId) {
         if (driveFileId == null || driveFileId.isBlank()) {
             throw new BadRequestException("The uploaded photo is missing.");
         }
@@ -323,13 +379,7 @@ public class MemoryService {
             folder.setCoverDriveFileId(driveFileId);
             folderRepository.save(folder);
         }
-
-        photo = photoRepository.save(photo);
-        activityLogService.log(userId, "MEMORY_PHOTO_UPLOADED", RelatedEntityType.MEMORY_PHOTO, photo.getId());
-        notificationService.notifyOthers(userId, NotificationType.GALLERY_UPLOAD, folder.getName(),
-                RelatedEntityType.MEMORY_PHOTO, photo.getId());
-
-        return mapPhotoToDTO(photo);
+        return photoRepository.save(photo);
     }
 
     @Transactional
@@ -446,6 +496,8 @@ public class MemoryService {
                 .photoUrl(mediaUrls.resolve(photo.getPhotoUrl(), photo.getDriveFileId(), MediaUrlService.Size.LARGE))
                 .thumbUrl(mediaUrls.resolve(photo.getPhotoUrl(), photo.getDriveFileId(), MediaUrlService.Size.THUMB))
                 .driveFileId(photo.getDriveFileId())
+                .downloadUrl(photo.getDriveFileId() == null || photo.getDriveFileId().isBlank() ? null
+                        : mediaUrls.downloadUrl(photo.getDriveFileId(), photo.getCaption()))
                 .storagePath(photo.getStoragePath())
                 .caption(photo.getCaption())
                 .location(photo.getLocation())

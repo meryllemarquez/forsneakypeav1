@@ -15,6 +15,8 @@ public class PhotoDTO {
     // Grid-sized image; photoUrl is the larger lightbox size. Both are signed Drive URLs for Drive photos.
     private String thumbUrl;
     private String driveFileId;
+    // Signed full-size (original) URL that downloads as a file; null for legacy non-Drive photos.
+    private String downloadUrl;
     private String caption;
     private String location;
     private Boolean isFavorite;

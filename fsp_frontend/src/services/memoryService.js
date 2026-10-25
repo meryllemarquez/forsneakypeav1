@@ -36,6 +36,12 @@ export const memoryService = {
     return res.data;
   },
 
+  // POST /api/memories/folders/{folderId}/photos/batch (up to 20 already-uploaded photos)
+  addPhotosBatch: async (folderId, items) => {
+    const res = await api.post(`/memories/folders/${folderId}/photos/batch`, { items });
+    return res.data;
+  },
+
   // PUT /api/memories/photos/{photoId}
   updatePhoto: async (photoId, updateData) => {
     const res = await api.put(`/memories/photos/${photoId}`, updateData);

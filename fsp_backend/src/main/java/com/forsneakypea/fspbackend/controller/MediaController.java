@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.RestController;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Streams a private Drive image. Public in Spring Security terms: the HMAC-signed, expiring URL
@@ -34,6 +36,8 @@ public class MediaController {
             @RequestParam("s") String sizeKey,
             @RequestParam("e") long expires,
             @RequestParam("sig") String signature,
+            @RequestParam(value = "dl", required = false) String dlFlag,
+            @RequestParam(value = "n", required = false) String fileName,
             HttpServletResponse response) throws IOException {
 
         MediaUrlService.Size size = MediaUrlService.Size.fromKey(sizeKey);
@@ -44,7 +48,8 @@ public class MediaController {
 
         DriveClient.Download download;
         try {
-            download = drive.openThumbnail(fileId, size.px);
+            // ORIGINAL is the untouched Drive file; the other sizes use a Drive-rendered thumbnail.
+            download = size == MediaUrlService.Size.ORIGINAL ? drive.openOriginal(fileId) : drive.openThumbnail(fileId, size.px);
             if (download == null) {
                 download = drive.openOriginal(fileId);
             }
@@ -59,6 +64,9 @@ public class MediaController {
         }
 
         response.setContentType(download.contentType());
+        if ("1".equals(dlFlag)) {
+            response.setHeader("Content-Disposition", attachment(fileName, download.contentType()));
+        }
         if (download.contentLength() >= 0) {
             response.setContentLengthLong(download.contentLength());
         }
@@ -71,5 +79,18 @@ public class MediaController {
         try (InputStream in = download.body(); OutputStream out = response.getOutputStream()) {
             in.transferTo(out);
         }
+    }
+
+    /** Content-Disposition for a download: a safe file name (letters, digits, dash) plus the right extension. */
+    private static String attachment(String requested, String contentType) {
+        String base = requested == null ? "" : requested.replaceAll("\\.[A-Za-z0-9]{1,5}$", "");
+        base = base.replaceAll("[^A-Za-z0-9._-]+", "-").replaceAll("^-+|-+$", "");
+        if (base.isEmpty()) base = "photo";
+        if (base.length() > 80) base = base.substring(0, 80);
+        String type = contentType == null ? "" : contentType.toLowerCase();
+        String ext = type.contains("png") ? ".png" : type.contains("webp") ? ".webp" : type.contains("gif") ? ".gif"
+                : type.contains("heic") ? ".heic" : ".jpg";
+        String name = base + ext;
+        return "attachment; filename=\"" + name + "\"; filename*=UTF-8''" + URLEncoder.encode(name, StandardCharsets.UTF_8);
     }
 }

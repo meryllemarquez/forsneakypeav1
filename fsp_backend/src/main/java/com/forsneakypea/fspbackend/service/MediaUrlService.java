@@ -27,7 +27,9 @@ public class MediaUrlService {
 
     public enum Size {
         THUMB("thumb", 480),
-        LARGE("large", 1600);
+        LARGE("large", 1600),
+        // The untouched file from Drive (px is unused).
+        ORIGINAL("original", 0);
 
         public final String key;
         public final int px;
@@ -44,6 +46,11 @@ public class MediaUrlService {
             return null;
         }
     }
+
+    // Public origin of this API (scheme + host, e.g. https://api.example.com). Set it when the request
+    // host is not the one browsers should use (reverse proxy, Render); empty = use the request's own.
+    @Value("${PUBLIC_API_BASE_URL:}")
+    private String publicBaseUrl;
 
     @Value("${MEDIA_SIGNING_SECRET:}")
     private String secret;
@@ -69,11 +76,23 @@ public class MediaUrlService {
         long exp = (Instant.now().getEpochSecond() / BUCKET_SECONDS + 2) * BUCKET_SECONDS;
         String sig = sign(fileId, size, exp);
         // Absolute, because the frontend runs on a different origin than this API.
+        if (publicBaseUrl != null && !publicBaseUrl.isBlank()) {
+            return publicBaseUrl.trim().replaceAll("/+$", "") + MEDIA_PATH + fileId
+                    + "?s=" + size.key + "&e=" + exp + "&sig=" + sig;
+        }
         if (RequestContextHolder.getRequestAttributes() != null) {
             return ServletUriComponentsBuilder.fromCurrentContextPath().path(MEDIA_PATH + fileId)
                     .queryParam("s", size.key).queryParam("e", exp).queryParam("sig", sig).toUriString();
         }
         return MEDIA_PATH + fileId + "?s=" + size.key + "&e=" + exp + "&sig=" + sig;
+    }
+
+    /** Signed original-size URL that the media endpoint serves as an attachment named {@code name}. */
+    public String downloadUrl(String fileId, String name) {
+        String base = url(fileId, Size.ORIGINAL);
+        if (base == null) return null;
+        String n = name == null || name.isBlank() ? "photo" : name;
+        return base + "&dl=1&n=" + java.net.URLEncoder.encode(n, StandardCharsets.UTF_8);
     }
 
     public boolean verify(String fileId, Size size, long exp, String sig) {

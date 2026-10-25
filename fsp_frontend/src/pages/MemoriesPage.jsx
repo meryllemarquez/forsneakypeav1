@@ -13,11 +13,13 @@ import {
   Trash2,
   Upload,
   X,
+  Download,
 } from 'lucide-react';
 import { memoryService } from '../services/memoryService';
 import { useFolders } from '../queries/queries';
 import { useMemoryMutations } from '../queries/mutations';
-import { uploadImageToDrive } from '../api/driveUpload';
+import PhotoUploadModal from '../components/memories/PhotoUploadModal/PhotoUploadModal';
+import AlbumDownloadModal from '../components/memories/AlbumDownloadModal/AlbumDownloadModal';
 import { PALETTE_ACCENTS, DEFAULT_ACCENT, albumAccent, accentVars } from '../constants/albumAccents';
 import Tabs, { panelId, tabId } from '../components/ui/Tabs/Tabs';
 import RadioGroup, { ColorSwatchGroup } from '../components/ui/RadioGroup/RadioGroup';
@@ -104,7 +106,7 @@ export default function MemoriesPage() {
   // Photos of the album being edited, so one can be picked as its cover.
   const [coverChoices, setCoverChoices] = useState([]);
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
-  const [uploadError, setUploadError] = useState('');
+  const [isDownloadOpen, setIsDownloadOpen] = useState(false);
 
   // Lightbox carousel state: -1 means closed, direction drives the slide animation
   const [lightbox, setLightbox] = useState({ index: -1, direction: 0 });
@@ -127,14 +129,6 @@ export default function MemoriesPage() {
     coverDriveFileId: '',
     eventDate: '',
     isCalendarHighlight: false,
-  });
-
-  const [uploadState, setUploadState] = useState({
-    file: null,
-    previewUrl: null,
-    caption: '',
-    location: '',
-    uploading: false,
   });
 
   const photos = useMemo(() => selectedFolder?.photos || [], [selectedFolder]);
@@ -415,52 +409,6 @@ export default function MemoriesPage() {
      PHOTOS
   --------------------------------------------------------------- */
 
-  // Handle Photo File Select
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    setUploadError('');
-    setUploadState((prev) => ({
-      ...prev,
-      file,
-      previewUrl: URL.createObjectURL(file),
-    }));
-  };
-
-  // Upload the photo straight to Google Drive, then save its Drive file id via the API
-  const handleUploadPhoto = async (e) => {
-    e.preventDefault();
-    if (!uploadState.file || !selectedFolder) return;
-
-    try {
-      setUploadError('');
-      setUploadState((prev) => ({ ...prev, uploading: true }));
-
-      const driveFileId = await uploadImageToDrive(uploadState.file, 'memories');
-
-      // Save Metadata to Backend
-      await memoryMutations.addPhotoToFolder(selectedFolder.id, {
-        driveFileId,
-        caption: uploadState.caption,
-        location: uploadState.location,
-      });
-
-      setUploadState({
-        file: null,
-        previewUrl: null,
-        caption: '',
-        location: '',
-        uploading: false,
-      });
-      setIsUploadModalOpen(false);
-      await loadFolderDetails(selectedFolder.id);
-    } catch (err) {
-      console.error('Photo upload failed', err);
-      setUploadState((prev) => ({ ...prev, uploading: false }));
-      setUploadError('Photo upload failed. Please try again.');
-    }
-  };
-
   // Toggle Favorite Status
   const handleToggleFavorite = async (photo, e) => {
     e?.stopPropagation();
@@ -557,10 +505,26 @@ export default function MemoriesPage() {
   };
 
   const closeFolderModal = () => setIsFolderModalOpen(false);
-  const closeUploadModal = () => setIsUploadModalOpen(false);
   const { doodle: pickedDoodle, cover: coverOn } = parseIconStyle(folderForm.iconStyle);
   const setLook = (patch) => setFolderForm((f) => ({ ...f, iconStyle: buildIconStyle({ ...parseIconStyle(f.iconStyle), ...patch }) }));
   const showHighlightControls = !!(selectedFolder?.isCalendarHighlight && selectedFolder?.eventDate);
+
+  // Saves the full-size original. The server answers the signed link with Content-Disposition: attachment.
+  const downloadPhoto = (photo) => {
+    const url = photo.downloadUrl || photo.photoUrl;
+    if (!url) {
+      addToast("Couldn't download that one. Try again?", 'error');
+      return;
+    }
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = '';
+    link.rel = 'noopener';
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    addToast('Saving your photo…', 'info', 1500);
+  };
 
   // Same panel for portrait (sidebar) and landscape (bottom bar) photos.
   const lightboxPanel = activePhoto && (
@@ -575,6 +539,10 @@ export default function MemoriesPage() {
         <Button size="sm" onClick={(e) => handleToggleFavorite(activePhoto, e)}>
           <HeartToggle on={activePhoto.isFavorite} size={20} />
           {activePhoto.isFavorite ? 'Favorited' : 'Favorite'}
+        </Button>
+        <Button size="sm" onClick={() => downloadPhoto(activePhoto)}>
+          <Download size={20} strokeWidth={2.6} aria-hidden="true" />
+          Download
         </Button>
         <Button size="sm" onClick={() => requestDeletePhoto(activePhoto)}>
           <Trash2 size={20} strokeWidth={2.6} aria-hidden="true" />
@@ -752,15 +720,21 @@ export default function MemoriesPage() {
                 </div>
               </div>
 
+              {photos.length > 0 && (
+                <Button onClick={() => setIsDownloadOpen(true)}>
+                  <Download size={20} strokeWidth={2.8} aria-hidden="true" />
+                  Download album
+                </Button>
+              )}
+
               <Button
                 variant="primary"
                 onClick={() => {
-                  setUploadError('');
                   setIsUploadModalOpen(true);
                 }}
               >
                 <Upload size={20} strokeWidth={2.8} aria-hidden="true" />
-                Add photo
+                Add photos
               </Button>
             </div>
 
@@ -772,12 +746,11 @@ export default function MemoriesPage() {
                 <Button
                   variant="primary"
                   onClick={() => {
-                    setUploadError('');
-                    setIsUploadModalOpen(true);
+                      setIsUploadModalOpen(true);
                   }}
                 >
                   <Upload size={20} strokeWidth={2.8} aria-hidden="true" />
-                  Upload first photo
+                  Add your first photos
                 </Button>
               </div>
             ) : (
@@ -1013,55 +986,21 @@ export default function MemoriesPage() {
         </form>
       </Modal>
 
-      {/* MODAL 2: UPLOAD PHOTO */}
-      <Modal open={isUploadModalOpen} onClose={closeUploadModal} title="Add photo to album" locked={uploadState.uploading}>
-        <form onSubmit={handleUploadPhoto} className={form.form}>
-          <label className={styles.dropZone}>
-            {uploadState.previewUrl ? (
-              <img src={uploadState.previewUrl} alt="Preview of the chosen photo" className={styles.uploadPreview} />
-            ) : (
-              <span className={styles.dropPrompt}>
-                <Icon name="camera" size={64} />
-                <span>Click or drag a photo here to upload</span>
-              </span>
-            )}
-            <input type="file" accept="image/*" required onChange={handleFileChange} aria-label="Choose a photo" />
-          </label>
+      {/* MODAL 2: ADD PHOTOS (many at once) */}
+      <PhotoUploadModal
+        open={isUploadModalOpen}
+        onClose={() => setIsUploadModalOpen(false)}
+        folderId={selectedFolder?.id}
+        onDone={() => selectedFolder && loadFolderDetails(selectedFolder.id)}
+      />
 
-          <div className={form.field}>
-            <label className={form.label} htmlFor="photo-caption">Caption</label>
-            <input
-              id="photo-caption"
-              className={form.input}
-              type="text"
-              placeholder="A sweet phrase or note..."
-              value={uploadState.caption}
-              onChange={(e) => setUploadState({ ...uploadState, caption: e.target.value })}
-            />
-          </div>
-
-          <div className={form.field}>
-            <label className={form.label} htmlFor="photo-location">Location (optional)</label>
-            <input
-              id="photo-location"
-              className={form.input}
-              type="text"
-              placeholder="e.g. Quezon City"
-              value={uploadState.location}
-              onChange={(e) => setUploadState({ ...uploadState, location: e.target.value })}
-            />
-          </div>
-
-          {uploadError && <p className={form.error} role="alert">{uploadError}</p>}
-
-          <div className={form.footer}>
-            <Button onClick={closeUploadModal} disabled={uploadState.uploading}>Cancel</Button>
-            <Button type="submit" variant="primary" disabled={uploadState.uploading || !uploadState.file}>
-              {uploadState.uploading ? 'Uploading...' : 'Save photo'}
-            </Button>
-          </div>
-        </form>
-      </Modal>
+      {/* MODAL 3: DOWNLOAD ALBUM AS ZIP */}
+      <AlbumDownloadModal
+        open={isDownloadOpen}
+        onClose={() => setIsDownloadOpen(false)}
+        folder={selectedFolder}
+        loadFolder={() => memoryService.getFolderById(selectedFolder.id)}
+      />
 
       {/* LIGHTBOX PHOTO PREVIEW + CAROUSEL */}
       <AnimatePresence>

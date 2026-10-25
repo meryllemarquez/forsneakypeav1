@@ -1,0 +1,203 @@
+.dropZone {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 22px 16px;
+  text-align: center;
+  background: var(--paper);
+  border: var(--border-width) dashed var(--ink);
+  border-radius: var(--radius-card);
+  cursor: pointer;
+  transition: background-color 0.15s ease, transform 0.15s ease;
+}
+
+.dropZone:hover,
+.dropZone:focus-within,
+.dragOver {
+  background: var(--sea-tint);
+}
+
+.dropZone:focus-within {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-offset);
+}
+
+.dropTitle {
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 1.05rem;
+}
+
+.dropHint {
+  font-family: var(--font-hand);
+  font-size: 1.15rem;
+  color: var(--ink-muted);
+}
+
+/* The real input covers the zone so a tap anywhere opens the picker; it stays keyboard-focusable. */
+.fileInput {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.skipNote {
+  margin: 0;
+  padding: 8px 12px;
+  background: var(--citrus-tint);
+  border: var(--border-width) solid var(--ink);
+  border-radius: var(--radius-input);
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 38vh;
+  margin: 0;
+  padding: 2px 4px 6px 2px;
+  overflow-y: auto;
+  list-style: none;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 64px;
+  padding: 8px 10px;
+  background: var(--white);
+  border: var(--border-width) solid var(--ink);
+  border-radius: var(--radius-input);
+}
+
+.failed {
+  background: var(--citrus-tint);
+}
+
+.cancelled {
+  opacity: 0.7;
+}
+
+.thumb {
+  position: relative;
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  overflow: hidden;
+  background: var(--sea-tint);
+  border: var(--border-width) solid var(--ink);
+  border-radius: 12px;
+}
+
+.thumbIcon {
+  position: absolute;
+}
+
+.thumbImg {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.info {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.name {
+  overflow: hidden;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.meta {
+  font-size: 0.85rem;
+  color: var(--ink-muted);
+}
+
+.errorText {
+  font-weight: 800;
+  color: var(--ink);
+}
+
+.bar {
+  width: 100%;
+  height: 8px;
+  overflow: hidden;
+  appearance: none;
+  background: var(--white);
+  border: var(--border-width) solid var(--ink);
+  border-radius: var(--radius-pill);
+}
+
+.bar::-webkit-progress-bar {
+  background: var(--white);
+}
+
+.bar::-webkit-progress-value {
+  background: var(--sea);
+  transition: width 0.2s linear;
+}
+
+.bar::-moz-progress-bar {
+  background: var(--sea);
+}
+
+.check {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: var(--gelato);
+  border: var(--border-width) solid var(--ink);
+  border-radius: 50%;
+}
+
+.pop {
+  animation: pop 0.12s ease-out;
+}
+
+@keyframes pop {
+  from { transform: scale(0.6); }
+  to { transform: scale(1); }
+}
+
+.footer {
+  align-items: center;
+  justify-content: space-between;
+}
+
+.count {
+  font-weight: 800;
+  color: var(--ink-soft);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dropZone,
+  .pop {
+    animation: none;
+    transition: none;
+  }
+
+  .bar::-webkit-progress-value {
+    transition: none;
+  }
+}

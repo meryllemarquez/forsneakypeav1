@@ -17,7 +17,8 @@ import { keyFamilies, queryKeys } from './queryKeys';
  * Mutation                                    Invalidates
  * ------------------------------------------  ---------------------------------------------
  * memory: createFolder / updateFolder /       folders (all), calendar (all), home
- *   deleteFolder / addPhoto / updatePhoto /
+ *   deleteFolder / addPhoto / addPhotosBatch /
+ *   updatePhoto /
  *   deletePhoto / setCalendarHighlight /
  *   clearCalendarHighlight
  * memory: updateHighlightPosition             folders (the calendar view updates its own
@@ -65,6 +66,7 @@ export function useMemoryMutations() {
     deleteFolder: useAction(memoryService.deleteFolder, { onSuccess: refreshMemories }),
     deleteAll: useAction(memoryService.deleteAll, { onSuccess: refreshMemories }),
     addPhotoToFolder: useAction(memoryService.addPhotoToFolder, { onSuccess: refreshMemories }),
+    addPhotosBatch: useAction(memoryService.addPhotosBatch, { onSuccess: refreshMemories }),
     updatePhoto: useAction(memoryService.updatePhoto, { onSuccess: refreshMemories }),
     deletePhoto: useAction(memoryService.deletePhoto, { onSuccess: refreshMemories }),
     setCalendarHighlight: useAction(memoryService.setCalendarHighlight, { onSuccess: refreshMemories }),
