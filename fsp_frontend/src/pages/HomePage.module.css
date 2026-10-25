@@ -3,7 +3,7 @@
 .pageContainer {
   min-height: 100vh;
   background-color: var(--paper);
-  background-image: radial-gradient(circle, rgb(23 43 112 / 0.14) 1.4px, transparent 2px);
+  background-image: radial-gradient(circle, var(--pattern-dot) 1.4px, transparent 2px);
   background-size: 24px 24px;
   color: var(--ink);
   font-family: var(--font-body);
@@ -19,7 +19,7 @@
   margin: 0 auto;
   padding: 10px 18px;
   background: var(--citrus-tint);
-  border: var(--border-width) solid var(--ink);
+  border: var(--border-width) solid var(--outline);
   border-radius: 20px;
   font-weight: 700;
 }
@@ -33,7 +33,7 @@
   gap: 10px;
   min-height: 54px;
   padding: 0 26px;
-  border: var(--border-width) solid var(--ink);
+  border: var(--border-width) solid var(--outline);
   border-radius: var(--radius-pill);
   font-weight: 800;
   font-size: 1.0625rem;
@@ -43,18 +43,18 @@
 
 .primaryBtn {
   background: var(--tomato);
-  color: var(--white);
+  color: var(--on-tomato);
   box-shadow: var(--shadow-button);
 }
 
 .primaryBtn:hover {
   transform: translate(-1px, -1px);
-  box-shadow: 5px 5px 0 var(--ink);
+  box-shadow: 5px 5px 0 var(--outline);
 }
 
 .primaryBtn:active {
   transform: translate(3px, 3px);
-  box-shadow: 1px 1px 0 var(--ink);
+  box-shadow: 1px 1px 0 var(--outline);
 }
 
 .secondaryBtn {
@@ -91,7 +91,7 @@
   margin: 0 0 22px;
   padding: 8px 18px 8px 10px;
   background: var(--white);
-  border: var(--border-width) solid var(--ink);
+  border: var(--border-width) solid var(--outline);
   border-radius: var(--radius-pill);
   transform: rotate(-2deg);
   font-family: var(--font-heading);
@@ -149,13 +149,15 @@
   border-radius: 50%;
   background-color: var(--gelato);
   background-image:
-    radial-gradient(circle at 20% 30%, rgb(255 159 28 / 0.85) 0 3.5px, transparent 4.5px),
-    radial-gradient(circle at 70% 65%, rgb(92 179 255 / 0.95) 0 3px, transparent 4px),
-    radial-gradient(circle at 40% 85%, rgb(224 48 26 / 0.65) 0 2.5px, transparent 3.5px),
-    radial-gradient(circle at 85% 15%, rgb(31 85 201 / 0.75) 0 2.5px, transparent 3.5px);
+    radial-gradient(circle at 20% 30%, color-mix(in srgb, var(--citrus) 85%, transparent) 0 3.5px, transparent 4.5px),
+    radial-gradient(circle at 70% 65%, color-mix(in srgb, var(--sea) 95%, transparent) 0 3px, transparent 4px),
+    radial-gradient(circle at 40% 85%, color-mix(in srgb, var(--tomato) 65%, transparent) 0 2.5px, transparent 3.5px),
+    radial-gradient(circle at 85% 15%, color-mix(in srgb, var(--amalfi) 75%, transparent) 0 2.5px, transparent 3.5px);
   background-size: 52px 52px, 42px 42px, 62px 62px, 34px 34px;
-  border: 3px solid var(--ink);
-  box-shadow: 8px 10px 0 var(--sea);
+  border: 3px solid var(--outline);
+  box-shadow: 8px 10px 0 var(--shadow-sea);
+  color: var(--on-bright);
+  --icon-ink: var(--on-bright);
 }
 
 .plateSticker {
@@ -268,7 +270,7 @@
   overflow: hidden;
   background: var(--white);
   color: var(--ink);
-  border: var(--border-width) solid var(--ink);
+  border: var(--border-width) solid var(--outline);
   border-radius: 26px;
   box-shadow: var(--shadow-card);
   text-decoration: none;
@@ -277,7 +279,7 @@
 
 .memoryCard:hover {
   transform: translate(-2px, -2px);
-  box-shadow: 8px 8px 0 var(--sea);
+  box-shadow: 8px 8px 0 var(--shadow-sea);
 }
 
 .skeleton {
@@ -297,7 +299,7 @@
   align-items: center;
   justify-content: center;
   height: 200px;
-  border-bottom: var(--border-width) solid var(--ink);
+  border-bottom: var(--border-width) solid var(--outline);
   background: var(--sea-tint);
 }
 
@@ -308,7 +310,7 @@
 }
 
 .coverIcon {
-  filter: drop-shadow(3px 4px 0 rgb(23 43 112 / 0.18));
+  filter: drop-shadow(3px 4px 0 var(--drop-shadow));
 }
 
 .photoChip {
@@ -317,7 +319,7 @@
   left: 14px;
   padding: 4px 12px;
   background: var(--white);
-  border: var(--border-width) solid var(--ink);
+  border: var(--border-width) solid var(--outline);
   border-radius: var(--radius-pill);
   font-size: 0.875rem;
   font-weight: 800;
@@ -380,7 +382,7 @@
   min-width: 0;
   padding: 28px 28px 14px;
   background: var(--white);
-  border: var(--border-width) solid var(--ink);
+  border: var(--border-width) solid var(--outline);
   border-radius: var(--radius-card-lg);
   box-shadow: var(--shadow-card-citrus);
 }
@@ -426,9 +428,11 @@
   width: 66px;
   height: 72px;
   background: var(--gelato);
-  border: var(--border-width) solid var(--ink);
+  border: var(--border-width) solid var(--outline);
   border-radius: 18px;
   line-height: 1;
+  color: var(--on-bright);
+  --icon-ink: var(--on-bright);
 }
 
 .dateBadgeMo {
@@ -481,7 +485,7 @@
   width: 120px;
   height: 32px;
   transform: translateX(-50%) rotate(-3deg);
-  background: rgb(92 179 255 / 0.8);
+  background: color-mix(in srgb, var(--sea) 80%, transparent);
   border-left: 2px dashed var(--white);
   border-right: 2px dashed var(--white);
 }
@@ -489,11 +493,13 @@
 .note {
   padding: 40px 30px 26px;
   background-color: var(--gelato);
-  background-image: repeating-linear-gradient(to bottom, transparent 0, transparent 36px, rgb(31 85 201 / 0.22) 36px, rgb(31 85 201 / 0.22) 38px);
-  border: var(--border-width) solid var(--ink);
+  background-image: repeating-linear-gradient(to bottom, transparent 0, transparent 36px, color-mix(in srgb, var(--amalfi) 22%, transparent) 36px, color-mix(in srgb, var(--amalfi) 22%, transparent) 38px);
+  border: var(--border-width) solid var(--outline);
   border-radius: 8px;
   transform: rotate(1.5deg);
-  box-shadow: 6px 8px 0 rgb(23 43 112 / 0.16);
+  box-shadow: 6px 8px 0 var(--drop-shadow);
+  color: var(--on-bright);
+  --icon-ink: var(--on-bright);
 }
 
 .noteLabel {
@@ -550,10 +556,10 @@
 .orders {
   background-color: var(--white);
   background-image:
-    repeating-linear-gradient(0deg, rgb(255 159 28 / 0.26) 0 16px, transparent 16px 32px),
-    repeating-linear-gradient(90deg, rgb(255 159 28 / 0.26) 0 16px, transparent 16px 32px);
-  border-top: var(--border-width) solid var(--ink);
-  border-bottom: var(--border-width) solid var(--ink);
+    repeating-linear-gradient(0deg, color-mix(in srgb, var(--citrus) 26%, transparent) 0 16px, transparent 16px 32px),
+    repeating-linear-gradient(90deg, color-mix(in srgb, var(--citrus) 26%, transparent) 0 16px, transparent 16px 32px);
+  border-top: var(--border-width) solid var(--outline);
+  border-bottom: var(--border-width) solid var(--outline);
 }
 
 .ordersInner {
@@ -579,7 +585,7 @@
   margin: 0 0 26px;
   padding: 4px 16px;
   background: var(--white);
-  border: var(--border-width) solid var(--ink);
+  border: var(--border-width) solid var(--outline);
   border-radius: 14px;
   font-family: var(--font-heading);
   font-weight: 800;
@@ -603,9 +609,9 @@
   gap: 8px;
   padding: 16px 8px 14px;
   background: var(--white);
-  border: var(--border-width) solid var(--ink);
+  border: var(--border-width) solid var(--outline);
   border-radius: 22px;
-  box-shadow: 4px 4px 0 var(--ink);
+  box-shadow: 4px 4px 0 var(--outline);
   text-align: center;
   font-family: var(--font-hand);
   font-weight: 700;
@@ -659,7 +665,7 @@
     min-height: 48px;
     padding: 0 12px;
     font-size: 0.9375rem;
-    box-shadow: 3px 3px 0 var(--ink);
+    box-shadow: 3px 3px 0 var(--outline);
   }
 
   .secondaryBtn {
@@ -713,7 +719,7 @@
     width: 196px;
     scroll-snap-align: start;
     border-radius: 20px;
-    box-shadow: 4px 4px 0 var(--sea);
+    box-shadow: 4px 4px 0 var(--shadow-sea);
   }
 
   .memoryCover {

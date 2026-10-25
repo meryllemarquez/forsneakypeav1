@@ -1,6 +1,6 @@
 .imageWrapper {
   overflow: hidden;
-  border: var(--border-width) solid var(--ink);
+  border: var(--border-width) solid var(--outline);
   border-radius: 22px;
   background: var(--sea-tint);
 }

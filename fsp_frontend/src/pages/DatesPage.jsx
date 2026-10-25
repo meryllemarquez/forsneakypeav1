@@ -238,7 +238,7 @@ const ChecklistRow = memo(function ChecklistRow({ item, onToggle, onDelete, onSa
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, x: 24, transition: { duration: 0.2 } }}
       transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-      whileDrag={{ scale: 1.02, boxShadow: '5px 5px 0 #172B70', zIndex: 5 }}
+      whileDrag={{ scale: 1.02, boxShadow: '5px 5px 0 var(--outline)', zIndex: 5 }}
       onDragEnd={onDragEnd}
     >
       <button

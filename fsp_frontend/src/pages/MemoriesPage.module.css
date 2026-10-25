@@ -3,7 +3,7 @@
 .pageContainer {
   min-height: 100vh;
   background-color: var(--paper);
-  background-image: radial-gradient(circle, rgb(92 179 255 / 0.5) 2px, transparent 2.6px);
+  background-image: radial-gradient(circle, color-mix(in srgb, var(--sea) 50%, transparent) 2px, transparent 2.6px);
   background-size: 28px 28px;
   color: var(--ink);
   font-family: var(--font-body);
@@ -73,7 +73,7 @@
   min-height: 52px;
   padding: 0 18px;
   background: var(--white);
-  border: var(--border-width) solid var(--ink);
+  border: var(--border-width) solid var(--outline);
   border-radius: var(--radius-pill);
 }
 
@@ -104,7 +104,7 @@
   margin: 28px 0;
   padding: 5px;
   background: var(--white);
-  border: var(--border-width) solid var(--ink);
+  border: var(--border-width) solid var(--outline);
   border-radius: var(--radius-pill);
 }
 
@@ -131,6 +131,8 @@
 .tabActive,
 .tabActive:hover {
   background: var(--citrus);
+  color: var(--on-bright);
+  --icon-ink: var(--on-bright);
 }
 
 .errorBanner {
@@ -140,7 +142,7 @@
   margin-bottom: 20px;
   padding: 10px 18px;
   background: var(--citrus-tint);
-  border: var(--border-width) solid var(--ink);
+  border: var(--border-width) solid var(--outline);
   border-radius: 20px;
   font-weight: 700;
 }
@@ -158,7 +160,7 @@
   flex-direction: column;
   overflow: hidden;
   background: var(--white);
-  border: var(--border-width) solid var(--ink);
+  border: var(--border-width) solid var(--outline);
   border-radius: 26px;
   box-shadow: 6px 6px 0 var(--album-accent, var(--sea));
   transition: transform 0.15s ease, box-shadow 0.15s ease;
@@ -188,7 +190,7 @@
   height: 190px;
   overflow: hidden;
   background: var(--sea-tint);
-  border-bottom: var(--border-width) solid var(--ink);
+  border-bottom: var(--border-width) solid var(--outline);
   /* the album's accent colour as a band along the bottom of the cover */
   box-shadow: inset 0 -10px 0 var(--album-accent, transparent);
   cursor: pointer;
@@ -201,7 +203,7 @@
 }
 
 .coverIcon {
-  filter: drop-shadow(3px 4px 0 rgb(23 43 112 / 0.18));
+  filter: drop-shadow(3px 4px 0 var(--drop-shadow));
 }
 
 .photoBadge {
@@ -211,7 +213,7 @@
   padding: 4px 12px;
   background: var(--album-accent, var(--white));
   color: var(--album-accent-ink, var(--ink));
-  border: var(--border-width) solid var(--ink);
+  border: var(--border-width) solid var(--outline);
   border-radius: var(--radius-pill);
   font-size: 0.875rem;
   font-weight: 800;
@@ -305,7 +307,7 @@
 }
 
 .newAlbumTile:hover {
-  background: rgb(255 255 255 / 0.7);
+  background: color-mix(in srgb, var(--white) 70%, transparent);
 }
 
 .newAlbumTitle {
@@ -377,7 +379,7 @@
   min-width: 0;
   padding: 14px 18px;
   background: color-mix(in srgb, var(--album-accent, var(--sea)) 22%, var(--white));
-  border: var(--border-width) solid var(--ink);
+  border: var(--border-width) solid var(--outline);
   border-radius: var(--radius-card);
 }
 
@@ -387,7 +389,7 @@
   width: 18px;
   height: 18px;
   background: var(--album-accent, var(--citrus));
-  border: var(--border-width) solid var(--ink);
+  border: var(--border-width) solid var(--outline);
   border-radius: 50%;
 }
 
@@ -417,7 +419,7 @@
   padding: 3px 14px 3px 8px;
   background: var(--album-accent, var(--gelato));
   color: var(--album-accent-ink, var(--ink));
-  border: var(--border-width) solid var(--ink);
+  border: var(--border-width) solid var(--outline);
   border-radius: var(--radius-pill);
   font-size: 0.875rem;
   font-weight: 800;
@@ -436,7 +438,7 @@
   position: relative;
   overflow: hidden;
   background: var(--white);
-  border: var(--border-width) solid var(--ink);
+  border: var(--border-width) solid var(--outline);
   border-radius: 22px;
   box-shadow: 5px 5px 0 var(--album-accent, var(--sea));
 }
@@ -489,7 +491,7 @@
   padding: 0;
   background: var(--white);
   color: var(--ink);
-  border: var(--border-width) solid var(--ink);
+  border: var(--border-width) solid var(--outline);
   border-radius: 50%;
   cursor: pointer;
 }
@@ -501,7 +503,7 @@
 .photoCaption {
   margin: 0;
   padding: 10px 14px;
-  border-top: var(--border-width) solid var(--ink);
+  border-top: var(--border-width) solid var(--outline);
   font-weight: 700;
   font-size: 0.95rem;
   overflow-wrap: anywhere;
@@ -522,7 +524,7 @@
   padding: 0;
   overflow: visible;
   background: var(--sea-tint);
-  border: var(--border-width) solid var(--ink);
+  border: var(--border-width) solid var(--outline);
   border-radius: 16px;
   cursor: pointer;
 }
@@ -536,7 +538,7 @@
 }
 
 .coverOptionActive {
-  box-shadow: 0 0 0 3px var(--white), 0 0 0 5px var(--ink);
+  box-shadow: 0 0 0 3px var(--white), 0 0 0 5px var(--outline);
 }
 
 
@@ -573,7 +575,7 @@
   padding: 0;
   background: var(--white);
   color: var(--ink);
-  border: var(--border-width) solid var(--ink);
+  border: var(--border-width) solid var(--outline);
   border-radius: 14px;
   font-family: inherit;
   font-weight: 800;
@@ -593,7 +595,9 @@
 .doodleActive,
 .doodleActive:hover {
   background: var(--citrus);
-  box-shadow: 3px 3px 0 var(--ink);
+  box-shadow: 3px 3px 0 var(--outline);
+  color: var(--on-bright);
+  --icon-ink: var(--on-bright);
 }
 
 .palette {
@@ -607,13 +611,13 @@
   width: var(--tap);
   height: var(--tap);
   padding: 0;
-  border: var(--border-width) solid var(--ink);
+  border: var(--border-width) solid var(--outline);
   border-radius: 50%;
   cursor: pointer;
 }
 
 .swatchActive {
-  box-shadow: 0 0 0 3px var(--white), 0 0 0 5px var(--ink);
+  box-shadow: 0 0 0 3px var(--white), 0 0 0 5px var(--outline);
 }
 
 .dropZone {
@@ -664,7 +668,7 @@
   width: 96px;
   height: 96px;
   object-fit: cover;
-  border: var(--border-width) solid var(--ink);
+  border: var(--border-width) solid var(--outline);
   border-radius: 20px;
 }
 
@@ -678,7 +682,7 @@
   align-items: center;
   justify-content: center;
   padding: 16px;
-  background: rgb(23 43 112 / 0.88);
+  background: var(--scrim-strong);
 }
 
 .lightboxContent {
@@ -688,9 +692,9 @@
   height: min(86vh, 760px);
   overflow: hidden;
   background: var(--white);
-  border: var(--border-width) solid var(--ink);
+  border: var(--border-width) solid var(--outline);
   border-radius: var(--radius-card-lg);
-  box-shadow: 8px 8px 0 var(--sea);
+  box-shadow: 8px 8px 0 var(--shadow-sea);
 }
 
 .lightboxLandscape {
@@ -735,13 +739,15 @@
   padding: 0;
   background: var(--white);
   color: var(--ink);
-  border: var(--border-width) solid var(--ink);
+  border: var(--border-width) solid var(--outline);
   border-radius: 50%;
   cursor: pointer;
 }
 
 .stageBtn:hover {
   background: var(--gelato);
+  color: var(--on-bright);
+  --icon-ink: var(--on-bright);
 }
 
 .stageClose {
@@ -768,7 +774,7 @@
   transform: translateX(-50%);
   padding: 4px 14px;
   background: var(--white);
-  border: var(--border-width) solid var(--ink);
+  border: var(--border-width) solid var(--outline);
   border-radius: var(--radius-pill);
   font-size: 0.875rem;
   font-weight: 800;
@@ -780,12 +786,12 @@
   gap: 14px;
   padding: 22px 20px;
   overflow-y: auto;
-  border-left: var(--border-width) solid var(--ink);
+  border-left: var(--border-width) solid var(--outline);
 }
 
 .lightboxLandscape .lightboxPanel {
   border-left: none;
-  border-top: var(--border-width) solid var(--ink);
+  border-top: var(--border-width) solid var(--outline);
   max-height: 40vh;
 }
 
@@ -811,7 +817,7 @@
   gap: 6px;
   padding: 3px 14px 3px 8px;
   background: var(--sea-tint);
-  border: var(--border-width) solid var(--ink);
+  border: var(--border-width) solid var(--outline);
   border-radius: var(--radius-pill);
   font-size: 0.875rem;
   font-weight: 800;
@@ -880,7 +886,7 @@
   .lightboxLandscape .lightboxPanel {
     max-height: 46vh;
     border-left: none;
-    border-top: var(--border-width) solid var(--ink);
+    border-top: var(--border-width) solid var(--outline);
   }
 
   .lightboxCaption {
@@ -911,7 +917,7 @@
   margin-top: 12px;
   padding: 10px 12px;
   background: var(--white);
-  border: var(--border-width) solid var(--ink);
+  border: var(--border-width) solid var(--outline);
   border-radius: var(--radius-input);
   box-shadow: 4px 4px 0 var(--album-accent);
   transition: box-shadow 0.12s ease;
@@ -922,7 +928,7 @@
   width: 48px;
   height: 36px;
   background: color-mix(in srgb, var(--album-accent) 35%, var(--white));
-  border: var(--border-width) solid var(--ink);
+  border: var(--border-width) solid var(--outline);
   border-radius: 10px;
   box-shadow: inset 0 -6px 0 var(--album-accent);
   transition: background-color 0.12s ease, box-shadow 0.12s ease;

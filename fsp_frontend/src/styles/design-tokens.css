@@ -2,7 +2,10 @@
   for sneakypea v2 design tokens: the single source of truth.
   Names say what the colour IS, not what it used to be.
 */
-:root {
+/* [data-theme="light"] on any element re-applies the light tokens to its subtree (used so PNG exports
+   stay light even when the app is in dark mode). */
+:root,
+[data-theme="light"] {
   /* Brand palette */
   --ink: #172B70;        /* all text, outlines, offset shadows */
   --ink-soft: #3A4A73;   /* secondary text */
@@ -44,6 +47,8 @@
   --link: var(--amalfi);
   --footer-bg: #1F55C9;
   --pattern-dot: rgb(23 43 112 / 0.14);
+  --scrim-strong: rgb(23 43 112 / 0.88);   /* lightbox / fullscreen backdrops */
+  --drop-shadow: rgb(23 43 112 / 0.18);    /* soft cast shadows under stickers and notes */
   color-scheme: light;
 
   /* Fonts */
@@ -135,6 +140,8 @@
   --scrim: rgb(5 8 24 / 0.66);
   --link: #8DB2FF;
   --pattern-dot: rgb(220 229 255 / 0.07);
+  --scrim-strong: rgb(5 8 24 / 0.92);
+  --drop-shadow: rgb(0 0 0 / 0.45);
   --shadow-soft: 0 8px 30px rgb(0 0 0 / 0.35);
   --shadow-modal: 0 20px 50px rgb(0 0 0 / 0.55);
   color-scheme: dark;

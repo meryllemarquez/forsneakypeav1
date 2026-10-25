@@ -22,7 +22,7 @@
   overflow: hidden;
   appearance: none;
   background: var(--white);
-  border: var(--border-width) solid var(--ink);
+  border: var(--border-width) solid var(--outline);
   border-radius: var(--radius-pill);
 }
 
@@ -33,10 +33,14 @@
 .bar::-webkit-progress-value {
   background: var(--sea);
   transition: width 0.2s linear;
+  color: var(--on-bright);
+  --icon-ink: var(--on-bright);
 }
 
 .bar::-moz-progress-bar {
   background: var(--sea);
+  color: var(--on-bright);
+  --icon-ink: var(--on-bright);
 }
 
 .count {
@@ -55,7 +59,7 @@
   margin: 0;
   padding: 8px 12px;
   background: var(--citrus-tint);
-  border: var(--border-width) solid var(--ink);
+  border: var(--border-width) solid var(--outline);
   border-radius: var(--radius-input);
   font-weight: 700;
 }

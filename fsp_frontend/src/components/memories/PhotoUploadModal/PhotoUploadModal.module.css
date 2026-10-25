@@ -50,7 +50,7 @@
   margin: 0;
   padding: 8px 12px;
   background: var(--citrus-tint);
-  border: var(--border-width) solid var(--ink);
+  border: var(--border-width) solid var(--outline);
   border-radius: var(--radius-input);
   font-weight: 700;
   font-size: 0.9rem;
@@ -74,7 +74,7 @@
   min-height: 64px;
   padding: 8px 10px;
   background: var(--white);
-  border: var(--border-width) solid var(--ink);
+  border: var(--border-width) solid var(--outline);
   border-radius: var(--radius-input);
 }
 
@@ -96,7 +96,7 @@
   height: 56px;
   overflow: hidden;
   background: var(--sea-tint);
-  border: var(--border-width) solid var(--ink);
+  border: var(--border-width) solid var(--outline);
   border-radius: 12px;
 }
 
@@ -142,7 +142,7 @@
   overflow: hidden;
   appearance: none;
   background: var(--white);
-  border: var(--border-width) solid var(--ink);
+  border: var(--border-width) solid var(--outline);
   border-radius: var(--radius-pill);
 }
 
@@ -153,10 +153,14 @@
 .bar::-webkit-progress-value {
   background: var(--sea);
   transition: width 0.2s linear;
+  color: var(--on-bright);
+  --icon-ink: var(--on-bright);
 }
 
 .bar::-moz-progress-bar {
   background: var(--sea);
+  color: var(--on-bright);
+  --icon-ink: var(--on-bright);
 }
 
 .check {
@@ -167,8 +171,10 @@
   width: 32px;
   height: 32px;
   background: var(--gelato);
-  border: var(--border-width) solid var(--ink);
+  border: var(--border-width) solid var(--outline);
   border-radius: 50%;
+  color: var(--on-bright);
+  --icon-ink: var(--on-bright);
 }
 
 .pop {
