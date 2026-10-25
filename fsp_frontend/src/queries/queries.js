@@ -4,6 +4,7 @@ import { memoryService } from '../services/memoryService';
 import { dateService } from '../services/dateService';
 import { loveBoardService } from '../services/loveBoardService';
 import { menuService } from '../services/menuService';
+import { wheelService } from '../services/wheelService';
 import { notificationService } from '../services/notificationService';
 import { profileService } from '../services/profileService';
 import { homeService } from '../services/homeService';
@@ -75,6 +76,24 @@ export function useMenuItems() {
   return useQuery({
     queryKey: queryKeys.menuItems(),
     queryFn: async () => (await menuService.getItems()) || [],
+    staleTime: 30 * SECOND,
+  });
+}
+
+// ---- Spin the wheel -------------------------------------------------------------------
+export function useWheels() {
+  return useQuery({
+    queryKey: queryKeys.wheels(),
+    queryFn: async () => (await wheelService.getWheels()) || [],
+    staleTime: 30 * SECOND,
+  });
+}
+
+export function useWheelSpins(wheelId, limit = 8) {
+  return useQuery({
+    queryKey: queryKeys.wheelSpins(wheelId),
+    queryFn: async () => (await wheelService.getSpins(wheelId, limit)) || [],
+    enabled: Boolean(wheelId),
     staleTime: 30 * SECOND,
   });
 }

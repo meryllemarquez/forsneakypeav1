@@ -8,6 +8,8 @@ export const queryKeys = {
   loveNotes: () => ['love-notes'],
   loveStickers: () => ['love-stickers'],
   menuItems: () => ['menu-items'],
+  wheels: () => ['wheels'],
+  wheelSpins: (id) => ['wheel-spins', id],
   notifications: () => ['notifications'],
   profile: () => ['profile'],
   homeSummary: (today) => ['home', 'summary', today],
@@ -22,6 +24,8 @@ export const keyFamilies = {
   loveNotes: ['love-notes'],
   loveStickers: ['love-stickers'],
   menuItems: ['menu-items'],
+  wheels: ['wheels'],
+  wheelSpins: ['wheel-spins'],
   notifications: ['notifications'],
   profile: ['profile'],
 };

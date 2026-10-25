@@ -6,6 +6,7 @@ import { checklistService } from '../services/checklistService';
 import { loveBoardService } from '../services/loveBoardService';
 import { profileService } from '../services/profileService';
 import { menuService } from '../services/menuService';
+import { wheelService } from '../services/wheelService';
 import { keyFamilies, queryKeys } from './queryKeys';
 
 /*
@@ -41,6 +42,10 @@ import { keyFamilies, queryKeys } from './queryKeys';
  * menu:   deleteItem                          menu-items (row removed optimistically)
  * menu:   reorderItems                        nothing on success (cache set to the saved
  *                                             order); reverts + refetches on failure
+ * wheel:  createWheel / updateWheel           wheels (cache set to the saved wheel)
+ * wheel:  deleteWheel                         wheels (row removed optimistically), wheel-spins
+ * wheel:  addSpin / setSpinAccepted /         wheel-spins
+ *   clearSpins
  * profile: updateProfile / updateAvatar /     profile (cache set to the saved profile)
  *   removeAvatar
  * notifications: see useNotifications.js     notifications (optimistic, resync when settled)
@@ -177,6 +182,36 @@ export function useMenuMutations() {
       },
       onSuccess: (saved) => setItems(saved),
     }),
+  };
+}
+
+export function useWheelMutations() {
+  const queryClient = useQueryClient();
+  const key = queryKeys.wheels();
+  const refreshWheels = () => invalidate(queryClient, keyFamilies.wheels);
+  const refreshSpins = () => invalidate(queryClient, keyFamilies.wheelSpins);
+  // Autosave writes the saved wheel straight into the list so the editor never refetches mid-typing.
+  const putWheel = (saved) =>
+    queryClient.setQueryData(key, (prev) => {
+      const rest = (prev || []).filter((wheel) => wheel.id !== saved.id);
+      return [saved, ...rest];
+    });
+
+  return {
+    createWheel: useAction(wheelService.createWheel, { onSuccess: putWheel }),
+    updateWheel: useAction(wheelService.updateWheel, { onSuccess: putWheel }),
+    deleteWheel: useAction(wheelService.deleteWheel, {
+      // Drop the wheel right away; a failed delete resyncs from the server.
+      onMutate: async ([id]) => {
+        await queryClient.cancelQueries({ queryKey: key });
+        queryClient.setQueryData(key, (prev) => (prev || []).filter((wheel) => wheel.id !== id));
+      },
+      onError: refreshWheels,
+      onSuccess: () => Promise.all([refreshWheels(), refreshSpins()]),
+    }),
+    addSpin: useAction(wheelService.addSpin, { onSuccess: refreshSpins }),
+    setSpinAccepted: useAction(wheelService.setSpinAccepted, { onSuccess: refreshSpins }),
+    clearSpins: useAction(wheelService.clearSpins, { onSuccess: refreshSpins }),
   };
 }
 
