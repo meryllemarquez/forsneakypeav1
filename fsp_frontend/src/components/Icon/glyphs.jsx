@@ -734,6 +734,15 @@ export const GLYPHS = {
       <ellipse cx="44" cy="7" rx="4" ry="5" fill="#5E9B4E" />
     </>
   ),
+  pen: (
+    <>
+      <path d="M14 50 L44 20 L52 28 L22 58 Z" fill="#1F55C9" />
+      <path d="M31 33 L39 41" stroke="#FFE680" strokeWidth="5" />
+      <path d="M14 50 L10 60 L22 58 Z" fill="#FFFFFF" />
+      <circle cx="11.5" cy="58.5" r="1.4" fill="currentColor" stroke="none" />
+      <path d="M44 26 L24 46" stroke="#FFFFFF" strokeWidth="1.6" />
+    </>
+  ),
 };
 
 export const ICON_NAMES = Object.keys(GLYPHS);
