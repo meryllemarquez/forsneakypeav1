@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Archive, ArchiveRestore, Trash2 } from 'lucide-react';
 import DataTable from '../../components/admin/common/DataTable';
+import RowActions from '../../components/admin/common/RowActions';
 import FilterBar from '../../components/admin/common/FilterBar';
 import ConfirmDialog from '../../components/ui/ConfirmDialog/ConfirmDialog';
 import { dateService } from '../../services/dateService';
@@ -87,24 +87,7 @@ export default function AdminDatesPage() {
       key: 'actions',
       label: 'Actions',
       render: (r) => (
-        <div className="flex items-center gap-1.5">
-          <button
-            type="button"
-            onClick={() => toggleArchive(r)}
-            title={r.isArchived ? 'Restore' : 'Archive'}
-            className="flex h-7 w-7 appearance-none items-center justify-center rounded-md border-0 bg-(--color-admin-surface-2) text-(--color-admin-text-muted) transition hover:bg-(--color-admin-border)"
-          >
-            {r.isArchived ? <ArchiveRestore size={13} /> : <Archive size={13} />}
-          </button>
-          <button
-            type="button"
-            onClick={() => setConfirmDelete(r)}
-            title="Delete"
-            className="flex h-7 w-7 appearance-none items-center justify-center rounded-md border-0 bg-(--color-admin-danger-soft) text-(--color-admin-danger) transition hover:opacity-80"
-          >
-            <Trash2 size={13} />
-          </button>
-        </div>
+        <RowActions name={r.title || r.name} isArchived={r.isArchived} onToggleArchive={() => toggleArchive(r)} onDelete={() => setConfirmDelete(r)} />
       ),
     },
   ];

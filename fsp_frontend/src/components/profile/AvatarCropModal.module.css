@@ -66,7 +66,7 @@
 .zoomSlider {
   flex: 1 1 auto;
   height: var(--tap);
-  accent-color: var(--tomato);
+  accent-color: var(--amalfi);
 }
 
 @media (prefers-reduced-motion: reduce) {

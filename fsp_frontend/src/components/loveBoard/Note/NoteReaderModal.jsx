@@ -164,7 +164,7 @@ export default function NoteReaderModal({ note, onClose, onSave, onToggleFavorit
                         type="checkbox"
                         checked={!!form.isPrivate}
                         onChange={(e) => setForm((f) => ({ ...f, isPrivate: e.target.checked }))}
-                        className="lb-focus size-6 accent-(--tomato)"
+                        className="lb-focus size-6 accent-(--ink)"
                       />
                       Keep this letter private (only I can see it)
                     </label>

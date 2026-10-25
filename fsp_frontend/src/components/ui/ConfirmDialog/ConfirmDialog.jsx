@@ -6,7 +6,7 @@ import styles from './ConfirmDialog.module.css';
 
 /**
  * The one confirmation dialog (delete, replace, discard...). `children` renders in place of the
- * icon (for example a photo thumbnail). Text is remembered while the exit animation plays, so
+ * icon (for example a photo thumbnail). `danger` styles the confirm button for destructive actions. Text is remembered while the exit animation plays, so
  * callers can clear their state the moment they close it.
  */
 export default function ConfirmDialog({
@@ -17,6 +17,7 @@ export default function ConfirmDialog({
   cancelLabel = 'Cancel',
   busyLabel = 'Working…',
   busy = false,
+  danger = false,
   error = '',
   icon = 'bell',
   onConfirm,
@@ -42,7 +43,7 @@ export default function ConfirmDialog({
           <Button onClick={onClose} disabled={busy} data-autofocus>
             {shown.cancelLabel}
           </Button>
-          <Button variant="primary" onClick={onConfirm} disabled={busy}>
+          <Button variant={danger ? 'danger' : 'primary'} onClick={onConfirm} loading={busy}>
             {busy ? busyLabel : shown.confirmLabel}
           </Button>
         </div>

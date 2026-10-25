@@ -1,6 +1,10 @@
 import { useMemo, useState } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
-import { Bell, CheckCheck, Search, X } from 'lucide-react';
+import { AnimatePresence } from 'framer-motion';
+import { Bell, CheckCheck, Search } from 'lucide-react';
+import Modal from '../ui/Modal/Modal';
+import Button from '../ui/Button/Button';
+import Chip from '../ui/Chip/Chip';
+import form from '../ui/FormControls.module.css';
 import NotificationCard from './NotificationCard';
 import EmptyState from './common/EmptyState';
 import { SkeletonRows } from './common/LoadingSkeleton';
@@ -16,6 +20,7 @@ function groupByDate(notifications) {
   return Array.from(groups.entries());
 }
 
+// The shared Modal gives this drawer Esc, a focus trap, focus restore and scroll lock.
 export default function NotificationDrawer({ open, notifications, loading, onClose, onMarkRead, onMarkAllRead, onDelete }) {
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState('all'); // all | unread
@@ -30,99 +35,57 @@ export default function NotificationDrawer({ open, notifications, loading, onClo
   const unreadCount = notifications.filter((n) => !n.isRead).length;
 
   return (
-    <AnimatePresence>
-      {open && (
-        <>
-          <motion.div
-            className="fixed inset-0 z-[140] bg-black/20"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={onClose}
+    <Modal open={open} onClose={onClose} placement="right" size="sm" title="Notifications">
+      <p className={form.hint} aria-live="polite">{unreadCount} unread</p>
+
+      <div className="mt-3 flex flex-col gap-3">
+        <div className="relative">
+          <Search size={18} strokeWidth={2.6} aria-hidden="true" className="pointer-events-none absolute top-1/2 left-3.5 -translate-y-1/2 text-(--ink)" />
+          <input
+            type="search"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search notifications…"
+            aria-label="Search notifications"
+            className={form.input}
+            style={{ paddingLeft: 42 }}
           />
-          <motion.div
-            className="fixed top-0 right-0 z-[150] flex h-full w-full max-w-sm flex-col border-l border-(--color-admin-border) bg-(--color-admin-surface)"
-            initial={{ x: '100%' }}
-            animate={{ x: 0 }}
-            exit={{ x: '100%' }}
-            transition={{ type: 'spring', stiffness: 340, damping: 34 }}
-          >
-            <div className="flex items-center justify-between border-b border-(--color-admin-border) px-5 py-4">
-              <div>
-                <p className="m-0 text-[15px] font-semibold text-(--color-admin-text)">Notifications</p>
-                <p className="m-0 text-xs text-(--color-admin-text-muted)">{unreadCount} unread</p>
-              </div>
-              <button
-                type="button"
-                onClick={onClose}
-                className="flex h-8 w-8 appearance-none items-center justify-center rounded-full border-0 bg-transparent text-(--color-admin-text-muted) transition hover:bg-(--color-admin-surface-2)"
-              >
-                <X size={16} />
-              </button>
-            </div>
+        </div>
 
-            <div className="flex items-center gap-2 border-b border-(--color-admin-border) px-4 py-3">
-              <div className="relative flex-1">
-                <Search size={13} className="pointer-events-none absolute top-1/2 left-2.5 -translate-y-1/2 text-(--color-admin-text-muted)" />
-                <input
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Search notifications…"
-                  className="w-full rounded-lg border border-(--color-admin-border) bg-(--color-admin-surface-2) py-1.5 pr-2 pl-7 text-xs outline-none focus:border-(--color-admin-accent)/50"
-                />
-              </div>
-              <div className="flex rounded-lg border border-(--color-admin-border) p-0.5">
-                {['all', 'unread'].map((f) => (
-                  <button
-                    key={f}
-                    type="button"
-                    onClick={() => setFilter(f)}
-                    className={`appearance-none rounded-md border-0 px-2.5 py-1 text-[11px] font-medium capitalize transition ${
-                      filter === f ? 'bg-(--color-admin-accent) text-white' : 'bg-transparent text-(--color-admin-text-muted)'
-                    }`}
-                  >
-                    {f}
-                  </button>
-                ))}
+        <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Show">
+          <Chip active={filter === 'all'} onClick={() => setFilter('all')}>All</Chip>
+          <Chip active={filter === 'unread'} onClick={() => setFilter('unread')}>Unread</Chip>
+          {unreadCount > 0 && (
+            <Button size="sm" onClick={onMarkAllRead}>
+              <CheckCheck size={18} strokeWidth={2.6} aria-hidden="true" />
+              Mark all as read
+            </Button>
+          )}
+        </div>
+      </div>
+
+      <div className="mt-4 space-y-4">
+        {loading ? (
+          <SkeletonRows rows={4} cols={1} />
+        ) : grouped.length === 0 ? (
+          <EmptyState icon={Bell} title="You're all caught up" description="No notifications to show." />
+        ) : (
+          grouped.map(([date, items]) => (
+            <div key={date}>
+              <p className="m-0 mb-2 text-xs font-semibold tracking-wide text-(--color-admin-text-muted) uppercase">
+                {date === new Date().toDateString() ? 'Today' : date}
+              </p>
+              <div className="space-y-2">
+                <AnimatePresence initial={false}>
+                  {items.map((n) => (
+                    <NotificationCard key={n.id} notification={n} onMarkRead={onMarkRead} onDelete={onDelete} />
+                  ))}
+                </AnimatePresence>
               </div>
             </div>
-
-            {unreadCount > 0 && (
-              <button
-                type="button"
-                onClick={onMarkAllRead}
-                className="mx-4 mt-3 inline-flex w-fit appearance-none items-center gap-1.5 rounded-lg border-0 bg-(--color-admin-surface-2) px-2.5 py-1.5 text-[11px] font-medium text-(--color-admin-text) transition hover:bg-(--color-admin-border)"
-              >
-                <CheckCheck size={12} />
-                Mark all as read
-              </button>
-            )}
-
-            <div className="flex-1 space-y-4 overflow-y-auto px-4 py-4">
-              {loading ? (
-                <SkeletonRows rows={4} cols={1} />
-              ) : grouped.length === 0 ? (
-                <EmptyState icon={Bell} title="You're all caught up" description="No notifications to show." />
-              ) : (
-                grouped.map(([date, items]) => (
-                  <div key={date}>
-                    <p className="m-0 mb-2 text-[11px] font-semibold tracking-wide text-(--color-admin-text-muted) uppercase">
-                      {date === new Date().toDateString() ? 'Today' : date}
-                    </p>
-                    <div className="space-y-2">
-                      <AnimatePresence initial={false}>
-                        {items.map((n) => (
-                          <NotificationCard key={n.id} notification={n} onMarkRead={onMarkRead} onDelete={onDelete} />
-                        ))}
-                      </AnimatePresence>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-          </motion.div>
-        </>
-      )}
-    </AnimatePresence>
+          ))
+        )}
+      </div>
+    </Modal>
   );
 }

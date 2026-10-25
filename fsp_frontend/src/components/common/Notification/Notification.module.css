@@ -73,3 +73,16 @@
     max-width: none;
   }
 }
+
+.errorBadge {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  background: var(--citrus);
+  color: var(--ink);
+  border: var(--border-width) solid var(--ink);
+  border-radius: 50%;
+}

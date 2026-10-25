@@ -11,6 +11,7 @@ import {
   Check,
   X,
 } from 'lucide-react';
+import IconButton from '../ui/IconButton/IconButton';
 
 const TYPE_ICON = {
   DATE_CREATED: Calendar,
@@ -60,29 +61,19 @@ export default function NotificationCard({ notification, onMarkRead, onDelete })
       <div className="min-w-0 flex-1">
         <p className="m-0 text-[13px] font-medium text-(--color-admin-text)">{notification.title}</p>
         {notification.message && <p className="m-0 mt-0.5 text-xs text-(--color-admin-text-muted)">{notification.message}</p>}
-        <p className="m-0 mt-1 text-[11px] text-(--color-admin-text-muted)">{timeAgo(notification.createdAt)}</p>
+        <p className="m-0 mt-1 text-xs text-(--color-admin-text-muted)">{timeAgo(notification.createdAt)}</p>
       </div>
-      <div className="flex shrink-0 flex-col gap-1 opacity-0 transition group-hover:opacity-100">
+      <div className="flex shrink-0 flex-col gap-1">
         {!notification.isRead && (
-          <button
-            type="button"
-            title="Mark as read"
-            onClick={() => onMarkRead(notification.id)}
-            className="flex h-6 w-6 appearance-none items-center justify-center rounded-md border-0 bg-(--color-admin-surface-2) text-(--color-admin-text-muted) transition hover:bg-(--color-admin-accent-soft) hover:text-(--color-admin-accent)"
-          >
-            <Check size={12} />
-          </button>
+          <IconButton label={`Mark as read: ${notification.title}`} onClick={() => onMarkRead(notification.id)}>
+            <Check size={18} strokeWidth={2.6} aria-hidden="true" />
+          </IconButton>
         )}
-        <button
-          type="button"
-          title="Delete"
-          onClick={() => onDelete(notification.id)}
-          className="flex h-6 w-6 appearance-none items-center justify-center rounded-md border-0 bg-(--color-admin-surface-2) text-(--color-admin-text-muted) transition hover:bg-(--color-admin-danger-soft) hover:text-(--color-admin-danger)"
-        >
-          <X size={12} />
-        </button>
+        <IconButton label={`Delete notification: ${notification.title}`} variant="danger" onClick={() => onDelete(notification.id)}>
+          <X size={18} strokeWidth={2.6} aria-hidden="true" />
+        </IconButton>
       </div>
-      {!notification.isRead && <span className="absolute top-3 right-3 h-1.5 w-1.5 rounded-full bg-(--color-admin-accent) group-hover:hidden" />}
+      {!notification.isRead && <span className="absolute top-3 right-3 h-1.5 w-1.5 rounded-full bg-(--color-admin-accent)" />}
     </motion.div>
   );
 }

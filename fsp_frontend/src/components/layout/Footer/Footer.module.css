@@ -37,7 +37,7 @@
   align-items: center;
   gap: 6px;
   margin: 4px 0 0;
-  color: #E3EEFF;
+  color: var(--footer-ink);
 }
 
 .links {
@@ -78,7 +78,7 @@
 .dogsNames {
   margin: 0;
   font-size: 0.95rem;
-  color: #E3EEFF;
+  color: var(--footer-ink);
 }
 
 @media (max-width: 900px) {

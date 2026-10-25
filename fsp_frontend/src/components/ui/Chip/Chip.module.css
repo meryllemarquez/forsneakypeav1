@@ -1,0 +1,31 @@
+.chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: var(--tap);
+  padding: 0 16px;
+  background: var(--white);
+  color: var(--ink);
+  border: var(--border-width) solid var(--ink);
+  border-radius: var(--radius-pill);
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  font-weight: 800;
+  line-height: 1;
+  cursor: pointer;
+  transition: background-color 0.12s ease, transform 0.12s ease;
+}
+
+.chip:hover:not(:disabled) { background: var(--sea-tint); }
+.chip:active:not(:disabled) { transform: translateY(1px); }
+
+.active,
+.active:hover:not(:disabled) { background: var(--citrus); }
+
+.check { flex: none; }
+
+.chip:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}

@@ -3,6 +3,7 @@ import { Trash2, Heart, Image } from 'lucide-react';
 import FilterBar from '../../components/admin/common/FilterBar';
 import EmptyState from '../../components/admin/common/EmptyState';
 import ConfirmDialog from '../../components/ui/ConfirmDialog/ConfirmDialog';
+import IconButton from '../../components/ui/IconButton/IconButton';
 import { SkeletonCards } from '../../components/admin/common/LoadingSkeleton';
 import { memoryService } from '../../services/memoryService';
 
@@ -78,18 +79,18 @@ export default function AdminGalleryPage() {
           {filtered.map((photo) => (
             <div key={photo.id} className="group relative aspect-square overflow-hidden rounded-xl bg-(--color-admin-surface-2)">
               <img src={photo.thumbUrl || photo.photoUrl} alt={photo.caption || ''} className="h-full w-full object-cover transition group-hover:scale-105" />
-              <div className="absolute inset-0 flex flex-col justify-between bg-gradient-to-t from-black/60 via-transparent to-transparent p-2 opacity-0 transition group-hover:opacity-100">
+              <div className="absolute inset-0 flex flex-col justify-between bg-gradient-to-t from-black/60 via-transparent to-transparent p-2">
                 <div className="flex justify-end">
-                  <button
-                    type="button"
+                  <IconButton
+                    label={`Delete photo${photo.caption ? `: ${photo.caption}` : photo.folderName ? ` from ${photo.folderName}` : ''}`}
+                    variant="danger"
                     onClick={() => setConfirmDelete(photo)}
-                    className="flex h-7 w-7 appearance-none items-center justify-center rounded-md border-0 bg-white/90 text-(--color-admin-danger) transition hover:bg-white"
                   >
-                    <Trash2 size={13} />
-                  </button>
+                    <Trash2 size={18} strokeWidth={2.6} aria-hidden="true" />
+                  </IconButton>
                 </div>
                 <div className="text-white">
-                  <p className="m-0 truncate text-[11px] font-medium">{photo.folderName}</p>
+                  <p className="m-0 truncate text-xs font-semibold">{photo.folderName}</p>
                   {photo.isFavorite && <Heart size={11} className="mt-0.5 fill-current" />}
                 </div>
               </div>

@@ -1,0 +1,26 @@
+.wrap {
+  position: relative;
+  display: block;
+  width: 100%;
+}
+
+.select {
+  appearance: none;
+  padding-right: 48px;
+  text-overflow: ellipsis;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.select:disabled {
+  cursor: not-allowed;
+}
+
+.chevron {
+  position: absolute;
+  top: 50%;
+  right: 14px;
+  color: var(--ink);
+  transform: translateY(-50%);
+  pointer-events: none;
+}

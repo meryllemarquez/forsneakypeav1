@@ -153,7 +153,7 @@ export default function NoteCanvasEditor({ paper, textBoxes, attachments, onChan
                 max={48}
                 value={selectedBlock.fontSize}
                 onChange={(e) => updateBlock(selectedBlock.id, { fontSize: Number(e.target.value) })}
-                className="lb-focus h-11 accent-(--tomato)"
+                className="lb-focus h-11 accent-(--amalfi)"
               />
             </label>
 
@@ -210,7 +210,7 @@ export default function NoteCanvasEditor({ paper, textBoxes, attachments, onChan
                 step={0.1}
                 value={selectedBlock.lineHeight ?? 1.3}
                 onChange={(e) => updateBlock(selectedBlock.id, { lineHeight: Number(e.target.value) })}
-                className="lb-focus h-11 accent-(--tomato)"
+                className="lb-focus h-11 accent-(--amalfi)"
               />
             </label>
             <label className="flex min-h-11 items-center gap-2 text-sm font-extrabold">
@@ -222,7 +222,7 @@ export default function NoteCanvasEditor({ paper, textBoxes, attachments, onChan
                 step={0.5}
                 value={selectedBlock.letterSpacing ?? 0}
                 onChange={(e) => updateBlock(selectedBlock.id, { letterSpacing: Number(e.target.value) })}
-                className="lb-focus h-11 accent-(--tomato)"
+                className="lb-focus h-11 accent-(--amalfi)"
               />
             </label>
           </div>

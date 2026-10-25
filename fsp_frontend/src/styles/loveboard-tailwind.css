@@ -40,7 +40,7 @@
 }
 
 .lb-board {
-  background-color: #fffdf6;
+  background-color: var(--paper-warm);
   background-image:
     linear-gradient(to right, transparent 140px, rgb(224 48 26 / 0.45) 140px, rgb(224 48 26 / 0.45) 144px, transparent 144px),
     repeating-linear-gradient(to bottom, transparent 0, transparent 54px, rgb(92 179 255 / 0.6) 54px, rgb(92 179 255 / 0.6) 58px);

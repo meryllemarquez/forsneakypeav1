@@ -256,7 +256,7 @@
 .cardDivider {
   height: 0;
   margin: 16px 0;
-  border-top: 2px dashed #C9D6EC;
+  border-top: 2px dashed var(--line-soft);
 }
 
 .formGroup {

@@ -55,6 +55,54 @@
   outline-offset: 1px;
 }
 
+/* Field states shared by Input / Textarea / Select / DatePicker / TimePicker. */
+.input:disabled,
+.textarea:disabled,
+.select:disabled {
+  background: var(--paper);
+  color: var(--ink-muted);
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.input[aria-invalid='true'],
+.textarea[aria-invalid='true'],
+.select[aria-invalid='true'] {
+  background: var(--citrus-tint);
+  box-shadow: 0 0 0 3px var(--citrus);
+}
+
+.required {
+  color: var(--ink);
+}
+
+.fieldError {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin: 0;
+  color: var(--ink);
+  font-size: 0.9rem;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.fieldError::before {
+  content: '!';
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  margin-top: 1px;
+  background: var(--citrus);
+  border: var(--border-width) solid var(--ink);
+  border-radius: 50%;
+  font-size: 0.7rem;
+  line-height: 1;
+}
+
 .error {
   margin: 0;
   padding: 8px 14px;

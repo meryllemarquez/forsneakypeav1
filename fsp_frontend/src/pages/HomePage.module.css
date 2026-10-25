@@ -400,7 +400,7 @@
 }
 
 .dateRow {
-  border-top: 2px dashed #C9D6EC;
+  border-top: 2px dashed var(--line-soft);
 }
 
 .dateLink {

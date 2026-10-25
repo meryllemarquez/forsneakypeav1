@@ -53,7 +53,7 @@
   border: none;
   border-radius: 0;
   box-shadow: none;
-  background-color: #fffdf6;
+  background-color: var(--paper-warm);
   background-image:
     linear-gradient(to right, transparent 13%, rgb(224 48 26 / 0.45) 13%, rgb(224 48 26 / 0.45) 14.5%, transparent 14.5%),
     repeating-linear-gradient(to bottom, transparent 0, transparent 16px, rgb(92 179 255 / 0.6) 16px, rgb(92 179 255 / 0.6) 18px);

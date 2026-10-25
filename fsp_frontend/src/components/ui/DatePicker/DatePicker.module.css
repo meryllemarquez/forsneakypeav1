@@ -1,0 +1,44 @@
+.wrap {
+  position: relative;
+  display: block;
+  width: 100%;
+}
+
+.icon {
+  position: absolute;
+  top: 50%;
+  left: 14px;
+  color: var(--ink);
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.input {
+  display: block;
+  min-width: 0;
+  padding-left: 46px;
+  font-weight: 700;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.input::-webkit-date-and-time-value {
+  min-height: 1.5em;
+  text-align: left;
+}
+
+/* The native indicator is stretched over the whole field, so tapping anywhere opens the picker. */
+.input::-webkit-calendar-picker-indicator {
+  position: absolute;
+  inset: 0;
+  width: auto;
+  height: auto;
+  margin: 0;
+  padding: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.input::-webkit-datetime-edit-text {
+  color: var(--ink-muted);
+}

@@ -21,6 +21,13 @@
   --citrus-tint: #FFD8A0;
   --amalfi-tint: #CBDBF8;
   --citrus-cover: #FFC76B;
+  --line-soft: #C9D6EC;   /* dashed dividers */
+  --footer-ink: #E3EEFF;   /* text on the amalfi footer */
+  --paper-warm: #FFFDF6;   /* paper behind the Love Board room */
+  --sky-deep: #8FC7F7;     /* sign-in backdrop gradient */
+  --sky-pale: #CFE6F7;
+  --sun-pale: #FFEBC0;
+  --sun-peach: #FFD7A6;
 
   /* Fonts */
   --font-heading: 'Shantell Sans', 'Comic Sans MS', cursive;

@@ -1,0 +1,79 @@
+.group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 4px;
+}
+
+.tile,
+.swatch {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0;
+  color: var(--ink);
+  border: var(--border-width) solid var(--ink);
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-weight: 800;
+  transition: background-color 0.12s ease, transform 0.12s ease;
+}
+
+.tile {
+  min-width: var(--tap);
+  min-height: var(--tap);
+  padding: 4px 10px;
+  background: var(--white);
+  border-radius: 14px;
+}
+
+.tile:hover:not(:disabled) {
+  background: var(--sea-tint);
+}
+
+.tile.selected,
+.tile.selected:hover:not(:disabled) {
+  background: var(--citrus);
+  box-shadow: 3px 3px 0 var(--ink);
+}
+
+.swatch {
+  width: var(--tap);
+  height: var(--tap);
+  background: var(--white);
+  border-radius: 50%;
+}
+
+.swatchFill {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+}
+
+.swatch.selected {
+  box-shadow: 0 0 0 3px var(--white), 0 0 0 5px var(--ink);
+}
+
+.badge {
+  position: absolute;
+  right: -6px;
+  bottom: -6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  background: var(--ink);
+  color: var(--white);
+  border: 2px solid var(--white);
+  border-radius: 50%;
+}
+
+.tile:disabled,
+.swatch:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}

@@ -7,6 +7,8 @@ import { useMemoryMutations } from '../../../queries/mutations';
 import { queryKeys } from '../../../queries/queryKeys';
 import { useScrollLock } from '../../../hooks/useScrollLock';
 import Icon from '../../Icon';
+import IconButton from '../../ui/IconButton/IconButton';
+import Select from '../../ui/Select/Select';
 import MemoryPreviewModal from './MemoryPreviewModal';
 import styles from './CalendarView.module.css';
 
@@ -16,7 +18,7 @@ const MONTH_NAMES = [
 ];
 const WEEKDAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
-// A press has to be held this long before it turns into a reposition drag â€”
+// A press has to be held this long before it turns into a reposition drag —
 // short of that, releasing is treated as a plain tap (open the preview).
 const LONG_PRESS_MS = 380;
 // If the pointer moves more than this before the hold fires, the gesture is
@@ -30,7 +32,20 @@ const MAX_YEAR = 2100;
 // any month/year, instead of clicking through the arrows one at a time.
 function MonthYearPicker({ cursor, onSelect, className }) {
   const [open, setOpen] = useState(false);
+  const [yearDraft, setYearDraft] = useState(String(cursor.year));
   const containerRef = useRef(null);
+
+  // Keep the draft in step when the year changes from outside (arrows, month steps, stepper buttons).
+  useEffect(() => {
+    setYearDraft(String(cursor.year));
+  }, [cursor.year]);
+
+  const commitYear = (text) => {
+    const year = Number(text);
+    if (!/^d{4}$/.test(text) || year < MIN_YEAR || year > MAX_YEAR) return false;
+    if (year !== cursor.year) onSelect(year, cursor.month);
+    return true;
+  };
 
   useEffect(() => {
     if (!open) return undefined;
@@ -62,30 +77,43 @@ function MonthYearPicker({ cursor, onSelect, className }) {
 
       {open && (
         <div className={styles.monthYearPopover}>
-          <select
-            className={styles.monthYearSelect}
-            value={cursor.month}
-            onChange={(e) => onSelect(cursor.year, Number(e.target.value))}
-            aria-label="Month"
-          >
-            {MONTH_NAMES.map((name, i) => (
-              <option key={name} value={i + 1}>{name}</option>
-            ))}
-          </select>
-          <input
-            type="number"
-            className={styles.monthYearInput}
-            value={cursor.year}
-            min={MIN_YEAR}
-            max={MAX_YEAR}
-            aria-label="Year"
-            onChange={(e) => {
-              const year = Number(e.target.value);
-              if (Number.isInteger(year) && year >= MIN_YEAR && year <= MAX_YEAR) {
-                onSelect(year, cursor.month);
-              }
-            }}
-          />
+          <div className={styles.monthSelect}>
+            <Select
+              value={cursor.month}
+              onChange={(e) => onSelect(cursor.year, Number(e.target.value))}
+              aria-label="Month"
+              options={MONTH_NAMES.map((name, i) => ({ value: i + 1, label: name }))}
+            />
+          </div>
+          <div className={styles.yearStepper}>
+            <IconButton label="Previous year" disabled={cursor.year <= MIN_YEAR} onClick={() => onSelect(cursor.year - 1, cursor.month)}>
+              <ChevronLeft size={20} strokeWidth={2.8} aria-hidden="true" />
+            </IconButton>
+            {/* A text field with its own draft: typing "2" on the way to "2027" must not snap back. */}
+            <input
+              type="text"
+              inputMode="numeric"
+              maxLength={4}
+              className={styles.monthYearInput}
+              value={yearDraft}
+              aria-label="Year"
+              onChange={(e) => {
+                const text = e.target.value.replace(/D/g, '');
+                setYearDraft(text);
+                commitYear(text);
+              }}
+              onBlur={() => {
+                if (!commitYear(yearDraft)) setYearDraft(String(cursor.year));
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'ArrowUp' && cursor.year < MAX_YEAR) { e.preventDefault(); onSelect(cursor.year + 1, cursor.month); }
+                if (e.key === 'ArrowDown' && cursor.year > MIN_YEAR) { e.preventDefault(); onSelect(cursor.year - 1, cursor.month); }
+              }}
+            />
+            <IconButton label="Next year" disabled={cursor.year >= MAX_YEAR} onClick={() => onSelect(cursor.year + 1, cursor.month)}>
+              <ChevronRight size={20} strokeWidth={2.8} aria-hidden="true" />
+            </IconButton>
+          </div>
         </div>
       )}
     </div>
@@ -190,12 +218,12 @@ function useHighlightReposition(onSave) {
   return { dragState, onPointerDown };
 }
 
-// The scrapbook "sheet" â€” big month number, weekday row, photo grid. Rendered
+// The scrapbook "sheet" — big month number, weekday row, photo grid. Rendered
 // both inline and (bigger) inside the fullscreen overlay, and is exactly the
 // DOM node the PNG export screenshots, so all three stay visually identical
 // by construction. The highlight photo is a CSS background-image (not an
 // <img> with object-fit) because html2canvas doesn't respect object-fit and
-// stretches such images to fill their box â€” background-size/position it
+// stretches such images to fill their box — background-size/position it
 // renders correctly, which also gives the reposition drag a natural knob.
 function CalendarSheet({ cursor, cells, isCurrentMonth, today, entries, loading, onDayClick, onRepositionSave, sheetRef, fullscreen }) {
   const { dragState, onPointerDown } = useHighlightReposition(onRepositionSave);
@@ -404,7 +432,7 @@ export default function CalendarView({ onOpenAlbum }) {
         <div className={styles.toolbarActions}>
           <button className={styles.toolbarIconBtn} onClick={handleExportPng} disabled={exporting} aria-label="Export as PNG">
             <Download size={20} strokeWidth={2.6} aria-hidden="true" />
-            <span>{exporting ? 'Exportingâ€¦' : 'Export as PNG'}</span>
+            <span>{exporting ? 'Exporting…' : 'Export as PNG'}</span>
           </button>
           <button className={styles.toolbarIconBtn} onClick={() => setIsFullscreen(true)} aria-label="Full screen">
             <Maximize2 size={20} strokeWidth={2.6} aria-hidden="true" />
@@ -450,7 +478,7 @@ export default function CalendarView({ onOpenAlbum }) {
                 <div className={styles.toolbarActions}>
                   <button className={styles.toolbarIconBtn} onClick={handleExportPng} disabled={exporting} aria-label="Export as PNG">
                     <Download size={20} strokeWidth={2.6} aria-hidden="true" />
-                    <span>{exporting ? 'Exportingâ€¦' : 'Export as PNG'}</span>
+                    <span>{exporting ? 'Exporting…' : 'Export as PNG'}</span>
                   </button>
                   <button className={styles.fullscreenCloseBtn} onClick={() => setIsFullscreen(false)} aria-label="Exit full screen" autoFocus>
                     <X size={22} strokeWidth={2.8} aria-hidden="true" />

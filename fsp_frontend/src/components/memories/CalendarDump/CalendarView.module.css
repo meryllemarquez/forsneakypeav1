@@ -99,7 +99,6 @@
   box-shadow: var(--shadow-card);
 }
 
-.monthYearSelect,
 .monthYearInput {
   min-height: var(--tap);
   padding: 0 12px;
@@ -112,7 +111,20 @@
 }
 
 .monthYearInput {
-  width: 6em;
+  width: 5.5em;
+  text-align: center;
+  font-weight: 800;
+}
+
+.monthSelect {
+  flex: 1 1 150px;
+  min-width: 150px;
+}
+
+.yearStepper {
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 /* ---------- The sheet ---------- */

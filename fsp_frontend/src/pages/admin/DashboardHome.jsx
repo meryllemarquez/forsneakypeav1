@@ -41,12 +41,12 @@ function formatAction(action) {
 }
 
 const STATUS_TONE = {
-  DREAMING: '#5CB3FF',
-  PLANNING: '#FFE680',
-  BOOKED: '#FF9F1C',
-  READY: '#1F55C9',
-  COMPLETED: '#172B70',
-  CANCELLED: '#4A5A80',
+  DREAMING: 'var(--sea)',
+  PLANNING: 'var(--gelato)',
+  BOOKED: 'var(--citrus)',
+  READY: 'var(--amalfi)',
+  COMPLETED: 'var(--ink)',
+  CANCELLED: 'var(--ink-muted)',
 };
 
 const QUICK_ACTIONS = [
@@ -260,7 +260,7 @@ export default function DashboardHome() {
                   <div className="h-1.5 overflow-hidden rounded-full bg-(--color-admin-surface-2)">
                     <div
                       className="h-full rounded-full"
-                      style={{ width: `${(count / statusTotal) * 100}%`, backgroundColor: STATUS_TONE[status] || '#8C230F' }}
+                      style={{ width: `${(count / statusTotal) * 100}%`, backgroundColor: STATUS_TONE[status] || 'var(--ink-muted)' }}
                     />
                   </div>
                 </div>
