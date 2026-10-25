@@ -32,6 +32,11 @@ public class BulkDeleteController {
         return ResponseEntity.ok(bulkDeleteService.deleteMemories());
     }
 
+    @DeleteMapping("/bouquets/all")
+    public ResponseEntity<Map<String, Object>> deleteBouquets() {
+        return ResponseEntity.ok(bulkDeleteService.deleteBouquets());
+    }
+
     @DeleteMapping("/dates/all")
     public ResponseEntity<Map<String, Object>> deleteDates() {
         return ResponseEntity.ok(bulkDeleteService.deleteDates());

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, Reorder, useReducedMotion } from 'framer-motion';
 import { ArrowDown, ArrowUp, ArrowUpDown, GripVertical } from 'lucide-react';
 import { useMenuItems } from '../../../queries/queries';
@@ -10,6 +11,7 @@ import Modal from '../../ui/Modal/Modal';
 import Button from '../../ui/Button/Button';
 import IconButton from '../../ui/IconButton/IconButton';
 import Chip from '../../ui/Chip/Chip';
+import AddToWheel from '../../wheel/AddToWheel/AddToWheel';
 import MenuItemForm from './MenuItemForm';
 import styles from './MenuBook.module.css';
 
@@ -48,6 +50,8 @@ export default function MenuBook({ open, onClose }) {
   const [reordering, setReordering] = useState(false);
   const [order, setOrder] = useState([]);
   const [editing, setEditing] = useState(null); // null | 'new' | item
+  const [wheelFood, setWheelFood] = useState(null); // food being added to a wheel
+  const navigate = useNavigate();
   const [intro, setIntro] = useState(true);
   const [announce, setAnnounce] = useState('');
   const dragging = useRef(false);
@@ -185,6 +189,7 @@ export default function MenuBook({ open, onClose }) {
               >
                 <ArrowUpDown size={20} aria-hidden="true" />
               </IconButton>
+              <Button size="sm" onClick={() => { close(); navigate('/wheel'); }}>Spin it</Button>
               <Button size="sm" variant="primary" onClick={() => setEditing('new')}>Add to the menu</Button>
             </div>
           </div>
@@ -250,6 +255,9 @@ export default function MenuBook({ open, onClose }) {
                     <LovedBadge lovedBy={item.lovedBy} />
                     <span className={styles.srOnly}>Edit {item.name}</span>
                   </button>
+                  <IconButton label={`Add ${item.name} to a wheel`} variant="ghost" className={styles.spinFor} onClick={() => setWheelFood(item)}>
+                    <Icon name="wheel" size={26} />
+                  </IconButton>
                 </motion.li>
               ))}
             </ul>
@@ -262,6 +270,8 @@ export default function MenuBook({ open, onClose }) {
           <div className={styles.srOnly} role="status" aria-live="polite">{announce}</div>
         </motion.div>
       </Modal>
+
+      {wheelFood && <AddToWheel food={wheelFood} onClose={() => setWheelFood(null)} />}
 
       <MenuItemForm
         item={editing && editing !== 'new' ? editing : null}

@@ -11,6 +11,7 @@ import Navbar from '../components/layout/Navbar/Navbar';
 import Footer from '../components/layout/Footer/Footer';
 import StatusChip from '../components/ui/StatusChip/StatusChip';
 import UsualOrdersCounter from '../components/home/UsualOrdersCounter/UsualOrdersCounter';
+import WheelCard from '../components/home/WheelCard/WheelCard';
 import styles from './HomePage.module.css';
 
 const ArrowRight = () => (
@@ -284,6 +285,10 @@ export default function HomePage() {
               )}
             </div>
           </div>
+        </section>
+
+        <section className={styles.section} aria-label="Spin the wheel">
+          <WheelCard />
         </section>
 
         {/* OUR USUAL ORDERS (gingham band) */}

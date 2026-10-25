@@ -412,6 +412,14 @@
   font-size: 1.5rem;
 }
 
+.wheelLink {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--tap);
+  color: var(--amalfi);
+  font-weight: 800;
+}
+
 .emptyText {
   margin: 0;
   max-width: 28em;

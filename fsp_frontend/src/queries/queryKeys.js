@@ -10,6 +10,8 @@ export const queryKeys = {
   menuItems: () => ['menu-items'],
   wheels: () => ['wheels'],
   wheelSpins: (id) => ['wheel-spins', id],
+  bouquets: () => ['bouquets'],
+  bouquet: (id) => ['bouquets', id],
   notifications: () => ['notifications'],
   profile: () => ['profile'],
   homeSummary: (today) => ['home', 'summary', today],
@@ -26,6 +28,7 @@ export const keyFamilies = {
   menuItems: ['menu-items'],
   wheels: ['wheels'],
   wheelSpins: ['wheel-spins'],
+  bouquets: ['bouquets'],
   notifications: ['notifications'],
   profile: ['profile'],
 };

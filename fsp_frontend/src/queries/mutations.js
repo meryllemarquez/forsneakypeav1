@@ -7,6 +7,7 @@ import { loveBoardService } from '../services/loveBoardService';
 import { profileService } from '../services/profileService';
 import { menuService } from '../services/menuService';
 import { wheelService } from '../services/wheelService';
+import { bouquetService } from '../services/bouquetService';
 import { keyFamilies, queryKeys } from './queryKeys';
 
 /*
@@ -46,6 +47,8 @@ import { keyFamilies, queryKeys } from './queryKeys';
  * wheel:  deleteWheel                         wheels (row removed optimistically), wheel-spins
  * wheel:  addSpin / setSpinAccepted /         wheel-spins
  *   clearSpins
+ * bouquet: create / update / delete /         bouquets (all, including single bouquets);
+ *   deleteAll                                 delete / deleteAll also love-stickers
  * profile: updateProfile / updateAvatar /     profile (cache set to the saved profile)
  *   removeAvatar
  * notifications: see useNotifications.js     notifications (optimistic, resync when settled)
@@ -212,6 +215,21 @@ export function useWheelMutations() {
     addSpin: useAction(wheelService.addSpin, { onSuccess: refreshSpins }),
     setSpinAccepted: useAction(wheelService.setSpinAccepted, { onSuccess: refreshSpins }),
     clearSpins: useAction(wheelService.clearSpins, { onSuccess: refreshSpins }),
+  };
+}
+
+export function useBouquetMutations() {
+  const queryClient = useQueryClient();
+  const refreshBouquets = () => invalidate(queryClient, keyFamilies.bouquets);
+  // Deleting a bouquet removes the stickers pinning it on the server.
+  const refreshBouquetsAndStickers = () =>
+    Promise.all([refreshBouquets(), invalidate(queryClient, keyFamilies.loveStickers)]);
+
+  return {
+    createBouquet: useAction(bouquetService.createBouquet, { onSuccess: refreshBouquets }),
+    updateBouquet: useAction(bouquetService.updateBouquet, { onSuccess: refreshBouquets }),
+    deleteBouquet: useAction(bouquetService.deleteBouquet, { onSuccess: refreshBouquetsAndStickers }),
+    deleteAllBouquets: useAction(bouquetService.deleteAllBouquets, { onSuccess: refreshBouquetsAndStickers }),
   };
 }
 

@@ -124,6 +124,11 @@
 
 .rowBtn:hover { background: var(--sea-tint); }
 
+.spinFor {
+  flex: none;
+  margin-right: 8px;
+}
+
 .rowBtn:focus-visible {
   outline: var(--focus-ring);
   outline-offset: var(--focus-offset);

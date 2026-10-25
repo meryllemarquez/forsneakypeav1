@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useCallback, useRef, memo } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence, Reorder, useDragControls } from 'framer-motion';
 import {
   Archive,
@@ -1029,6 +1029,7 @@ export default function DatesPage() {
                   <Plus size={20} strokeWidth={3} aria-hidden="true" />
                   Plan our first date
                 </Button>
+                <Link to="/wheel" className={styles.wheelLink}>Not sure where to go? Spin for it</Link>
               </>
             ) : (
               <>

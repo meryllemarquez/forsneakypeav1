@@ -38,3 +38,62 @@ export function defaultWheelColors(count) {
   }
   return out;
 }
+
+// Doodles a slice can wear (food and places). All are in the server's allow-list.
+export const WHEEL_DOODLES = [
+  'lasagna', 'pizza', 'burger', 'ramen', 'bowl', 'lechon', 'fries', 'donut',
+  'cake', 'iceCream', 'milkTea', 'coffee', 'motmot', 'mountain', 'museum', 'plane',
+];
+
+export const newChoiceId = () => Math.random().toString(36).slice(2, 10);
+
+/** Colour for a slice appended to `choices`: next on the palette, unlike the last and first slice. */
+export function nextWheelColor(choices) {
+  const prev = choices[choices.length - 1]?.color;
+  const first = choices[0]?.color;
+  for (let i = 0; i < WALK.length; i += 1) {
+    const key = WALK[(choices.length + i) % WALK.length];
+    if (key !== prev && key !== first) return key;
+  }
+  return WALK[0];
+}
+
+// Menu foods keep their "loved by" colour; a tint breaks up neighbours that would match.
+const LOVED_COLORS = {
+  her: ['citrus', 'citrus-tint'],
+  him: ['sea', 'sea-tint'],
+  both: ['gelato', 'gelato-tint'],
+};
+
+/** `existing` choices plus menu foods (skipping ones already there) up to `limit` slices. */
+export function choicesFromMenu(items, existing = [], limit = WHEEL_LIMITS.maxChoices) {
+  const out = [...existing];
+  const have = new Set(out.map((c) => c.label.trim().toLowerCase()));
+  for (const item of items) {
+    if (out.length >= limit) break;
+    const label = (item.name || '').trim().slice(0, WHEEL_LIMITS.maxLabel);
+    if (!label || have.has(label.toLowerCase())) continue;
+    const [base, tint] = LOVED_COLORS[item.lovedBy] || LOVED_COLORS.both;
+    const color = out[out.length - 1]?.color === base ? tint : base;
+    out.push({ id: newChoiceId(), label, color, doodle: item.doodle || null });
+    have.add(label.toLowerCase());
+  }
+  return out;
+}
+
+// The wheel last opened (or added to), so "add to a wheel" can skip the picker.
+const LAST_WHEEL_KEY = 'fsp-wheel-last';
+export function rememberWheel(id) {
+  try {
+    localStorage.setItem(LAST_WHEEL_KEY, id);
+  } catch {
+    /* not remembered */
+  }
+}
+export function lastWheelId() {
+  try {
+    return localStorage.getItem(LAST_WHEEL_KEY);
+  } catch {
+    return null;
+  }
+}

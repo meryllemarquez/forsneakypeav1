@@ -12,6 +12,7 @@ import PageLoader from './components/common/PageLoader/PageLoader';
 const MemoriesPage = lazy(() => import('./pages/MemoriesPage'));
 const DatesPage = lazy(() => import('./pages/DatesPage'));
 const LoveLettersPage = lazy(() => import('./pages/LoveLettersPage'));
+const WheelPage = lazy(() => import('./pages/WheelPage'));
 
 // Dev-only icon kit preview. `import.meta.env.DEV` is replaced with `false` in production builds,
 // so the dynamic import (and the page) is dropped from the bundle.
@@ -56,6 +57,18 @@ export default function App() {
                 <HomePage />
               </ProtectedRoute>
             } 
+          />
+
+          {/* Spin the wheel: not a tab, reached from Home, the menu and Dates */}
+          <Route
+            path="/wheel"
+            element={
+              <ProtectedRoute>
+                <Suspense fallback={<PageLoader />}>
+                  <WheelPage />
+                </Suspense>
+              </ProtectedRoute>
+            }
           />
 
           {/* Phase 5: Memories & Album System */}

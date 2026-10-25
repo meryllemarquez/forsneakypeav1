@@ -5,6 +5,7 @@ import { dateService } from '../services/dateService';
 import { loveBoardService } from '../services/loveBoardService';
 import { menuService } from '../services/menuService';
 import { wheelService } from '../services/wheelService';
+import { bouquetService } from '../services/bouquetService';
 import { notificationService } from '../services/notificationService';
 import { profileService } from '../services/profileService';
 import { homeService } from '../services/homeService';
@@ -94,6 +95,24 @@ export function useWheelSpins(wheelId, limit = 8) {
     queryKey: queryKeys.wheelSpins(wheelId),
     queryFn: async () => (await wheelService.getSpins(wheelId, limit)) || [],
     enabled: Boolean(wheelId),
+    staleTime: 30 * SECOND,
+  });
+}
+
+// ---- Bouquets -------------------------------------------------------------------------
+export function useBouquets() {
+  return useQuery({
+    queryKey: queryKeys.bouquets(),
+    queryFn: async () => (await bouquetService.getBouquets()) || [],
+    staleTime: 30 * SECOND,
+  });
+}
+
+export function useBouquet(id) {
+  return useQuery({
+    queryKey: queryKeys.bouquet(id),
+    queryFn: () => bouquetService.getBouquet(id),
+    enabled: Boolean(id),
     staleTime: 30 * SECOND,
   });
 }

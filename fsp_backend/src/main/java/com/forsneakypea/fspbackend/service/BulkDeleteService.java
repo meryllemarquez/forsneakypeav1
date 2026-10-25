@@ -69,6 +69,18 @@ public class BulkDeleteService {
         return result;
     }
 
+    /** Every bouquet and the Love Board stickers that pin one. */
+    @Transactional
+    public Map<String, Object> deleteBouquets() {
+        int stickers = jdbc.update("DELETE FROM love_stickers WHERE image LIKE 'bouquet:%'");
+        int bouquets = jdbc.update("DELETE FROM bouquets");
+
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("deletedBouquets", bouquets);
+        result.put("deletedStickers", stickers);
+        return result;
+    }
+
     /** Dates with their checklists, reminders, attachments and favorites. Categories stay. */
     @Transactional
     public Map<String, Object> deleteDates() {
