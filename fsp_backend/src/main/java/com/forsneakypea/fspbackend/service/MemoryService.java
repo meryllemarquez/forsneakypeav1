@@ -70,12 +70,23 @@ public class MemoryService {
         return mapFolderToDTO(folder);
     }
 
+    private static final String DEFAULT_ACCENT = "#FF9F1C";
+    private static final java.util.regex.Pattern HEX_COLOR = java.util.regex.Pattern.compile("^#[0-9A-Fa-f]{6}$");
+
+    /** Albums only accept a #RRGGBB colour (old albums may still hold legacy values, which load fine). */
+    private static void requireValidAccent(String accent) {
+        if (accent != null && !HEX_COLOR.matcher(accent).matches()) {
+            throw new BadRequestException("Pick one of the album colours.");
+        }
+    }
+
     @Transactional
     public FolderDTO createFolder(FolderRequestDTO.CreateOrUpdateFolder request, Long userId) { // ✅ Long userId
+        requireValidAccent(request.getAccentColor());
         MemoryFolder folder = MemoryFolder.builder()
                 .name(request.getName())
                 .description(request.getDescription())
-                .accentColor(request.getAccentColor() != null ? request.getAccentColor() : "#C73616")
+                .accentColor(request.getAccentColor() != null ? request.getAccentColor() : DEFAULT_ACCENT)
                 .iconStyle(request.getIconStyle() != null ? request.getIconStyle() : "camera")
                 .coverImageUrl(mediaUrls.isSignedUrl(request.getCoverImageUrl()) ? null : request.getCoverImageUrl())
                 .createdBy(userId)
@@ -96,6 +107,7 @@ public class MemoryService {
 
     @Transactional
     public FolderDTO updateFolder(UUID id, FolderRequestDTO.CreateOrUpdateFolder request, boolean force, Long userId) {
+        requireValidAccent(request.getAccentColor());
         MemoryFolder folder = folderRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Folder not found"));
 

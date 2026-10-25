@@ -6,6 +6,7 @@ import { useCalendarMonth } from '../../../queries/queries';
 import { useMemoryMutations } from '../../../queries/mutations';
 import { queryKeys } from '../../../queries/queryKeys';
 import { useScrollLock } from '../../../hooks/useScrollLock';
+import { useNotification } from '../../../hooks/useNotification';
 import Icon from '../../Icon';
 import IconButton from '../../ui/IconButton/IconButton';
 import Select from '../../ui/Select/Select';
@@ -324,6 +325,7 @@ export default function CalendarView({ onOpenAlbum }) {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [exporting, setExporting] = useState(false);
   const sheetRef = useRef(null);
+  const { addToast } = useNotification();
 
   const entriesByDay = useMemo(() => {
     const map = new Map();
@@ -380,19 +382,36 @@ export default function CalendarView({ onOpenAlbum }) {
   const handleExportPng = async () => {
     if (!sheetRef.current || exporting) return;
     setExporting(true);
+    // No focus ring on the picture; the clone below drops today / hover / drag marks.
+    document.activeElement?.blur?.();
     try {
       const { default: html2canvas } = await import('html2canvas');
-      const canvas = await html2canvas(sheetRef.current, {
+      const capture = (scale) => html2canvas(sheetRef.current, {
         backgroundColor: '#FFF8E8',
-        scale: Math.max(3, window.devicePixelRatio || 1),
+        scale,
         useCORS: true,
+        // Only the cloned DOM changes, so nothing flickers on screen.
+        onclone: (_doc, clonedEl) => {
+          clonedEl.classList.add(styles.exporting);
+          clonedEl.setAttribute('data-theme', 'light');
+        },
       });
+      let canvas;
+      try {
+        canvas = await capture(Math.max(3, window.devicePixelRatio || 1));
+      } catch (firstErr) {
+        // Low-memory phones can fail at 3x: retry once smaller.
+        console.warn('Export at full scale failed, retrying at 2x', firstErr);
+        canvas = await capture(2);
+      }
       const link = document.createElement('a');
       link.download = `calendar-dump-${MONTH_NAMES[cursor.month - 1].toLowerCase()}-${cursor.year}.png`;
       link.href = canvas.toDataURL('image/png');
       link.click();
+      addToast('Saved your calendar sheet', 'success');
     } catch (err) {
       console.error('Failed to export calendar as PNG', err);
+      addToast("Couldn't make the picture. Try again?", 'error');
     } finally {
       setExporting(false);
     }

@@ -29,7 +29,7 @@ public class MemoryFolder {
 
     @Column(name = "accent_color", length = 20)
     @Builder.Default
-    private String accentColor = "#C73616";
+    private String accentColor = "#FF9F1C";
 
     @Column(name = "icon_style", length = 30)
     @Builder.Default

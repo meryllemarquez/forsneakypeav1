@@ -7,6 +7,7 @@ import Sidebar from './Sidebar';
 import TopBar from './TopBar';
 import NotificationDrawer from './NotificationDrawer';
 import { useAuth } from '../../hooks/useAuth';
+import LogoutConfirm from '../layout/LogoutConfirm/LogoutConfirm';
 import { useNotifications } from '../../queries/useNotifications';
 
 const TITLES = {
@@ -23,7 +24,8 @@ const TITLES = {
 };
 
 export default function AdminLayout() {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
+  const [leaveOpen, setLeaveOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -41,8 +43,8 @@ export default function AdminLayout() {
   const unreadCount = notifications.filter((n) => !n.isRead).length;
 
   const handleLogout = () => {
-    logout();
-    navigate('/auth');
+    setMobileSidebarOpen(false);
+    setLeaveOpen(true);
   };
 
   const title = TITLES[location.pathname] || 'Control Center';
@@ -114,6 +116,8 @@ export default function AdminLayout() {
         onMarkAllRead={handleMarkAllRead}
         onDelete={handleDelete}
       />
+
+      <LogoutConfirm open={leaveOpen} onClose={() => setLeaveOpen(false)} onLoggedOut={() => navigate('/auth')} />
     </div>
   );
 }

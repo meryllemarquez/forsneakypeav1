@@ -160,13 +160,13 @@
   background: var(--white);
   border: var(--border-width) solid var(--ink);
   border-radius: 26px;
-  box-shadow: var(--shadow-card);
+  box-shadow: 6px 6px 0 var(--album-accent, var(--sea));
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
 .folderCard:hover {
   transform: translate(-2px, -2px);
-  box-shadow: 8px 8px 0 var(--sea);
+  box-shadow: 8px 8px 0 var(--album-accent, var(--sea));
 }
 
 .skeleton {
@@ -189,6 +189,8 @@
   overflow: hidden;
   background: var(--sea-tint);
   border-bottom: var(--border-width) solid var(--ink);
+  /* the album's accent colour as a band along the bottom of the cover */
+  box-shadow: inset 0 -10px 0 var(--album-accent, transparent);
   cursor: pointer;
 }
 
@@ -207,7 +209,8 @@
   top: 14px;
   left: 14px;
   padding: 4px 12px;
-  background: var(--white);
+  background: var(--album-accent, var(--white));
+  color: var(--album-accent-ink, var(--ink));
   border: var(--border-width) solid var(--ink);
   border-radius: var(--radius-pill);
   font-size: 0.875rem;
@@ -369,16 +372,23 @@
 .albumTitleBlock {
   display: flex;
   flex: 1 1 280px;
-  align-items: stretch;
+  align-items: center;
   gap: 14px;
   min-width: 0;
+  padding: 14px 18px;
+  background: color-mix(in srgb, var(--album-accent, var(--sea)) 22%, var(--white));
+  border: var(--border-width) solid var(--ink);
+  border-radius: var(--radius-card);
 }
 
+/* the album's accent colour as a dot beside the title */
 .accentBar {
   flex: none;
-  width: 8px;
+  width: 18px;
+  height: 18px;
+  background: var(--album-accent, var(--citrus));
   border: var(--border-width) solid var(--ink);
-  border-radius: var(--radius-pill);
+  border-radius: 50%;
 }
 
 .albumHeading {
@@ -405,7 +415,8 @@
   gap: 6px;
   margin-top: 8px;
   padding: 3px 14px 3px 8px;
-  background: var(--gelato);
+  background: var(--album-accent, var(--gelato));
+  color: var(--album-accent-ink, var(--ink));
   border: var(--border-width) solid var(--ink);
   border-radius: var(--radius-pill);
   font-size: 0.875rem;
@@ -427,7 +438,14 @@
   background: var(--white);
   border: var(--border-width) solid var(--ink);
   border-radius: 22px;
-  box-shadow: 5px 5px 0 var(--sea);
+  box-shadow: 5px 5px 0 var(--album-accent, var(--sea));
+}
+
+/* selected / focused photo and the calendar highlight take the album's accent */
+.photoCard:focus-within,
+.photoCardHighlight {
+  outline: 3px solid var(--album-accent, var(--citrus));
+  outline-offset: 2px;
 }
 
 .photoOpen {
@@ -883,4 +901,45 @@
 
 .tabsSpacing {
   margin: 28px 0;
+}
+
+/* Live preview of the chosen accent inside the album form */
+.accentPreview {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 12px;
+  padding: 10px 12px;
+  background: var(--white);
+  border: var(--border-width) solid var(--ink);
+  border-radius: var(--radius-input);
+  box-shadow: 4px 4px 0 var(--album-accent);
+  transition: box-shadow 0.12s ease;
+}
+
+.accentPreviewCover {
+  flex: none;
+  width: 48px;
+  height: 36px;
+  background: color-mix(in srgb, var(--album-accent) 35%, var(--white));
+  border: var(--border-width) solid var(--ink);
+  border-radius: 10px;
+  box-shadow: inset 0 -6px 0 var(--album-accent);
+  transition: background-color 0.12s ease, box-shadow 0.12s ease;
+}
+
+.accentPreviewLabel {
+  min-width: 0;
+  overflow: hidden;
+  font-family: var(--font-heading);
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .accentPreview,
+  .accentPreviewCover {
+    transition: none;
+  }
 }

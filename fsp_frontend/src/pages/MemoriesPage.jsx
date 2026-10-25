@@ -18,6 +18,7 @@ import { memoryService } from '../services/memoryService';
 import { useFolders } from '../queries/queries';
 import { useMemoryMutations } from '../queries/mutations';
 import { uploadImageToDrive } from '../api/driveUpload';
+import { PALETTE_ACCENTS, DEFAULT_ACCENT, albumAccent, accentVars } from '../constants/albumAccents';
 import Tabs, { panelId, tabId } from '../components/ui/Tabs/Tabs';
 import RadioGroup, { ColorSwatchGroup } from '../components/ui/RadioGroup/RadioGroup';
 import Field from '../components/ui/Field/Field';
@@ -42,29 +43,7 @@ const HeartToggle = ({ on, size = 22 }) =>
 const HighlightToggle = ({ on, size = 22 }) =>
   on ? <Icon name="sparkle" size={size + 6} /> : <Sparkle size={size} strokeWidth={2.6} aria-hidden="true" />;
 
-// Album accent swatches: the thin colour bar beside the title on an album page.
-const PALETTE_ACCENTS = [
-  { name: 'Citrus', value: '#FF9F1C' },
-  { name: 'Sea', value: '#5CB3FF' },
-  { name: 'Gelato', value: '#FFE680' },
-  { name: 'Amalfi', value: '#1F55C9' },
-  { name: 'Ink', value: '#172B70' },
-];
-const DEFAULT_ACCENT = PALETTE_ACCENTS[0].value;
-// Albums saved before the rebrand keep their old hex in the database; show them in the new palette.
-const LEGACY_ACCENTS = {
-  '#E38A96': '#FF9F1C',
-  '#D97785': '#FF9F1C',
-  '#C73616': '#FF9F1C',
-  '#F4A9B8': '#FFE680',
-  '#8FAE7D': '#1F55C9',
-  '#3E332E': '#172B70',
-};
-const displayAccent = (hex) => LEGACY_ACCENTS[(hex || '').toUpperCase()] || hex || DEFAULT_ACCENT;
-
-// Cover tiles for albums with no cover photo cycle through these soft fills.
 const AUTO_DOODLE = '__auto';
-const COVER_TINTS = ['var(--sea)', 'var(--gelato)', 'var(--citrus-cover)', 'var(--sea-tint)'];
 
 // Doodles offered in the album form (people stay out of the list).
 const PICKABLE_DOODLES = ICON_NAMES.filter((name) => name !== 'her' && name !== 'him');
@@ -340,7 +319,7 @@ export default function MemoriesPage() {
       setFolderForm({
         name: folder.name || '',
         description: folder.description || '',
-        accentColor: displayAccent(folder.accentColor),
+        accentColor: albumAccent(folder.accentColor, folder.id).hex,
         iconStyle: folder.iconStyle || 'camera',
         // A Drive cover is addressed by file id; its coverImageUrl is a short-lived signed URL.
         coverImageUrl: folder.coverDriveFileId ? '' : folder.coverImageUrl || '',
@@ -689,11 +668,11 @@ export default function MemoriesPage() {
               </div>
             ) : (
               <div className={styles.folderGrid}>
-                {filteredFolders.map((folder, i) => (
-                  <article key={folder.id} className={styles.folderCard}>
+                {filteredFolders.map((folder) => (
+                  <article key={folder.id} className={styles.folderCard} style={accentVars(folder.accentColor, folder.id)}>
                     <div
                       className={styles.cover}
-                      style={albumCoverUrl(folder) ? undefined : { background: COVER_TINTS[i % COVER_TINTS.length] }}
+                      style={albumCoverUrl(folder) ? undefined : { background: 'color-mix(in srgb, var(--album-accent) 35%, var(--white))' }}
                       onClick={(e) => openAlbumFromCard(folder, e)}
                     >
                       {albumCoverUrl(folder) ? (
@@ -752,7 +731,7 @@ export default function MemoriesPage() {
 
         {/* VIEW 2: SELECTED ALBUM GALLERY */}
         {viewMode === 'albums' && selectedFolder && (
-          <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
+          <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }} style={accentVars(selectedFolder.accentColor, selectedFolder.id)}>
             <div className={styles.albumHeader}>
               <Button size="sm" onClick={() => setSelectedFolder(null)}>
                 <ArrowLeft size={20} strokeWidth={2.8} aria-hidden="true" />
@@ -760,7 +739,7 @@ export default function MemoriesPage() {
               </Button>
 
               <div className={styles.albumTitleBlock}>
-                <span className={styles.accentBar} style={{ backgroundColor: displayAccent(selectedFolder.accentColor) }} aria-hidden="true" />
+                <span className={styles.accentBar} aria-hidden="true" />
                 <div>
                   <h2 className={styles.albumHeading}>{selectedFolder.name}</h2>
                   <p className={styles.albumMeta}>{selectedFolder.description || 'Private collection'}</p>
@@ -806,7 +785,7 @@ export default function MemoriesPage() {
                 {photos.map((photo, index) => {
                   const isHighlight = photo.id === selectedFolder.highlightPhotoId;
                   return (
-                    <li key={photo.id} className={styles.photoCard}>
+                    <li key={photo.id} className={`${styles.photoCard} ${isHighlight ? styles.photoCardHighlight : ''}`}>
                       <button
                         type="button"
                         className={styles.photoOpen}
@@ -989,6 +968,10 @@ export default function MemoriesPage() {
               onChange={(accentColor) => setFolderForm({ ...folderForm, accentColor })}
               colors={PALETTE_ACCENTS}
             />
+            <div className={styles.accentPreview} style={accentVars(folderForm.accentColor)} aria-hidden="true">
+              <span className={styles.accentPreviewCover} />
+              <span className={styles.accentPreviewLabel}>{folderForm.name || 'Your album'}</span>
+            </div>
           </fieldset>
 
           <Field label="Date happened" htmlFor="album-date">

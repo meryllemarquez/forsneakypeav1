@@ -427,3 +427,28 @@
     transition: none;
   }
 }
+
+/* PNG export only (class added to the cloned sheet by html2canvas onclone): a clean
+   scrapbook page with no today ring, hover caption, focus ring or drag state. */
+.calendarSheet.exporting .dayCellToday {
+  background: var(--paper);
+  box-shadow: none;
+}
+
+.calendarSheet.exporting .dayHoverInfo {
+  display: none;
+}
+
+.calendarSheet.exporting .dayCell,
+.calendarSheet.exporting .dayCellFilled,
+.calendarSheet.exporting .dayCellDragging {
+  transform: none;
+  box-shadow: none;
+  z-index: auto;
+}
+
+.calendarSheet.exporting *,
+.calendarSheet.exporting *:focus,
+.calendarSheet.exporting *:focus-visible {
+  outline: none !important;
+}

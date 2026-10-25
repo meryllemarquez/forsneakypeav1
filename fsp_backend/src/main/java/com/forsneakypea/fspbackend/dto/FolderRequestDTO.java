@@ -18,7 +18,7 @@ public class FolderRequestDTO {
         private String name;
 
         private String description;
-        private String accentColor = "#C73616";
+        private String accentColor = "#FF9F1C";
         private String iconStyle = "camera";
         private String coverImageUrl;
         private String coverDriveFileId;

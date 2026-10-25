@@ -10,6 +10,7 @@ import Icon from '../../Icon';
 import Logo from '../Logo/Logo';
 import TabBar from '../TabBar/TabBar';
 import NotificationBell from '../../notifications/NotificationBell';
+import LogoutConfirm from '../LogoutConfirm/LogoutConfirm';
 import styles from './Navbar.module.css';
 
 function Avatar({ user, size }) {
@@ -76,7 +77,7 @@ function AvatarMenu({ user, isCouple, isAdmin, onLogout }) {
               <ShieldCheck size={18} strokeWidth={2.4} aria-hidden="true" /> Admin
             </button>
           )}
-          <button type="button" role="menuitem" className={styles.menuItem} onClick={onLogout}>
+          <button type="button" role="menuitem" className={styles.menuItem} onClick={() => { setOpen(false); onLogout(); }}>
             <LogOut size={18} strokeWidth={2.4} aria-hidden="true" /> Sign out
           </button>
         </div>
@@ -86,7 +87,8 @@ function AvatarMenu({ user, isCouple, isAdmin, onLogout }) {
 }
 
 export default function Navbar() {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
+  const [leaveOpen, setLeaveOpen] = useState(false);
   const navigate = useNavigate();
   const isPhone = useMediaQuery(PHONE_NAV_QUERY);
 
@@ -140,7 +142,7 @@ export default function Navbar() {
           <NotificationBell />
 
           {isPhone ? (
-            <AvatarMenu user={user} isCouple={isCouple} isAdmin={isAdmin} onLogout={logout} />
+            <AvatarMenu user={user} isCouple={isCouple} isAdmin={isAdmin} onLogout={() => setLeaveOpen(true)} />
           ) : (
             <>
               {isCouple ? (
@@ -154,7 +156,7 @@ export default function Navbar() {
                   <span>{displayName}</span>
                 </div>
               )}
-              <button type="button" className={styles.iconBtn} onClick={logout} aria-label="Sign out">
+              <button type="button" className={styles.iconBtn} onClick={() => setLeaveOpen(true)} aria-label="Sign out">
                 <LogOut size={20} strokeWidth={2.4} aria-hidden="true" />
               </button>
             </>
@@ -163,6 +165,8 @@ export default function Navbar() {
       </header>
 
       {isPhone && <TabBar />}
+
+      <LogoutConfirm open={leaveOpen} onClose={() => setLeaveOpen(false)} />
     </>
   );
 }
