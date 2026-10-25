@@ -673,19 +673,6 @@ export default function LandingScene({ phone = false }) {
         </motion.g>
       </g>
 
-      {/* name bubbles live in their own top layer so a neighbour never paints over them */}
-      <g pointerEvents="none">
-        {[
-          { id: 'junebug', c: L.junebug, text: 'Junebug' },
-          { id: 'chimken', c: L.chimken, text: 'Chimken' },
-          { id: 'rorry', c: L.rorry, text: pink ? 'yay!' : 'hmph.' },
-          ...DOGS.map((d, i) => ({ id: d.id, c: { x: L.dogs.xs[i], size: L.dogs.sizes[i], y: L.dogs.y - L.dogs.sizes[i] }, text: d.name })),
-          { id: 'skyrie', c: L.skyrie, text: 'boing!' },
-        ].map((b) => (
-          <Bubble key={b.id} cx={bubbleX(b.c)} y={bubbleY(b.c)} text={b.text} show={active === b.id} bounds={L.bounds} />
-        ))}
-      </g>
-
       {/* Motmot */}
       <motion.g
         animate={motmot}
@@ -708,6 +695,22 @@ export default function LandingScene({ phone = false }) {
         <Bubble cx={bubbleX(L.motmot)} y={bubbleY(L.motmot)} text="vroom vroom!" show={active === 'motmot'} bounds={L.bounds} />
       </motion.g>
     </>
+  );
+
+  // Name bubbles are drawn in a second svg layered above the storybook (z-index), so a book or a
+  // neighbouring character can never cover them. It uses the scene's viewBox so they line up.
+  const bubbles = (
+    <g pointerEvents="none">
+          {[
+            { id: 'junebug', c: L.junebug, text: 'Junebug' },
+            { id: 'chimken', c: L.chimken, text: 'Chimken' },
+            { id: 'rorry', c: L.rorry, text: pink ? 'yay!' : 'hmph.' },
+            ...DOGS.map((d, i) => ({ id: d.id, c: { x: L.dogs.xs[i], size: L.dogs.sizes[i], y: L.dogs.y - L.dogs.sizes[i] }, text: d.name })),
+            { id: 'skyrie', c: L.skyrie, text: 'boing!' },
+          ].map((b) => (
+            <Bubble key={b.id} cx={bubbleX(b.c)} y={bubbleY(b.c)} text={b.text} show={active === b.id} bounds={L.bounds} />
+          ))}
+        </g>
   );
 
   const label = 'A cozy little scene: our house with a glowing window, Motmot parked out front, five dogs and four plushies';
@@ -759,11 +762,15 @@ export default function LandingScene({ phone = false }) {
           <Fireflies list={FIREFLIES_PHONE} />
           {characters}
         </svg>
+        <svg className={styles.bubbleLayer} viewBox="0 0 400 800" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+          {bubbles}
+        </svg>
       </>
     );
   }
 
   return (
+    <>
     <svg className={styles.scene} viewBox="0 0 1200 760" preserveAspectRatio="xMidYMax slice" role="group" aria-label={label}>
       <Defs />
 
@@ -851,5 +858,9 @@ export default function LandingScene({ phone = false }) {
         {characters}
       </motion.g>
     </svg>
+    <svg className={styles.bubbleLayer} viewBox="0 0 1200 760" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+      <motion.g style={{ x: frontX }}>{bubbles}</motion.g>
+    </svg>
+    </>
   );
 }

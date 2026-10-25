@@ -8,6 +8,7 @@ export const REACTION_MS = {
   too_sleepy: 1900,
   hugged: 1500,
   walked: 2900,
+  wait: 1500, // cooldown: a gentle head tilt, no stat change
 };
 // With reduced motion nothing moves: a heart or sparkle fades in and the bubble stays ~1.6s.
 export const REDUCED_MS = 1700;
@@ -22,6 +23,7 @@ export function bodyMotion(kind, petId, size) {
         transition: { duration: 0.9, delay: 0.5, ease: 'easeOut' },
       };
     case 'already_full':
+    case 'wait':
       return { animate: { rotate: [0, -6, -6, 0] }, transition: { duration: 1.2, times: [0, 0.25, 0.75, 1], ease: 'easeInOut' } };
     case 'too_sleepy':
       return { animate: { scale: [1, 0.95, 0.95, 1], y: [0, 3 * s, 3 * s, 0] }, transition: { duration: 1.6, times: [0, 0.25, 0.8, 1] } };

@@ -1,0 +1,64 @@
+.stage {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+  background: var(--surface);
+  border: var(--border-width) solid var(--outline);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+  color: var(--ink);
+}
+
+/* room for the speech bubble above the figure and the walk to either side */
+.figure {
+  display: flex;
+  justify-content: center;
+  padding-top: 52px;
+  overflow-x: clip;
+}
+
+.name {
+  margin: 0;
+  text-align: center;
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 1.6rem;
+  line-height: 1.1;
+}
+
+.kind {
+  margin: -8px 0 0;
+  text-align: center;
+  font-size: 0.9rem;
+  color: var(--ink-muted);
+}
+
+.mood {
+  margin: 0;
+  text-align: center;
+  font-family: var(--font-hand);
+  font-size: 1.5rem;
+  line-height: 1.15;
+  color: var(--ink-soft);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+}
+
+.last {
+  margin: 0;
+  text-align: center;
+  font-size: 0.95rem;
+  color: var(--ink-soft);
+}
+
+.counts {
+  margin: -8px 0 0;
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--ink-muted);
+}

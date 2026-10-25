@@ -13,10 +13,10 @@ import styles from './StoryBook.module.css';
 const FIRST_BODY = STORY_PAGES[0].body;
 const FIRST_LINE = `${FIRST_BODY.slice(0, FIRST_BODY.indexOf(', Cj'))}…`;
 
-// Where the book rests (bottom centre), in scene coordinates: on the hill in the middle, between the title and the characters row (LandingScene: 1200x760 wide, 400x800 phone, both "slice", bottom aligned).
+// Where the book rests (bottom centre), in scene coordinates: on the far hill in the middle, clearly above the tallest name bubble (bubble tops: wide y 570, phone y 536) (LandingScene: 1200x760 wide, 400x800 phone, both "slice", bottom aligned).
 const SPOTS = {
-  wide: { w: 1200, h: 760, x: 600, y: 618, book: 150 },
-  phone: { w: 400, h: 800, x: 200, y: 584, book: 110 },
+  wide: { w: 1200, h: 760, x: 600, y: 550, book: 150 },
+  phone: { w: 400, h: 800, x: 200, y: 520, book: 110 },
 };
 const LABEL_H = 48; // the "psst" line and its arrow, upper-left of the book
 

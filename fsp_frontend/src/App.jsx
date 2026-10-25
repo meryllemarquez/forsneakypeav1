@@ -13,6 +13,7 @@ const MemoriesPage = lazy(() => import('./pages/MemoriesPage'));
 const DatesPage = lazy(() => import('./pages/DatesPage'));
 const LoveLettersPage = lazy(() => import('./pages/LoveLettersPage'));
 const WheelPage = lazy(() => import('./pages/WheelPage'));
+const PetsPage = lazy(() => import('./pages/PetsPage'));
 const BouquetMakerPage = lazy(() => import('./pages/BouquetMakerPage'));
 const BouquetGalleryPage = lazy(() => import('./pages/BouquetGalleryPage'));
 const BouquetViewPage = lazy(() => import('./pages/BouquetViewPage'));
@@ -69,6 +70,18 @@ export default function App() {
               <ProtectedRoute>
                 <Suspense fallback={<PageLoader />}>
                   <WheelPage />
+                </Suspense>
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Our little ones (pets): not a tab, reached from the Home widget */}
+          <Route
+            path="/pets"
+            element={
+              <ProtectedRoute allowedRoles={['ROLE_USER']}>
+                <Suspense fallback={<PageLoader />}>
+                  <PetsPage />
                 </Suspense>
               </ProtectedRoute>
             }

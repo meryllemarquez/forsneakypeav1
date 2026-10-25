@@ -2,6 +2,8 @@ package com.forsneakypea.fspbackend.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.time.OffsetDateTime;
 
@@ -25,12 +27,15 @@ public class Pet {
     private String kind;
 
     @Column(name = "fullness_base", nullable = false)
+    @JdbcTypeCode(SqlTypes.SMALLINT) // pets.fullnessBase is smallint
     private int fullnessBase;
 
     @Column(name = "energy_base", nullable = false)
+    @JdbcTypeCode(SqlTypes.SMALLINT) // pets.energyBase is smallint
     private int energyBase;
 
     @Column(name = "joy_base", nullable = false)
+    @JdbcTypeCode(SqlTypes.SMALLINT) // pets.joyBase is smallint
     private int joyBase;
 
     @Column(name = "snapshot_at", nullable = false)
@@ -58,5 +63,6 @@ public class Pet {
     private OffsetDateTime lastActionAt;
 
     @Column(name = "sort_order", nullable = false)
+    @JdbcTypeCode(SqlTypes.SMALLINT) // pets.sortOrder is smallint
     private int sortOrder;
 }

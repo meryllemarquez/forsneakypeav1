@@ -1,0 +1,120 @@
+.card {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 10px 16px;
+  min-height: 88px;
+  padding: 14px 20px;
+  background: var(--surface);
+  border: var(--border-width) solid var(--outline);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+  color: var(--ink);
+  text-decoration: none;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+.card:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 8px 8px 0 var(--shadow-sea, var(--sea));
+}
+
+.card:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-offset);
+}
+
+.text {
+  display: grid;
+  min-width: 0;
+}
+
+.title {
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 1.4rem;
+  line-height: 1.1;
+}
+
+.hand {
+  font-family: var(--font-hand);
+  font-size: 1.4rem;
+  line-height: 1.15;
+  color: var(--ink-muted);
+}
+
+.faces {
+  display: flex;
+  gap: 4px;
+  grid-column: 1 / -1;
+  grid-row: 2;
+}
+
+.face,
+.skel {
+  flex: none;
+  width: 44px;
+  height: 44px;
+}
+
+.skel {
+  border-radius: 50%;
+  background: var(--surface-sunk);
+  border: 2px solid var(--line-soft);
+  animation: petsWidgetPulse 1.4s ease-in-out infinite;
+}
+
+.visit {
+  grid-row: 1;
+  grid-column: 2;
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--tap);
+  padding: 0 16px;
+  font-family: var(--font-heading);
+  font-weight: 800;
+  background: var(--surface);
+  border: var(--border-width) solid var(--outline);
+  border-radius: var(--radius-input);
+  box-shadow: var(--shadow-button);
+}
+
+@keyframes petsWidgetPulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+/* wider cards: faces sit between the text and the button */
+@media (min-width: 640px) {
+  .card {
+    grid-template-columns: 1fr auto auto;
+  }
+
+  .faces {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .visit {
+    grid-column: 3;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card {
+    transition: none;
+  }
+
+  .card:hover {
+    transform: none;
+  }
+
+  .skel {
+    animation: none;
+  }
+}

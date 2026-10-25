@@ -1,0 +1,83 @@
+.list {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* phone: label + word on one line, the bar underneath; wider: three columns on one line */
+.row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 4px 12px;
+}
+
+.label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 0.95rem;
+}
+
+.word {
+  grid-row: 1;
+  grid-column: 2;
+  font-family: var(--font-hand);
+  font-size: 1.25rem;
+  line-height: 1;
+  color: var(--ink-soft);
+}
+
+.track {
+  grid-row: 2;
+  grid-column: 1 / -1;
+  height: 14px;
+  overflow: hidden;
+  background: var(--surface-sunk);
+  border: 2px solid var(--outline);
+  border-radius: var(--radius-pill);
+}
+
+.fill {
+  display: block;
+  height: 100%;
+  border-radius: var(--radius-pill);
+  background: var(--citrus);
+  /* a little ink edge so the bar reads even when two fills sit near the same colour */
+  border-right: 2px solid var(--outline);
+  transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.energy .fill {
+  background: var(--sea);
+}
+
+.joy .fill {
+  background: var(--gelato);
+}
+
+@media (min-width: 560px) {
+  .row {
+    grid-template-columns: 110px 1fr 120px;
+  }
+
+  .word {
+    grid-row: auto;
+    grid-column: 3;
+  }
+
+  .track {
+    grid-row: auto;
+    grid-column: 2;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fill {
+    transition: none;
+  }
+}

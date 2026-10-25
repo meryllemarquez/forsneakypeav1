@@ -14,6 +14,7 @@ import StatusChip from '../components/ui/StatusChip/StatusChip';
 import UsualOrdersCounter from '../components/home/UsualOrdersCounter/UsualOrdersCounter';
 import StoryCoverCard from '../components/story/StoryCoverCard/StoryCoverCard';
 import WheelCard from '../components/home/WheelCard/WheelCard';
+import PetsWidget from '../components/home/PetsWidget/PetsWidget';
 import BouquetsCard from '../components/home/BouquetsCard/BouquetsCard';
 import styles from './HomePage.module.css';
 
@@ -338,6 +339,10 @@ export default function HomePage() {
 
         <section className={styles.section} aria-label="Spin the wheel">
           <WheelCard />
+        </section>
+
+        <section className={styles.section} aria-label="Our little ones">
+          <PetsWidget />
         </section>
 
         <section className={styles.section} aria-label="Bouquets">
