@@ -6,6 +6,7 @@ import {
   emptyRecipe,
   fanPlacement,
   flowerCount,
+  makeCardItem,
   newItemId,
   round1,
   wrapAngle,
@@ -100,7 +101,21 @@ export default function useBouquetEditor(initial = emptyRecipe()) {
       markSaved: () => dispatch({ type: 'saved' }),
       setWrap: (wrap) => change((r) => (r.wrap === wrap ? null : { ...r, wrap })),
       setRibbon: (patch) => change((r) => ({ ...r, ribbon: { ...r.ribbon, ...patch } })),
-      clearAll: () => change((r) => (r.items.length ? { ...r, items: [] } : null), { select: null }),
+      // Clear all keeps the letter card.
+      clearAll: () =>
+        change((r) => (r.items.some((i) => i.type === 'flower') ? { ...r, items: r.items.filter((i) => i.type === 'card') } : null), {
+          select: null,
+        }),
+
+      // Letter text / names. Typing passes a key so one burst of typing is one undo step.
+      setCard: (patch, key) => change((r) => ({ ...r, card: { ...r.card, ...patch } }), { key }),
+      setCardShown: (show) =>
+        change((r) => {
+          const has = r.items.some((i) => i.type === 'card');
+          if (show === has && show === r.card.show) return null;
+          const items = show && !has ? [...r.items, makeCardItem()] : show ? r.items : r.items.filter((i) => i.type !== 'card');
+          return { ...r, items, card: { ...r.card, show } };
+        }, { select: show ? undefined : null }),
 
       // Returns false when the bouquet is full (the page shows the toast).
       addFlower: (name, tint) => {

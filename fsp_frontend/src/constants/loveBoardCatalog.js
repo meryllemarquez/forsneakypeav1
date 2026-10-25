@@ -40,6 +40,11 @@ export const STICKER_GROUPS = [
   { id: 'app', label: 'App', icons: ['house', 'envelope', 'bell', 'heart', 'sparkle'] },
 ];
 
+// A sticker that pins a saved bouquet: `bouquet:<uuid>` (the picture is drawn from the bouquet's recipe).
+export const bouquetStickerValue = (id) => `bouquet:${id}`;
+export const isBouquetSticker = (image) => typeof image === 'string' && image.startsWith('bouquet:');
+export const bouquetStickerId = (image) => (isBouquetSticker(image) ? image.slice('bouquet:'.length) : null);
+
 export const paperValue = (id) => `paper:${id}`;
 export const pinValue = (id) => `pin:${id}`;
 export const tapeValue = (id) => `tape:${id}`;

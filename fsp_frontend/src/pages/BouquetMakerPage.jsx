@@ -16,6 +16,7 @@ import {
 import { useBouquet } from '../queries/queries';
 import { useBouquetMutations } from '../queries/mutations';
 import { useNotification } from '../hooks/useNotification';
+import { useAuth } from '../hooks/useAuth';
 import useBouquetEditor from '../hooks/useBouquetEditor';
 import { LIMITS, clamp, emptyRecipe, normalizeRecipe, round1, wrapAngle } from '../utils/bouquetRecipe';
 import Navbar from '../components/layout/Navbar/Navbar';
@@ -31,15 +32,21 @@ import styles from './BouquetMakerPage.module.css';
 const DEFAULT_TITLE = 'Untitled bouquet';
 const typing = (target) => /^(INPUT|TEXTAREA|SELECT)$/.test(target?.tagName) || target?.isContentEditable;
 
-// Maker for /bouquets/new and /bouquets/:id/edit. The letter card and PNG export come later.
+// Maker for /bouquets/new and /bouquets/:id/edit.
 export default function BouquetMakerPage() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { addToast } = useNotification();
   const { createBouquet, updateBouquet } = useBouquetMutations();
   const { data: loaded, isLoading, isError, refetch } = useBouquet(id);
 
-  const editor = useBouquetEditor(useMemo(emptyRecipe, []));
+  // A new bouquet's card is signed with the signed-in name.
+  const fresh = useMemo(() => {
+    const base = emptyRecipe();
+    return { ...base, card: { ...base.card, from: (user?.name || '').slice(0, 24) } };
+  }, [user?.name]);
+  const editor = useBouquetEditor(fresh);
   const { recipe, selected, selectedId } = editor;
   const [title, setTitle] = useState('');
   const [titleDirty, setTitleDirty] = useState(false);
@@ -52,6 +59,7 @@ export default function BouquetMakerPage() {
   const loadedFor = useRef(null);
   const version = useRef(null);
   const dirty = editor.dirty || titleDirty;
+  const selectedCardId = recipe.items.find((i) => i.type === 'card')?.id;
 
   // Load a saved bouquet into the editor once (later refetches must not wipe unsaved edits).
   useEffect(() => {
@@ -174,7 +182,7 @@ export default function BouquetMakerPage() {
       case 'PageUp': editor.layerItem(item.id, 1, e.shiftKey); break;
       case 'PageDown': editor.layerItem(item.id, -1, e.shiftKey); break;
       case 'Delete':
-      case 'Backspace': editor.removeItem(item.id); break;
+      case 'Backspace': removeItem(item); break;
       case 'd':
       case 'D': duplicate(item.id); break;
       case 'Escape': editor.select(null); break;
@@ -193,10 +201,16 @@ export default function BouquetMakerPage() {
     else addToast("That's a full bouquet, love.", 'info');
   };
 
+  // Deleting the letter card turns "show the card" off (the Card tab can bring it back).
+  function removeItem(item) {
+    if (item.type === 'card') editor.setCardShown(false);
+    else editor.removeItem(item.id);
+  }
+
   function duplicate(itemId) {
     const copy = editor.duplicateItem(itemId);
     if (copy) setJustAddedId(copy);
-    else addToast("That's a full bouquet, love.", 'info');
+    else if (editor.full) addToast("That's a full bouquet, love.", 'info');
   }
 
   const save = async () => {
@@ -204,23 +218,14 @@ export default function BouquetMakerPage() {
     const name = title.trim() || DEFAULT_TITLE;
     setSaving(true);
     try {
-      if (id) {
-        const saved = await updateBouquet(id, { title: name, recipe, version: version.current });
-        version.current = saved.version;
-        setTitle(saved.title);
-      } else {
-        const saved = await createBouquet({ title: name, recipe });
-        version.current = saved.version;
-        loadedFor.current = saved.id;
-        editor.markSaved();
-        setTitleDirty(false);
-        addToast('Saved to our bouquets', 'success');
-        navigate(`/bouquets/${saved.id}/edit`, { replace: true });
-        return;
-      }
+      const saved = id
+        ? await updateBouquet(id, { title: name, recipe, version: version.current })
+        : await createBouquet({ title: name, recipe });
+      version.current = saved.version;
       editor.markSaved();
       setTitleDirty(false);
       addToast('Saved to our bouquets', 'success');
+      navigate(`/bouquets/${saved.id}`);
     } catch (err) {
       const stale = err?.response?.status === 409;
       addToast(
@@ -234,10 +239,10 @@ export default function BouquetMakerPage() {
     }
   };
 
-  const goBack = () => (dirty ? setLeaving(true) : navigate('/home'));
+  const goBack = () => (dirty ? setLeaving(true) : navigate('/bouquets'));
 
-  const interactive = useMemo(
-    () => ({
+  // Rebuilt every render on purpose: the handlers read the latest state.
+  const interactive = {
       svgRef,
       selectedId,
       justAddedId,
@@ -251,11 +256,8 @@ export default function BouquetMakerPage() {
       onItemKeyDown,
       onFocusItem: (item) => editor.select(item.id),
       onHandlePointerDown: (e, item, kind) => begin(e, item, kind),
-      onDelete: (item) => editor.removeItem(item.id),
-    }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [selectedId, justAddedId, editor.recipe]
-  );
+      onDelete: removeItem,
+  };
 
   if (id && isLoading) {
     return (
@@ -315,8 +317,10 @@ export default function BouquetMakerPage() {
                 <IconButton label="Bigger" onClick={() => editor.scaleBy(selected.id, 1.15)}><Plus size={18} /></IconButton>
                 <IconButton label="Bring forward" onClick={(e) => editor.layerItem(selected.id, 1, e.shiftKey)}><ArrowUp size={18} /></IconButton>
                 <IconButton label="Send back" onClick={(e) => editor.layerItem(selected.id, -1, e.shiftKey)}><ArrowDown size={18} /></IconButton>
-                <IconButton label="Duplicate" onClick={() => duplicate(selected.id)}><Copy size={18} /></IconButton>
-                <IconButton label="Delete" onClick={() => editor.removeItem(selected.id)}><Trash2 size={18} /></IconButton>
+                {selected.type === 'flower' && (
+                  <IconButton label="Duplicate" onClick={() => duplicate(selected.id)}><Copy size={18} /></IconButton>
+                )}
+                <IconButton label="Delete" onClick={() => removeItem(selected)}><Trash2 size={18} /></IconButton>
               </div>
             )}
 
@@ -340,6 +344,10 @@ export default function BouquetMakerPage() {
               onWrap={editor.setWrap}
               onRibbon={editor.setRibbon}
               onAddFlower={addFlower}
+              onCard={editor.setCard}
+              onEndTyping={editor.endGesture}
+              onCardShown={editor.setCardShown}
+              onCardPaper={(paper) => selectedCardId && editor.patchItem(selectedCardId, { paper })}
             />
           </aside>
         </div>
@@ -353,7 +361,7 @@ export default function BouquetMakerPage() {
         confirmLabel="Leave"
         cancelLabel="Stay"
         danger
-        onConfirm={() => navigate('/home')}
+        onConfirm={() => navigate('/bouquets')}
         onClose={() => setLeaving(false)}
       />
     </div>

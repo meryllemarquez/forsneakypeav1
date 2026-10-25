@@ -687,7 +687,7 @@ export default function LoveLettersPage() {
 
       <DeleteAllDialog
         open={deleteAllOpen}
-        what="letters and stickers"
+        what="letters and stickers (your saved bouquets stay in the gallery)"
         busy={deleteAllBusy}
         error={deleteAllError}
         onConfirm={handleDeleteAll}

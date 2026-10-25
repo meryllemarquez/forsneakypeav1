@@ -187,6 +187,12 @@ public class LoveBoardService {
 
     @Transactional
     public LoveStickerDTO createSticker(LoveStickerRequestDTO.CreateSticker request, Long userId) {
+        String image = request.getImage();
+        // A pinned bouquet is "bouquet:<uuid>"; anything else with that prefix is rejected.
+        if (image != null && image.startsWith("bouquet:")
+                && !image.matches("bouquet:[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}")) {
+            throw new BadRequestException("That bouquet sticker is not valid.");
+        }
         LoveSticker sticker = LoveSticker.builder()
                 .image(request.getImage())
                 .positionX(request.getPositionX() != null ? request.getPositionX() : 0.0)

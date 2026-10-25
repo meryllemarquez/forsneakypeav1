@@ -47,11 +47,60 @@ export const FLOWERS = [
 
 export const FLOWER_BY_NAME = Object.fromEntries(FLOWERS.map((f) => [f.name, f]));
 
+// The letter card: a draggable 120 x 150 item tucked bottom-right, plus the text in `recipe.card`.
+export const CARD_SIZE = { w: 120, h: 150 };
+export const LETTER_MAX = 240;
+export const NAME_MAX = 24;
+export const CARD_PAPERS = [
+  { id: 'gelato', label: 'Gelato', fill: '#FFF0B3' },
+  { id: 'sea', label: 'Sea', fill: '#CDE7FF' },
+  { id: 'citrus', label: 'Citrus', fill: '#FFD8A0' },
+  { id: 'lined', label: 'Lined', fill: '#FFFFFF' },
+];
+export const PAPER_FILL = Object.fromEntries(CARD_PAPERS.map((p) => [p.id, p.fill]));
+export const makeCardItem = (paper = 'gelato') => ({ id: 'card', type: 'card', x: 300, y: 390, r: 8, s: 1, paper });
+export const findCard = (recipe) => recipe.items.find((item) => item.type === 'card') || null;
+
+// Greedy word wrap (long words are cut), at most `maxLines` lines; the last line gets an ellipsis if cut.
+export function wrapLines(text, maxChars, maxLines = Infinity) {
+  const lines = [];
+  let line = '';
+  const push = () => {
+    lines.push(line);
+    line = '';
+  };
+  String(text || '')
+    .split(/\s+/)
+    .filter(Boolean)
+    .forEach((rawWord) => {
+      let word = rawWord;
+      while (word.length > maxChars) {
+        if (line) push();
+        line = word.slice(0, maxChars);
+        word = word.slice(maxChars);
+        push();
+      }
+      if (!line) line = word;
+      else if (line.length + 1 + word.length <= maxChars) line += ` ${word}`;
+      else {
+        push();
+        line = word;
+      }
+    });
+  if (line) push();
+  if (lines.length > maxLines) {
+    const kept = lines.slice(0, maxLines);
+    kept[maxLines - 1] = `${kept[maxLines - 1].slice(0, Math.max(0, maxChars - 1))}…`;
+    return kept;
+  }
+  return lines;
+}
+
 export const emptyRecipe = () => ({
   v: 1,
   wrap: 'kraft',
   ribbon: { style: 'bow', color: 'sea' },
-  items: [],
+  items: [makeCardItem()],
   card: { show: true, to: '', from: '', text: '' },
 });
 
@@ -88,8 +137,20 @@ export function normalizeRecipe(raw) {
         flip: Boolean(item.flip),
       };
     });
-  // The letter card is not editable yet; keep whatever was saved so editing never loses it.
-  const cardItems = (Array.isArray(raw.items) ? raw.items : []).filter((item) => item && item.type === 'card');
+  const showCard = raw.card?.show !== false;
+  const savedCard = (Array.isArray(raw.items) ? raw.items : []).find((item) => item && item.type === 'card');
+  const cardItems =
+    showCard && savedCard
+      ? [
+          {
+            ...makeCardItem(PAPER_FILL[savedCard.paper] ? savedCard.paper : 'gelato'),
+            x: clamp(Number(savedCard.x) || 300, 0, CANVAS.w),
+            y: clamp(Number(savedCard.y) || 390, 0, CANVAS.h),
+            r: clamp(Number(savedCard.r) || 0, -180, 180),
+            s: clamp(Number(savedCard.s) || 1, LIMITS.minScale, LIMITS.maxScale),
+          },
+        ]
+      : [];
   return {
     ...base,
     wrap: typeof raw.wrap === 'string' ? raw.wrap : base.wrap,
@@ -97,8 +158,8 @@ export function normalizeRecipe(raw) {
       style: raw.ribbon?.style || base.ribbon.style,
       color: raw.ribbon?.color || base.ribbon.color,
     },
-    items: [...items, ...cardItems.slice(0, 1)],
-    card: { ...base.card, ...(raw.card && typeof raw.card === 'object' ? raw.card : {}) },
+    items: [...items, ...cardItems],
+    card: { ...base.card, ...(raw.card && typeof raw.card === 'object' ? raw.card : {}), show: showCard && cardItems.length > 0 },
   };
 }
 

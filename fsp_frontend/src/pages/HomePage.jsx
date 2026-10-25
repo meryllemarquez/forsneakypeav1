@@ -12,6 +12,7 @@ import Footer from '../components/layout/Footer/Footer';
 import StatusChip from '../components/ui/StatusChip/StatusChip';
 import UsualOrdersCounter from '../components/home/UsualOrdersCounter/UsualOrdersCounter';
 import WheelCard from '../components/home/WheelCard/WheelCard';
+import BouquetsCard from '../components/home/BouquetsCard/BouquetsCard';
 import styles from './HomePage.module.css';
 
 const ArrowRight = () => (
@@ -289,6 +290,10 @@ export default function HomePage() {
 
         <section className={styles.section} aria-label="Spin the wheel">
           <WheelCard />
+        </section>
+
+        <section className={styles.section} aria-label="Bouquets">
+          <BouquetsCard />
         </section>
 
         {/* OUR USUAL ORDERS (gingham band) */}

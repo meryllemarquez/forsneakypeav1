@@ -3,7 +3,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Lock, Unlock, Copy, Trash2, BringToFront, SendToBack, RotateCw } from 'lucide-react';
 import Icon from '../../Icon';
 import { useCanvasDrag } from '../../../hooks/useCanvasDrag';
-import { resolveStickerIcon } from '../../../constants/loveBoardCatalog';
+import { bouquetStickerId, isBouquetSticker, resolveStickerIcon } from '../../../constants/loveBoardCatalog';
+import { useBouquets } from '../../../queries/queries';
+import { normalizeRecipe } from '../../../utils/bouquetRecipe';
+import BouquetCanvas from '../../bouquet/BouquetCanvas/BouquetCanvas';
 
 const MIN_SCALE = 0.35;
 const MAX_SCALE = 3;
@@ -164,7 +167,11 @@ export default function Sticker({
       <div className="relative h-full w-full">
         {/* The doodle fills ~80% of the box, like the old patches did, so saved sizes keep their footprint. */}
         <div data-theme="light" className="pointer-events-none flex h-full w-full items-center justify-center">
-          <Icon name={resolveStickerIcon(sticker.image)} size={Math.round(renderedSize * 0.8)} sticker />
+          {isBouquetSticker(sticker.image) ? (
+            <BouquetStickerArt id={bouquetStickerId(sticker.image)} size={Math.round(renderedSize * 0.9)} />
+          ) : (
+            <Icon name={resolveStickerIcon(sticker.image)} size={Math.round(renderedSize * 0.8)} sticker />
+          )}
         </div>
         {sticker.isLocked && (
           <span
@@ -271,6 +278,19 @@ export default function Sticker({
         </button>
       )}
     </motion.div>
+  );
+}
+
+// A pinned bouquet: the same SVG as the gallery, read from the cached bouquet list. A bouquet that
+// was deleted (or is still loading) shows the tulip doodle instead.
+function BouquetStickerArt({ id, size }) {
+  const { data: bouquets } = useBouquets();
+  const bouquet = bouquets?.find((b) => b.id === id);
+  if (!bouquet) return <Icon name="tulip" size={size} sticker />;
+  return (
+    <div style={{ width: size * 0.8, height: size }}>
+      <BouquetCanvas recipe={normalizeRecipe(bouquet.recipe)} bare />
+    </div>
   );
 }
 

@@ -19,6 +19,34 @@
   gap: 14px;
 }
 
+.toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: var(--tap, 44px);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.toggle input {
+  width: 22px;
+  height: 22px;
+  accent-color: var(--amalfi);
+}
+
+/* The letter preview uses the handwritten face, the rest of the form stays Nunito. */
+.letter {
+  font-family: var(--font-hand);
+  font-size: 1.25rem;
+  resize: vertical;
+}
+
+.names {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
 .wraps {
   flex-wrap: wrap;
 }

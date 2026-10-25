@@ -14,6 +14,8 @@ const DatesPage = lazy(() => import('./pages/DatesPage'));
 const LoveLettersPage = lazy(() => import('./pages/LoveLettersPage'));
 const WheelPage = lazy(() => import('./pages/WheelPage'));
 const BouquetMakerPage = lazy(() => import('./pages/BouquetMakerPage'));
+const BouquetGalleryPage = lazy(() => import('./pages/BouquetGalleryPage'));
+const BouquetViewPage = lazy(() => import('./pages/BouquetViewPage'));
 
 // Dev-only icon kit preview. `import.meta.env.DEV` is replaced with `false` in production builds,
 // so the dynamic import (and the page) is dropped from the bundle.
@@ -72,15 +74,20 @@ export default function App() {
             }
           />
 
-          {/* Bouquet maker (gallery and view screens come later) */}
-          {['/bouquets/new', '/bouquets/:id/edit'].map((path) => (
+          {/* Bouquets: gallery, view, maker (reached from a Home card, not the nav) */}
+          {[
+            ['/bouquets', BouquetGalleryPage],
+            ['/bouquets/new', BouquetMakerPage],
+            ['/bouquets/:id', BouquetViewPage],
+            ['/bouquets/:id/edit', BouquetMakerPage],
+          ].map(([path, Page]) => (
             <Route
               key={path}
               path={path}
               element={
                 <ProtectedRoute allowedRoles={['ROLE_USER']}>
                   <Suspense fallback={<PageLoader />}>
-                    <BouquetMakerPage />
+                    <Page />
                   </Suspense>
                 </ProtectedRoute>
               }

@@ -13,6 +13,26 @@
   overflow: hidden;
 }
 
+/* Love Board stickers: just the artwork, with a soft cut-out shadow. */
+.bare {
+  aspect-ratio: auto;
+  background: none;
+  border: 0;
+  border-radius: 0;
+  overflow: visible;
+  filter: drop-shadow(2px 3px 3px rgb(23 43 112 / 0.28));
+}
+
+.readable {
+  cursor: pointer;
+  outline: none;
+}
+
+.readable:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-offset, 2px);
+}
+
 /* Touch gestures belong to the canvas only; the rest of the page still scrolls. */
 .interactive {
   touch-action: none;

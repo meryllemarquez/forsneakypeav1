@@ -1,0 +1,102 @@
+.page {
+  min-height: 100vh;
+  background-color: var(--paper);
+  background-image: radial-gradient(circle, var(--pattern-dot) 1.4px, transparent 2px);
+  background-size: 24px 24px;
+  color: var(--ink);
+  font-family: var(--font-body);
+}
+
+.main {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 16px 16px 48px;
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.titles {
+  min-width: 0;
+}
+
+.title {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 1.5rem;
+  line-height: 1.1;
+  overflow-wrap: anywhere;
+}
+
+.by {
+  margin: 2px 0 0;
+  font-family: var(--font-hand);
+  font-size: 1.25rem;
+  color: var(--ink-muted);
+}
+
+.stage {
+  width: min(100%, 520px);
+  margin: 0 auto;
+}
+
+.tip {
+  margin: 8px 0 0;
+  text-align: center;
+  font-family: var(--font-hand);
+  font-size: 1.2rem;
+  color: var(--ink-muted);
+}
+
+/* One tomato button (Pin), the rest stay quiet */
+.actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.actions > :first-child {
+  grid-column: 1 / -1;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.hand {
+  margin: 16px 0 0;
+  font-family: var(--font-hand);
+  font-size: 1.4rem;
+  text-align: center;
+  color: var(--ink-soft);
+}
+
+.hand a {
+  color: var(--amalfi);
+  font-weight: 700;
+}
+
+.letter {
+  margin: 0;
+  font-family: var(--font-hand);
+  font-size: 1.6rem;
+  line-height: 1.25;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.from {
+  margin: 12px 0 0;
+  text-align: right;
+  font-family: var(--font-hand);
+  font-size: 1.4rem;
+  color: var(--ink-muted);
+}
