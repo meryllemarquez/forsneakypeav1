@@ -5,6 +5,7 @@ import { dateService } from '../services/dateService';
 import { checklistService } from '../services/checklistService';
 import { loveBoardService } from '../services/loveBoardService';
 import { profileService } from '../services/profileService';
+import { menuService } from '../services/menuService';
 import { keyFamilies, queryKeys } from './queryKeys';
 
 /*
@@ -36,6 +37,10 @@ import { keyFamilies, queryKeys } from './queryKeys';
  *                                             love-notes if the request fails
  * love:   create/update/deleteSticker         nothing on success (page updates the cache);
  *                                             updateSticker resyncs love-stickers on failure
+ * menu:   createItem / updateItem             menu-items
+ * menu:   deleteItem                          menu-items (row removed optimistically)
+ * menu:   reorderItems                        nothing on success (cache set to the saved
+ *                                             order); reverts + refetches on failure
  * profile: updateProfile / updateAvatar /     profile (cache set to the saved profile)
  *   removeAvatar
  * notifications: see useNotifications.js     notifications (optimistic, resync when settled)
@@ -133,6 +138,44 @@ export function useLoveBoardMutations() {
           invalidate(queryClient, keyFamilies.loveStickers),
           invalidate(queryClient, keyFamilies.home),
         ]),
+    }),
+  };
+}
+
+export function useMenuMutations() {
+  const queryClient = useQueryClient();
+  const key = queryKeys.menuItems();
+  const refreshMenu = () => invalidate(queryClient, keyFamilies.menuItems);
+  const setItems = (updater) => queryClient.setQueryData(key, updater);
+
+  return {
+    createItem: useAction(menuService.createItem, { onSuccess: refreshMenu }),
+    updateItem: useAction(menuService.updateItem, { onSuccess: refreshMenu }),
+    deleteItem: useAction(menuService.deleteItem, {
+      // Drop the row right away; a failed delete resyncs from the server.
+      onMutate: async ([id]) => {
+        await queryClient.cancelQueries({ queryKey: key });
+        setItems((prev) => (prev || []).filter((item) => item.id !== id));
+      },
+      onError: refreshMenu,
+      onSuccess: refreshMenu,
+    }),
+    reorderItems: useAction(menuService.reorderItems, {
+      // Optimistic: show the new order immediately, revert to the previous list on failure.
+      onMutate: async ([ids]) => {
+        await queryClient.cancelQueries({ queryKey: key });
+        const previous = queryClient.getQueryData(key);
+        setItems((prev) => {
+          const byId = new Map((prev || []).map((item) => [item.id, item]));
+          return ids.map((id) => byId.get(id)).filter(Boolean);
+        });
+        return { previous };
+      },
+      onError: (_err, _args, context) => {
+        if (context?.previous) setItems(context.previous);
+        return refreshMenu();
+      },
+      onSuccess: (saved) => setItems(saved),
     }),
   };
 }

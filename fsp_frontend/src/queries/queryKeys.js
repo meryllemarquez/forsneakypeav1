@@ -7,6 +7,7 @@ export const queryKeys = {
   dateCategories: () => ['date-categories'],
   loveNotes: () => ['love-notes'],
   loveStickers: () => ['love-stickers'],
+  menuItems: () => ['menu-items'],
   notifications: () => ['notifications'],
   profile: () => ['profile'],
   homeSummary: (today) => ['home', 'summary', today],
@@ -20,6 +21,7 @@ export const keyFamilies = {
   home: ['home'],
   loveNotes: ['love-notes'],
   loveStickers: ['love-stickers'],
+  menuItems: ['menu-items'],
   notifications: ['notifications'],
   profile: ['profile'],
 };

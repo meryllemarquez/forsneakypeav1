@@ -552,6 +552,101 @@ export const GLYPHS = {
       <path d="M47 28 L48.3 31 L51.5 31.3 L49 33.4 L49.8 36.5 L47 34.8 L44.2 36.5 L45 33.4 L42.5 31.3 L45.7 31 Z" fill="#FF9F1C" strokeWidth="1.6" />
     </>
   ),
+  burger: (
+    <>
+      <path d="M12 32 C12 17 56 17 56 32 Z" fill="#FFC76B" stroke="none" />
+      <path d="M10 30 C10 15 54 15 54 30 Z" fill="#FFC76B" />
+      <path d="M23 23 l3 -1 M31 20 l3 0 M39 24 l3 1" strokeWidth="2" />
+      <path d="M8 33 Q14 38 20 33 T32 33 T44 33 T56 33 V36 H8 Z" fill="#5E9B4E" />
+      <rect x="9" y="37" width="46" height="7" rx="3.5" fill="#8A4B2A" />
+      <path d="M14 44 L22 50 L30 44 Z" fill="#FFE680" />
+      <path d="M10 46 H54 Q54 54 46 54 H18 Q10 54 10 46 Z" fill="#FFC76B" />
+      <path d="M20 23 l2 -2" stroke="#FFFFFF" strokeWidth="2" />
+    </>
+  ),
+  ramen: (
+    <>
+      <path d="M44 6 L30 27 M50 8 L36 28" />
+      <path d="M20 31 Q24 22 28 31 M30 31 Q34 20 38 31 M40 31 Q44 23 48 31" />
+      <path d="M10 33 H58 C58 47 48 56 34 56 C20 56 10 47 10 33 Z" fill="#5CB3FF" stroke="none" />
+      <path d="M8 31 H56 C56 46 46 55 32 55 C18 55 8 46 8 31 Z" fill="#FFFFFF" />
+      <path d="M10 31 C20 36 44 36 54 31" fill="#FF9F1C" />
+      <path d="M36 28 a6 6 0 0 1 12 0" fill="#FFE680" />
+      <circle cx="42" cy="28" r="2" fill="#FF9F1C" stroke="none" />
+      <path d="M16 44 c3 3 7 3 10 0" stroke="#1F55C9" strokeWidth="2" />
+    </>
+  ),
+  milkTea: (
+    <>
+      <path d="M38 4 L41 22" strokeWidth="7" />
+      <path d="M38 4 L41 22" stroke="#E0301A" strokeWidth="3.4" />
+      <path d="M18 22 L22 57 H46 L50 22 Z" fill="#5CB3FF" stroke="none" />
+      <path d="M16 20 L20 56 H44 L48 20 Z" fill="#CDE7FF" />
+      <path d="M18 32 L20 56 H44 L46 32 Z" fill="#C99A6B" />
+      <path d="M14 20 C14 10 50 10 50 20 Z" fill="#FFFFFF" />
+      <circle cx="26" cy="51" r="2.4" fill="currentColor" stroke="none" />
+      <circle cx="33" cy="52" r="2.4" fill="currentColor" stroke="none" />
+      <circle cx="39" cy="50" r="2.4" fill="currentColor" stroke="none" />
+      <circle cx="30" cy="46" r="2.4" fill="currentColor" stroke="none" />
+      <path d="M21 16 C23 14 26 13 29 13" stroke="#FFFFFF" strokeWidth="2" />
+    </>
+  ),
+  iceCream: (
+    <>
+      <path d="M20 31 L32 59 L44 31 Z" fill="#FFC76B" />
+      <path d="M24 38 L38 38 M27 45 L37 45 M24 33 L35 55 M40 33 L29 55" strokeWidth="1.8" />
+      <path d="M14 32 C12 16 52 16 50 32 C46 36 44 31 40 34 C36 37 34 32 32 34 C28 37 24 32 22 34 C18 36 16 33 14 32 Z" fill="#FF8FB1" />
+      <path d="M22 20 C22 10 42 10 42 20 Z" fill="#FFFFFF" />
+      <circle cx="32" cy="7" r="3.5" fill="#E0301A" />
+      <path d="M32 3.5 C33 1 35 1 36 2" />
+      <path d="M21 26 c1 -3 3 -4 5 -4" stroke="#FFFFFF" strokeWidth="2" />
+    </>
+  ),
+  cake: (
+    <>
+      <ellipse cx="32" cy="55" rx="26" ry="5" fill="#CDE7FF" />
+      <path d="M10 36 H54 V52 C54 54 10 54 10 52 Z" fill="#FFE680" />
+      <path d="M10 43 C16 47 20 41 26 45 C32 49 38 41 44 45 C48 47 52 44 54 43" fill="#FFFFFF" />
+      <path d="M10 36 C14 28 20 32 24 28 C30 32 36 28 40 32 C46 28 50 32 54 36 Z" fill="#FF8FB1" />
+      <rect x="29" y="17" width="6" height="11" rx="1.5" fill="#5CB3FF" />
+      <path d="M32 7 C36 11 35 14 32 14 C29 14 28 11 32 7 Z" fill="#FF9F1C" />
+      <path d="M17 33 l3 -1" stroke="#FFFFFF" strokeWidth="2" />
+    </>
+  ),
+  sushi: (
+    <>
+      <path d="M12 44 C12 34 56 34 56 44 C56 54 12 54 12 44 Z" fill="#5CB3FF" stroke="none" />
+      <path d="M10 41 C10 31 54 31 54 41 C54 51 10 51 10 41 Z" fill="#FFFFFF" />
+      <path d="M12 37 C20 25 44 25 52 37 C44 35 20 35 12 37 Z" fill="#FF9F1C" />
+      <path d="M22 30 L25 34 M31 28 L33 34 M40 30 L42 34" stroke="#FFFFFF" strokeWidth="2" />
+      <rect x="28" y="28" width="8" height="22" rx="1.5" fill="#1F55C9" />
+      <circle cx="17" cy="43" r="1" fill="currentColor" stroke="none" />
+      <circle cx="46" cy="45" r="1" fill="currentColor" stroke="none" />
+      <circle cx="22" cy="47" r="1" fill="currentColor" stroke="none" />
+    </>
+  ),
+  coffee: (
+    <>
+      <path d="M22 18 C18 12 26 10 22 4 M32 18 C28 12 36 10 32 4" />
+      <path d="M14 26 H46 V46 C46 54 40 58 30 58 C20 58 14 54 14 46 Z" fill="#5CB3FF" stroke="none" />
+      <path d="M12 24 H44 V44 C44 52 38 56 28 56 C18 56 12 52 12 44 Z" fill="#FFFFFF" />
+      <path d="M44 28 C54 28 54 42 44 42" />
+      <ellipse cx="28" cy="24" rx="16" ry="3.5" fill="#8A4B2A" />
+      <path d="M28 26 C25 24 25 22 26.5 22 C27.5 22 28 23 28 23 C28 23 28.5 22 29.5 22 C31 22 31 24 28 26 Z" fill="#FFE680" stroke="none" />
+      <path d="M8 60 H50" />
+    </>
+  ),
+  siomai: (
+    <>
+      <ellipse cx="32" cy="50" rx="26" ry="8" fill="#C99A6B" />
+      <path d="M12 49 C20 54 44 54 52 49" strokeWidth="1.8" />
+      <path d="M26 54 V57 M38 54 V57" strokeWidth="1.8" />
+      <path d="M32 40 C32 30 40 27 44 30 C48 27 54 31 54 40 Z" fill="#FFE680" />
+      <path d="M12 46 C12 32 24 28 30 32 C36 28 48 32 48 46 Z" fill="#FFE680" />
+      <path d="M20 35 L21 42 M26 33 L26 42 M32 34 L31 42 M38 33 L37 42" strokeWidth="1.8" />
+      <circle cx="30" cy="31" r="2.6" fill="#FF9F1C" />
+    </>
+  ),
 };
 
 export const ICON_NAMES = Object.keys(GLYPHS);

@@ -57,6 +57,14 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.error(ex.getMessage()));
     }
 
+    @ExceptionHandler({ConflictException.class, org.springframework.orm.ObjectOptimisticLockingFailureException.class})
+    public ResponseEntity<ApiResponse<Object>> handleConflict(RuntimeException ex) {
+        String message = ex instanceof ConflictException
+                ? ex.getMessage()
+                : "This was just changed by someone else.";
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ApiResponse.error(message));
+    }
+
     @ExceptionHandler(CalendarConflictException.class)
     public ResponseEntity<ApiResponse<CalendarConflictDTO>> handleCalendarConflict(CalendarConflictException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT)

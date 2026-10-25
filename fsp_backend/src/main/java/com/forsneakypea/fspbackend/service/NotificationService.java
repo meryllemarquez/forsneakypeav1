@@ -104,6 +104,8 @@ public class NotificationService {
             case DATE_UPDATED -> new String[]{"Date Plan Updated", actor + " updated a date plan" + quoted + "."};
             case DATE_COMPLETED -> new String[]{"Date Completed", actor + " marked a date as completed" + quoted + "."};
             case PROFILE_CHANGED -> new String[]{"Profile Updated", actor + " updated their profile."};
+            // SYSTEM carries a ready-made phrase ("added ramen to our usual orders").
+            case SYSTEM -> new String[]{"Our usual orders", actor + " " + (label == null ? "made an update" : label.trim()) + "."};
             default -> new String[]{"Update", actor + " made an update."};
         };
     }

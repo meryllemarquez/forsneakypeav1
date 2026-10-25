@@ -3,6 +3,7 @@ import { useCallback } from 'react';
 import { memoryService } from '../services/memoryService';
 import { dateService } from '../services/dateService';
 import { loveBoardService } from '../services/loveBoardService';
+import { menuService } from '../services/menuService';
 import { notificationService } from '../services/notificationService';
 import { profileService } from '../services/profileService';
 import { homeService } from '../services/homeService';
@@ -66,6 +67,15 @@ export function useLoveStickers() {
     queryFn: async () => (await loveBoardService.getStickers()) || [],
     staleTime: 45 * SECOND,
     refetchOnWindowFocus: false,
+  });
+}
+
+// ---- Menu (Our usual orders) ----------------------------------------------------------
+export function useMenuItems() {
+  return useQuery({
+    queryKey: queryKeys.menuItems(),
+    queryFn: async () => (await menuService.getItems()) || [],
+    staleTime: 30 * SECOND,
   });
 }
 
