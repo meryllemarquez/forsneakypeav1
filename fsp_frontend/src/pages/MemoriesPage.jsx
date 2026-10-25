@@ -18,6 +18,10 @@ import { memoryService } from '../services/memoryService';
 import { useFolders } from '../queries/queries';
 import { useMemoryMutations } from '../queries/mutations';
 import { uploadImageToDrive } from '../api/driveUpload';
+import Tabs, { panelId, tabId } from '../components/ui/Tabs/Tabs';
+import RadioGroup, { ColorSwatchGroup } from '../components/ui/RadioGroup/RadioGroup';
+import Field from '../components/ui/Field/Field';
+import { DatePicker } from '../components/ui/DatePicker/DatePicker';
 import { useNotification } from '../hooks/useNotification';
 import { useScrollLock } from '../hooks/useScrollLock';
 import { albumCoverUrl, buildIconStyle, parseIconStyle, resolveAlbumIcon } from '../utils/doodleFor';
@@ -59,6 +63,7 @@ const LEGACY_ACCENTS = {
 const displayAccent = (hex) => LEGACY_ACCENTS[(hex || '').toUpperCase()] || hex || DEFAULT_ACCENT;
 
 // Cover tiles for albums with no cover photo cycle through these soft fills.
+const AUTO_DOODLE = '__auto';
 const COVER_TINTS = ['var(--sea)', 'var(--gelato)', 'var(--citrus-cover)', 'var(--sea-tint)'];
 
 // Doodles offered in the album form (people stay out of the list).
@@ -639,28 +644,17 @@ export default function MemoriesPage() {
         </div>
 
         {/* VIEW SWITCHER */}
-        <div className={styles.tabs} role="tablist" aria-label="View">
-          <button
-            type="button"
-            role="tab"
-            aria-selected={viewMode === 'albums'}
-            className={`${styles.tab} ${viewMode === 'albums' ? styles.tabActive : ''}`}
-            onClick={() => setViewMode('albums')}
-          >
-            <Icon name="film" size={26} />
-            Albums
-          </button>
-          <button
-            type="button"
-            role="tab"
-            aria-selected={viewMode === 'calendar'}
-            className={`${styles.tab} ${viewMode === 'calendar' ? styles.tabActive : ''}`}
-            onClick={() => setViewMode('calendar')}
-          >
-            <Icon name="sparkle" size={26} />
-            Calendar dump
-          </button>
-        </div>
+        <Tabs
+          label="View"
+          idPrefix="memories"
+          className={styles.tabsSpacing}
+          value={viewMode}
+          onChange={setViewMode}
+          tabs={[
+            { id: 'albums', label: 'Albums', icon: <Icon name="film" size={26} /> },
+            { id: 'calendar', label: 'Calendar dump', icon: <Icon name="sparkle" size={26} /> },
+          ]}
+        />
 
         {(errorMessage || loadError) && (
           <div className={styles.errorBanner} role="alert">
@@ -669,6 +663,7 @@ export default function MemoriesPage() {
           </div>
         )}
 
+        <div role="tabpanel" id={panelId('memories', viewMode)} aria-labelledby={tabId('memories', viewMode)}>
         {/* VIEW: CALENDAR DUMP */}
         {viewMode === 'calendar' && <CalendarView onOpenAlbum={handleOpenAlbumFromCalendar} />}
 
@@ -869,6 +864,7 @@ export default function MemoriesPage() {
             </Button>
           </div>
         )}
+        </div>
       </main>
 
       <DeleteAllDialog
@@ -911,32 +907,27 @@ export default function MemoriesPage() {
           <fieldset className={styles.fieldset}>
             <legend className={form.label}>Album doodle</legend>
             <p className={form.hint}>Shown when the album has no cover photo. Automatic picks one from the album name.</p>
-            <div className={styles.doodleGrid} role="radiogroup" aria-label="Album doodle">
-              <button
-                type="button"
-                role="radio"
-                aria-checked={!pickedDoodle}
-                className={`${styles.doodleOption} ${styles.doodleAuto} ${!pickedDoodle ? styles.doodleActive : ''}`}
-                onClick={() => setLook({ doodle: null })}
-              >
-                <Icon name={resolveAlbumIcon({ name: folderForm.name })} size={30} />
-                Automatic
-              </button>
-              {PICKABLE_DOODLES.map((name) => (
-                <button
-                  key={name}
-                  type="button"
-                  role="radio"
-                  aria-checked={pickedDoodle === name}
-                  aria-label={name}
-                  title={name}
-                  className={`${styles.doodleOption} ${pickedDoodle === name ? styles.doodleActive : ''}`}
-                  onClick={() => setLook({ doodle: name })}
-                >
-                  <Icon name={name} size={32} />
-                </button>
-              ))}
-            </div>
+            <RadioGroup
+              label="Album doodle"
+              className={styles.doodleGrid}
+              optionClassName={styles.doodleOption}
+              value={pickedDoodle || AUTO_DOODLE}
+              onChange={(v) => setLook({ doodle: v === AUTO_DOODLE ? null : v })}
+              options={[
+                {
+                  value: AUTO_DOODLE,
+                  label: 'Automatic',
+                  className: styles.doodleAuto,
+                  content: (
+                    <>
+                      <Icon name={resolveAlbumIcon({ name: folderForm.name })} size={30} />
+                      Automatic
+                    </>
+                  ),
+                },
+                ...PICKABLE_DOODLES.map((name) => ({ value: name, label: name, content: <Icon name={name} size={32} /> })),
+              ]}
+            />
           </fieldset>
 
           <div className={form.switchRow}>
@@ -965,64 +956,48 @@ export default function MemoriesPage() {
                   {editingFolder ? 'This album has no photos yet.' : 'Add photos after creating the album.'} The first photo you add becomes the cover.
                 </p>
               ) : (
-                <div className={styles.coverGrid} role="radiogroup" aria-label="Cover photo">
-                  {coverChoices.map((photo, index) => {
-                    // Drive photos are picked by file id; legacy photos by their (permanent) URL.
-                    const isCover = photo.driveFileId
-                      ? folderForm.coverDriveFileId === photo.driveFileId
-                      : !folderForm.coverDriveFileId && folderForm.coverImageUrl === photo.photoUrl;
-                    return (
-                      <button
-                        key={photo.id}
-                        type="button"
-                        role="radio"
-                        aria-checked={isCover}
-                        aria-label={`Photo ${index + 1}${photo.caption ? `: ${photo.caption}` : ''}`}
-                        className={`${styles.coverOption} ${isCover ? styles.coverOptionActive : ''}`}
-                        onClick={() => setFolderForm((f) => ({
-                          ...f,
-                          coverDriveFileId: photo.driveFileId || '',
-                          coverImageUrl: photo.driveFileId ? '' : photo.photoUrl,
-                        }))}
-                      >
-                        <img src={photo.thumbUrl || photo.photoUrl} alt="" loading="lazy" />
-                      </button>
-                    );
-                  })}
-                </div>
+                <RadioGroup
+                  label="Cover photo"
+                  className={styles.coverGrid}
+                  optionClassName={styles.coverOption}
+                  // Drive photos are picked by file id; legacy photos by their (permanent) URL.
+                  value={folderForm.coverDriveFileId ? `d:${folderForm.coverDriveFileId}` : `u:${folderForm.coverImageUrl}`}
+                  onChange={(key) => {
+                    const photo = coverChoices.find((p) => (p.driveFileId ? `d:${p.driveFileId}` : `u:${p.photoUrl}`) === key);
+                    if (!photo) return;
+                    setFolderForm((f) => ({
+                      ...f,
+                      coverDriveFileId: photo.driveFileId || '',
+                      coverImageUrl: photo.driveFileId ? '' : photo.photoUrl,
+                    }));
+                  }}
+                  options={coverChoices.map((photo, index) => ({
+                    value: photo.driveFileId ? `d:${photo.driveFileId}` : `u:${photo.photoUrl}`,
+                    label: `Photo ${index + 1}${photo.caption ? `: ${photo.caption}` : ''}`,
+                    content: <img src={photo.thumbUrl || photo.photoUrl} alt="" loading="lazy" />,
+                  }))}
+                />
               )}
             </fieldset>
           )}
 
           <fieldset className={styles.fieldset}>
             <legend className={form.label}>Accent color</legend>
-            <div className={styles.palette} role="radiogroup" aria-label="Accent color">
-              {PALETTE_ACCENTS.map((item) => (
-                <button
-                  key={item.value}
-                  type="button"
-                  role="radio"
-                  aria-checked={folderForm.accentColor === item.value}
-                  aria-label={item.name}
-                  title={item.name}
-                  className={`${styles.swatch} ${folderForm.accentColor === item.value ? styles.swatchActive : ''}`}
-                  style={{ backgroundColor: item.value }}
-                  onClick={() => setFolderForm({ ...folderForm, accentColor: item.value })}
-                />
-              ))}
-            </div>
+            <ColorSwatchGroup
+              label="Accent color"
+              value={folderForm.accentColor}
+              onChange={(accentColor) => setFolderForm({ ...folderForm, accentColor })}
+              colors={PALETTE_ACCENTS}
+            />
           </fieldset>
 
-          <div className={form.field}>
-            <label className={form.label} htmlFor="album-date">Date happened</label>
-            <input
+          <Field label="Date happened" htmlFor="album-date">
+            <DatePicker
               id="album-date"
-              className={form.input}
-              type="date"
               value={folderForm.eventDate}
               onChange={(e) => setFolderForm({ ...folderForm, eventDate: e.target.value })}
             />
-          </div>
+          </Field>
 
           <div className={form.switchRow}>
             <label className={form.switch}>

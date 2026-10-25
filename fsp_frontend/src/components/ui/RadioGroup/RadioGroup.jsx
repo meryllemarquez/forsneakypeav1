@@ -4,14 +4,15 @@ import styles from './RadioGroup.module.css';
 
 /**
  * One-of-many picker with real radio-group behaviour: a single tab stop, Arrow keys move and
- * select, Home / End jump. `options` are { value, label, content?, disabled? }; `content` is what
+ * select, Home / End jump. `options` are { value, label, content?, disabled?, className? }; `content` is what
  * is drawn inside the button (an icon, a thumbnail...), `label` is the accessible name.
  * The selected option always shows a check badge, never colour alone.
  *
  *   <RadioGroup label="Album doodle" value={v} onChange={setV} options={...} />
  */
-export default function RadioGroup({ label, value, onChange, options, className = '', optionClassName = '', variant = 'tile', ...rest }) {
+export default function RadioGroup({ label, value, onChange, options: given, disabled = false, className = '', optionClassName = '', variant = 'tile', ...rest }) {
   const refs = useRef([]);
+  const options = disabled ? given.map((o) => ({ ...o, disabled: true })) : given;
   const enabled = options.map((o, i) => (o.disabled ? -1 : i)).filter((i) => i >= 0);
   const selectedIndex = options.findIndex((o) => o.value === value);
   const tabStop = selectedIndex >= 0 && !options[selectedIndex].disabled ? selectedIndex : enabled[0];
@@ -46,7 +47,7 @@ export default function RadioGroup({ label, value, onChange, options, className 
             title={o.label}
             disabled={o.disabled}
             tabIndex={i === tabStop ? 0 : -1}
-            className={`${styles[variant]} ${selected ? styles.selected : ''} ${optionClassName}`}
+            className={`${styles[variant]} ${selected ? styles.selected : ''} ${optionClassName} ${o.className || ''}`}
             onClick={() => onChange(o.value)}
             onKeyDown={(e) => onKeyDown(e, i)}
           >
@@ -64,21 +65,23 @@ export default function RadioGroup({ label, value, onChange, options, className 
 }
 
 /**
- * Colour picker built on RadioGroup. colors: [{ value: '#hex' or 'var(--token)', name: 'Citrus' }].
+ * Colour picker built on RadioGroup. colors: [{ value, name, color? }]: `value` is what onChange returns,
+ * `color` (defaults to `value`) is the CSS colour drawn, e.g. { value: 'rose', name: 'Citrus', color: '#FF9F1C' }.
  * The accessible name is the colour's NAME, never its hex.
  */
-export function ColorSwatchGroup({ label, value, onChange, colors, className = '' }) {
+export function ColorSwatchGroup({ label, value, onChange, colors, disabled = false, className = '' }) {
   return (
     <RadioGroup
       label={label}
       value={value}
       onChange={onChange}
       variant="swatch"
+      disabled={disabled}
       className={className}
       options={colors.map((c) => ({
         value: c.value,
         label: c.name,
-        content: <span className={styles.swatchFill} style={{ backgroundColor: c.value }} />,
+        content: <span className={styles.swatchFill} style={{ backgroundColor: c.color || c.value }} />,
       }))}
     />
   );

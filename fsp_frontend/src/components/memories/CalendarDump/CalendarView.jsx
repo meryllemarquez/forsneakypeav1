@@ -42,7 +42,7 @@ function MonthYearPicker({ cursor, onSelect, className }) {
 
   const commitYear = (text) => {
     const year = Number(text);
-    if (!/^d{4}$/.test(text) || year < MIN_YEAR || year > MAX_YEAR) return false;
+    if (!/^[0-9]{4}$/.test(text) || year < MIN_YEAR || year > MAX_YEAR) return false;
     if (year !== cursor.year) onSelect(year, cursor.month);
     return true;
   };
@@ -98,7 +98,7 @@ function MonthYearPicker({ cursor, onSelect, className }) {
               value={yearDraft}
               aria-label="Year"
               onChange={(e) => {
-                const text = e.target.value.replace(/D/g, '');
+                const text = e.target.value.replace(/[^0-9]/g, '');
                 setYearDraft(text);
                 commitYear(text);
               }}

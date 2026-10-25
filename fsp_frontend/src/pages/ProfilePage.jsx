@@ -7,6 +7,7 @@ import { useNotification } from '../hooks/useNotification';
 import { useProfile } from '../queries/queries';
 import { useProfileMutations } from '../queries/mutations';
 import { uploadImageToDrive } from '../api/driveUpload';
+import { ColorSwatchGroup } from '../components/ui/RadioGroup/RadioGroup';
 import { ACCENT_COLORS, EMOJI_OPTIONS, DEFAULT_ACCENT_COLOR, getAccent } from '../constants/profileOptions';
 import Icon from '../components/Icon';
 import AvatarCropModal from '../components/profile/AvatarCropModal';
@@ -381,26 +382,13 @@ export default function ProfilePage() {
               <div className={styles.formLabelRow}>
                 <span className={styles.fieldLabel} id="profile-accent-label">Accent color</span>
               </div>
-              <div className={styles.swatchGrid} role="radiogroup" aria-labelledby="profile-accent-label">
-                {ACCENT_COLORS.map((color) => (
-                  <motion.button
-                    key={color.key}
-                    type="button"
-                    className={`${styles.swatch} ${form.accentColor === color.key ? styles.swatchActive : ''}`}
-                    style={{ backgroundColor: color.hex, color: color.ink }}
-                    title={color.label}
-                    role="radio"
-                    aria-checked={form.accentColor === color.key}
-                    aria-label={color.label}
-                    disabled={isSaving}
-                    onClick={() => updateField('accentColor', color.key)}
-                    whileHover={{ scale: 1.08 }}
-                    whileTap={{ scale: 0.94 }}
-                  >
-                    {form.accentColor === color.key && <CheckIcon />}
-                  </motion.button>
-                ))}
-              </div>
+              <ColorSwatchGroup
+                label="Accent color"
+                value={form.accentColor}
+                disabled={isSaving}
+                onChange={(key) => updateField('accentColor', key)}
+                colors={ACCENT_COLORS.map((c) => ({ value: c.key, name: c.label, color: c.hex }))}
+              />
             </div>
 
             <div className={styles.formGroup}>

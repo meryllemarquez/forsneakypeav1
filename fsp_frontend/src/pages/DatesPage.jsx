@@ -25,6 +25,9 @@ import {
 } from 'lucide-react';
 import { dateService } from '../services/dateService';
 import { uploadImageToDrive } from '../api/driveUpload';
+import Field from '../components/ui/Field/Field';
+import Select from '../components/ui/Select/Select';
+import { DatePicker, TimePicker } from '../components/ui/DatePicker/DatePicker';
 import { useDates, useDateCategories, useCacheSetter } from '../queries/queries';
 import { useDateMutations, useChecklistMutations } from '../queries/mutations';
 import { queryKeys } from '../queries/queryKeys';
@@ -916,10 +919,7 @@ export default function DatesPage() {
   const drawerReservation = RESERVATION_META[drawerDate?.reservationStatus] || RESERVATION_META.NOT_NEEDED;
 
   const field = (id, label, control) => (
-    <div className={form.field}>
-      <label className={form.label} htmlFor={id}>{label}</label>
-      {control}
-    </div>
+    <Field label={label} htmlFor={id}>{control}</Field>
   );
   const values = formState.values;
 
@@ -1237,10 +1237,8 @@ export default function DatesPage() {
             ))}
             <div className={styles.formRow}>
               {field('date-category', 'Category', (
-                <select id="date-category" className={form.select} value={values.categoryId} onChange={(e) => updateFormField('categoryId', e.target.value)}>
-                  <option value="">No category</option>
-                  {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
-                </select>
+                <Select id="date-category" value={values.categoryId} onChange={(e) => updateFormField('categoryId', e.target.value)}
+                  placeholder="No category" options={categories.map((c) => ({ value: c.id, label: c.name }))} />
               ))}
               {field('date-activity', 'Activity type', (
                 <input id="date-activity" className={form.input} type="text" placeholder="e.g. Dinner, Hike, Movie" value={values.activityType || ''}
@@ -1257,10 +1255,10 @@ export default function DatesPage() {
             <legend className={styles.formSectionTitle}>Schedule</legend>
             <div className={styles.formRow}>
               {field('date-date', 'Date', (
-                <input id="date-date" className={form.input} type="date" value={values.plannedDate} onChange={(e) => updateFormField('plannedDate', e.target.value)} />
+                <DatePicker id="date-date" value={values.plannedDate} onChange={(e) => updateFormField('plannedDate', e.target.value)} />
               ))}
               {field('date-time', 'Time', (
-                <input id="date-time" className={form.input} type="time" value={values.plannedTime} onChange={(e) => updateFormField('plannedTime', e.target.value)} />
+                <TimePicker id="date-time" value={values.plannedTime} onChange={(e) => updateFormField('plannedTime', e.target.value)} />
               ))}
               {field('date-duration', 'Duration (min)', (
                 <input id="date-duration" className={form.input} type="number" min="0" value={values.durationMinutes} onChange={(e) => updateFormField('durationMinutes', e.target.value)} />
@@ -1284,22 +1282,16 @@ export default function DatesPage() {
             <legend className={styles.formSectionTitle}>Planning</legend>
             <div className={styles.formRow}>
               {field('date-priority', 'Priority', (
-                <select id="date-priority" className={form.select} value={values.priority} onChange={(e) => updateFormField('priority', e.target.value)}>
-                  <option value="LOW">Low</option><option value="MEDIUM">Medium</option><option value="HIGH">High</option>
-                </select>
+                <Select id="date-priority" value={values.priority} onChange={(e) => updateFormField('priority', e.target.value)}
+                  options={[{ value: 'LOW', label: 'Low' }, { value: 'MEDIUM', label: 'Medium' }, { value: 'HIGH', label: 'High' }]} />
               ))}
               {field('date-reservation', 'Reservation', (
-                <select id="date-reservation" className={form.select} value={values.reservationStatus} onChange={(e) => updateFormField('reservationStatus', e.target.value)}>
-                  <option value="NOT_NEEDED">Not needed</option>
-                  <option value="PENDING">Pending</option>
-                  <option value="CONFIRMED">Confirmed</option>
-                  <option value="CANCELLED">Cancelled</option>
-                </select>
+                <Select id="date-reservation" value={values.reservationStatus} onChange={(e) => updateFormField('reservationStatus', e.target.value)}
+                  options={[{ value: 'NOT_NEEDED', label: 'Not needed' }, { value: 'PENDING', label: 'Pending' }, { value: 'CONFIRMED', label: 'Confirmed' }, { value: 'CANCELLED', label: 'Cancelled' }]} />
               ))}
               {formState.mode === 'edit' && field('date-status', 'Status', (
-                <select id="date-status" className={form.select} value={values.status} onChange={(e) => updateFormField('status', e.target.value)}>
-                  {STATUS_ORDER.map((s) => <option key={s} value={s}>{DATE_STATUS_LABELS[s]}</option>)}
-                </select>
+                <Select id="date-status" value={values.status} onChange={(e) => updateFormField('status', e.target.value)}
+                  options={STATUS_ORDER.map((s) => ({ value: s, label: DATE_STATUS_LABELS[s] }))} />
               ))}
             </div>
             <div className={styles.formRow}>
