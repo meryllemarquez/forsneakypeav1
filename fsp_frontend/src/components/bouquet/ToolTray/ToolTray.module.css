@@ -5,10 +5,30 @@
   min-width: 0;
 }
 
-/* ~200px on phones, the panel scrolls on its own */
+/* All four tabs share the row (no sideways scrolling: scrollbars are hidden app-wide, so a
+   clipped tab would be invisible). */
+.tray .tabs {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  width: 100%;
+  gap: 2px;
+  padding: 4px;
+  overflow: visible;
+}
+
+.tray .tabs > button {
+  justify-content: center;
+  min-width: 0;
+  padding: 0 4px;
+  font-size: 0.95rem;
+}
+
+/* ~200px on phones, the panel scrolls on its own; a fade hints there is more below */
 .panel {
   max-height: 200px;
   overflow-y: auto;
+  -webkit-mask-image: linear-gradient(180deg, #000 calc(100% - 20px), transparent);
+  mask-image: linear-gradient(180deg, #000 calc(100% - 20px), transparent);
   padding: 4px 2px 8px;
   overscroll-behavior: contain;
 }
@@ -125,6 +145,8 @@
   .panel {
     max-height: none;
     overflow: visible;
+    -webkit-mask-image: none;
+    mask-image: none;
   }
 }
 

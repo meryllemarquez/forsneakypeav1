@@ -82,7 +82,7 @@ export default function ToolTray({ recipe, onWrap, onRibbon, onAddFlower, full, 
 
   return (
     <div className={styles.tray}>
-      <Tabs label="Bouquet tools" tabs={TABS} value={tab} onChange={setTab} idPrefix="bouquet-tools" />
+      <Tabs label="Bouquet tools" tabs={TABS} value={tab} onChange={setTab} idPrefix="bouquet-tools" className={styles.tabs} />
 
       <div className={styles.panel}>
         <TabPanel idPrefix="bouquet-tools" id="wrap" active={tab === 'wrap'}>
