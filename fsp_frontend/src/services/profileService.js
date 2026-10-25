@@ -13,6 +13,12 @@ export const profileService = {
     return res.data?.data || res.data;
   },
 
+  // PUT /api/profile/theme  ('light' | 'dark' | 'system')
+  updateTheme: async (themePref) => {
+    const res = await api.put('/profile/theme', { themePref });
+    return res.data?.data || res.data;
+  },
+
   // PUT /api/profile/avatar
   updateAvatar: async ({ driveFileId }) => {
     const res = await api.put('/profile/avatar', { driveFileId });

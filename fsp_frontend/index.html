@@ -7,6 +7,23 @@
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#FFF8E8" />
+    <meta name="color-scheme" content="light dark" />
+    <script>
+      /* Set the theme before first paint so there is no flash of the wrong one. Keep in step with ThemeProvider. */
+      (function () {
+        var pref = 'system';
+        try {
+          var stored = localStorage.getItem('fsp-theme');
+          if (stored === 'light' || stored === 'dark' || stored === 'system') pref = stored;
+        } catch (e) {}
+        var dark = pref === 'dark' || (pref === 'system' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        var root = document.documentElement;
+        root.setAttribute('data-theme', dark ? 'dark' : 'light');
+        root.setAttribute('data-theme-pref', pref);
+        var meta = document.querySelector('meta[name="theme-color"]');
+        if (meta) meta.setAttribute('content', dark ? '#0E1533' : '#FFF8E8');
+      })();
+    </script>
     <title>forsneakypea</title>
   </head>
   <body>

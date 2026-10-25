@@ -12,12 +12,12 @@ export const GLYPHS = {
     <>
       <circle cx="16" cy="47" r="8" fill="#5CB3FF" />
       <circle cx="50" cy="47" r="8" fill="#5CB3FF" />
-      <circle cx="16" cy="47" r="2" fill="#172B70" />
-      <circle cx="50" cy="47" r="2" fill="#172B70" />
+      <circle cx="16" cy="47" r="2" fill="currentColor" />
+      <circle cx="50" cy="47" r="2" fill="currentColor" />
       <path d="M5 42 C5 34 12 31 22 31 L31 33 L29 41 H5 Z" fill="#E0301A" />
       <path d="M28 41 H40 L39 45 H27 Z" fill="#E0301A" />
       <path d="M40 43 L37 22 C37 19 41 19 43 22 L48 38 L47 44 Z" fill="#E0301A" />
-      <path d="M13 28 H30 C32 28 32 31 30 31 H13 C11 31 11 28 13 28 Z" fill="#172B70" />
+      <path d="M13 28 H30 C32 28 32 31 30 31 H13 C11 31 11 28 13 28 Z" fill="currentColor" />
       <path d="M43 22 L52 45" />
       <path d="M39 17 H48 M41 17 L42 21" />
       <circle cx="52" cy="25" r="2.6" fill="#FFE680" />
@@ -123,9 +123,9 @@ export const GLYPHS = {
       <path d="M18 30 C18 20 24 16 32 16 C40 16 46 20 46 30 C46 42 40 50 32 50 C24 50 18 42 18 30 Z" />
       <path d="M19 22 C12 22 8 32 12 40 C16 38 18 32 19 28" />
       <path d="M45 22 C52 22 56 32 52 40 C48 38 46 32 45 28" />
-      <circle cx="26" cy="30" r="1.8" fill="#172B70" />
-      <circle cx="38" cy="30" r="1.8" fill="#172B70" />
-      <ellipse cx="32" cy="37" rx="3.2" ry="2.2" fill="#172B70" />
+      <circle cx="26" cy="30" r="1.8" fill="currentColor" />
+      <circle cx="38" cy="30" r="1.8" fill="currentColor" />
+      <ellipse cx="32" cy="37" rx="3.2" ry="2.2" fill="currentColor" />
       <path d="M28 41 C30 43.5 34 43.5 36 41" />
     </>
   ),
@@ -139,8 +139,8 @@ export const GLYPHS = {
       <ellipse cx="53.5" cy="40" rx="3.4" ry="2.4" fill="#8B5A2B" />
       <ellipse cx="23" cy="58.5" rx="4" ry="2.4" fill="#8B5A2B" />
       <ellipse cx="41" cy="58.5" rx="4" ry="2.4" fill="#8B5A2B" />
-      <circle cx="26" cy="27" r="1.7" fill="#172B70" />
-      <circle cx="38" cy="27" r="1.7" fill="#172B70" />
+      <circle cx="26" cy="27" r="1.7" fill="currentColor" />
+      <circle cx="38" cy="27" r="1.7" fill="currentColor" />
       <circle cx="22" cy="31" r="2.6" fill="#FF8FA3" stroke="none" opacity="0.8" />
       <circle cx="42" cy="31" r="2.6" fill="#FF8FA3" stroke="none" opacity="0.8" />
       <path d="M29 31 c1.2 1.8 4.8 1.8 6 0" />
@@ -160,9 +160,9 @@ export const GLYPHS = {
       <circle cx="51" cy="44" r="5" fill="#FFFFFF" stroke="none" />
       <ellipse cx="24.5" cy="40" rx="4.4" ry="3.8" fill="#FFB3C7" />
       <ellipse cx="39.5" cy="40" rx="4.4" ry="3.8" fill="#FFB3C7" />
-      <circle cx="24.5" cy="40" r="1.7" fill="#172B70" />
-      <circle cx="39.5" cy="40" r="1.7" fill="#172B70" />
-      <ellipse cx="32" cy="46" rx="3.2" ry="2.5" fill="#172B70" />
+      <circle cx="24.5" cy="40" r="1.7" fill="currentColor" />
+      <circle cx="39.5" cy="40" r="1.7" fill="currentColor" />
+      <ellipse cx="32" cy="46" rx="3.2" ry="2.5" fill="currentColor" />
       <path d="M28 50 Q32 53.5 36 50" />
       <path d="M12 31 C12 4 52 4 52 31 Z" fill="#FF8FB1" />
       <path d="M12 31 C12 11 52 11 52 31 Z" fill="#FFE680" />
@@ -182,8 +182,8 @@ export const GLYPHS = {
       <ellipse cx="46" cy="51" rx="3.6" ry="2.4" fill="#8B5A2B" />
       <ellipse cx="18" cy="51" rx="3.6" ry="2.4" fill="#8B5A2B" />
       <ellipse cx="56" cy="39" rx="2.4" ry="3.2" fill="#8B5A2B" />
-      <circle cx="46" cy="30" r="1.6" fill="#172B70" />
-      <circle cx="54" cy="30" r="1.6" fill="#172B70" />
+      <circle cx="46" cy="30" r="1.6" fill="currentColor" />
+      <circle cx="54" cy="30" r="1.6" fill="currentColor" />
       <circle cx="43" cy="35" r="2.3" fill="#FF8FA3" stroke="none" opacity="0.8" />
       <circle cx="57" cy="35" r="2.3" fill="#FF8FA3" stroke="none" opacity="0.8" />
       <path d="M48 34 c1 1.6 3 1.6 4 0" />
@@ -193,8 +193,8 @@ export const GLYPHS = {
     <>
       <path d="M13 34 C13 12 51 12 51 34 C51 42 55 48 51 54 C48 58 44 54 43 49 C42 56 36 58 34 52 C33 58 27 58 26 52 C24 57 18 58 15 54 C11 48 13 42 13 34 Z" fill="#3FB8AF" />
       <path d="M20 26 L29 29 M44 26 L35 29" />
-      <circle cx="25" cy="33" r="1.8" fill="#172B70" />
-      <circle cx="39" cy="33" r="1.8" fill="#172B70" />
+      <circle cx="25" cy="33" r="1.8" fill="currentColor" />
+      <circle cx="39" cy="33" r="1.8" fill="currentColor" />
       <path d="M26 43 Q32 38 38 43" />
     </>
   ),
@@ -353,7 +353,7 @@ export const GLYPHS = {
   vinyl: (
     <>
       <circle cx="34" cy="34" r="22" fill="#5CB3FF" stroke="none" />
-      <circle cx="32" cy="32" r="22" fill="#172B70" />
+      <circle cx="32" cy="32" r="22" fill="currentColor" />
       <circle cx="32" cy="32" r="16" stroke="#5CB3FF" strokeWidth="1.4" />
       <circle cx="32" cy="32" r="12" stroke="#5CB3FF" strokeWidth="1.4" />
       <circle cx="32" cy="32" r="7" fill="#E0301A" stroke="none" />
@@ -495,7 +495,15 @@ export const GLYPHS = {
       <circle cx="19.3" cy="40.7" r="3.4" fill="#FFE680" />
       <circle cx="14" cy="28" r="3.4" fill="#E0301A" />
       <circle cx="19.3" cy="15.3" r="3.4" fill="#FF9F1C" />
-      <circle cx="32" cy="28" r="3" fill="#172B70" />
+      <circle cx="32" cy="28" r="3" fill="currentColor" />
+    </>
+  ),
+  moon: (
+    <>
+      <path d="M44 9 A24 24 0 1 0 55 44 A19 19 0 0 1 44 9 Z" fill="#FFE680" />
+      <path d="M25 33 c1.5 2 4.5 2 6 0" />
+      <circle cx="49" cy="17" r="1.8" fill="#FFE680" />
+      <circle cx="56" cy="27" r="1.4" fill="#FFE680" />
     </>
   ),
   sun: (
@@ -503,8 +511,8 @@ export const GLYPHS = {
       <circle cx="34" cy="34" r="13" fill="#FF9F1C" stroke="none" />
       <circle cx="32" cy="32" r="13" fill="#FFE680" />
       <path d="M32 7 v7 M32 50 v7 M7 32 h7 M50 32 h7 M14.5 14.5 l5 5 M44.5 44.5 l5 5 M49.5 14.5 l-5 5 M19.5 44.5 l-5 5" />
-      <circle cx="27.5" cy="30" r="1.6" fill="#172B70" />
-      <circle cx="36.5" cy="30" r="1.6" fill="#172B70" />
+      <circle cx="27.5" cy="30" r="1.6" fill="currentColor" />
+      <circle cx="36.5" cy="30" r="1.6" fill="currentColor" />
       <path d="M27 35 c2 3 8 3 10 0" />
     </>
   ),
@@ -514,8 +522,8 @@ export const GLYPHS = {
       <path d="M14 50 C9 30 15 11 32 11 C49 11 55 30 50 50 C46 53 43 47 43 41 H21 C21 47 18 53 14 50 Z" fill="#E0301A" />
       <circle cx="32" cy="32" r="13" fill="#FFF3D6" />
       <path d="M19 31 C19 21 25 17 32 17 C39 17 45 21 45 31 C40 28 35 25 31 22 C28 26 24 29 19 31 Z" fill="#E0301A" />
-      <circle cx="27" cy="34" r="1.7" fill="#172B70" />
-      <circle cx="37" cy="34" r="1.7" fill="#172B70" />
+      <circle cx="27" cy="34" r="1.7" fill="currentColor" />
+      <circle cx="37" cy="34" r="1.7" fill="currentColor" />
       <circle cx="24" cy="38.5" r="2.4" fill="#FF9F1C" stroke="none" opacity="0.7" />
       <circle cx="40" cy="38.5" r="2.4" fill="#FF9F1C" stroke="none" opacity="0.7" />
       <path d="M29 39 c1.5 2 4.5 2 6 0" />
@@ -526,9 +534,9 @@ export const GLYPHS = {
     <>
       <path d="M14 62 C14 51 50 51 50 62" fill="#FF9F1C" />
       <circle cx="32" cy="33" r="14" fill="#FFF3D6" />
-      <path d="M18 31 C17 18 25 13 33 13 C42 13 47 19 46 31 C43 25 37 23 30 24 C25 25 21 27 18 31 Z" fill="#172B70" />
-      <circle cx="27" cy="33" r="1.7" fill="#172B70" />
-      <circle cx="37" cy="33" r="1.7" fill="#172B70" />
+      <path d="M18 31 C17 18 25 13 33 13 C42 13 47 19 46 31 C43 25 37 23 30 24 C25 25 21 27 18 31 Z" fill="currentColor" />
+      <circle cx="27" cy="33" r="1.7" fill="currentColor" />
+      <circle cx="37" cy="33" r="1.7" fill="currentColor" />
       <path d="M26 40 C28 38 30 38 32 40 C34 38 36 38 38 40" strokeWidth="2.4" />
       <path d="M29 44 c1.5 1.5 4.5 1.5 6 0" />
       <circle cx="23.5" cy="38" r="2.2" fill="#E0301A" stroke="none" opacity="0.4" />

@@ -86,6 +86,7 @@ public class AuthServiceImpl implements AuthService {
                 .bio(user.getBio())
                 .favoriteEmoji(user.getFavoriteEmoji())
                 .accentColor(user.getAccentColor())
+                .themePref(user.getThemePref())
                 .avatarUrl(mediaUrls.resolve(user.getAvatarUrl(), user.getAvatarDriveFileId(), MediaUrlService.Size.THUMB))
                 .build();
     }
@@ -144,6 +145,7 @@ public class AuthServiceImpl implements AuthService {
                 .bio(user.getBio())
                 .favoriteEmoji(user.getFavoriteEmoji())
                 .accentColor(user.getAccentColor())
+                .themePref(user.getThemePref())
                 .avatarUrl(mediaUrls.resolve(user.getAvatarUrl(), user.getAvatarDriveFileId(), MediaUrlService.Size.THUMB))
                 .build();
     }

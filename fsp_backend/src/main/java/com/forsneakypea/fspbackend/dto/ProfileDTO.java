@@ -15,6 +15,7 @@ public class ProfileDTO {
     private String bio;
     private String favoriteEmoji;
     private String accentColor;
+    private String themePref;
     private String avatarUrl;
     private String role;
     private OffsetDateTime updatedAt;

@@ -40,6 +40,19 @@
 
 }
 
+/* Short cross-fade while the theme changes (ThemeProvider adds the class for ~250ms). */
+.theme-fading,
+.theme-fading *,
+.theme-fading *::before,
+.theme-fading *::after {
+  transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease !important;
+}
+
+::selection {
+  background: var(--sea-tint);
+  color: var(--ink);
+}
+
 :focus-visible {
   outline: var(--focus-ring);
   outline-offset: var(--focus-offset);

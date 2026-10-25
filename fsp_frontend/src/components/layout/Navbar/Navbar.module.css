@@ -15,7 +15,7 @@
   gap: 4px;
   padding: 5px;
   background: var(--white);
-  border: var(--border-width) solid var(--ink);
+  border: var(--border-width) solid var(--outline);
   border-radius: var(--radius-pill);
 }
 
@@ -39,7 +39,8 @@
 
 .navLink[aria-current='page'] {
   background: var(--user-accent, var(--citrus));
-  color: var(--user-accent-ink, var(--ink));
+  color: var(--user-accent-ink, var(--on-bright));
+  --icon-ink: var(--user-accent-ink, var(--on-bright));
 }
 
 .right {
@@ -56,7 +57,7 @@
   padding: 0 18px;
   background: var(--white);
   color: var(--ink);
-  border: var(--border-width) solid var(--ink);
+  border: var(--border-width) solid var(--outline);
   border-radius: var(--radius-pill);
   font-weight: 800;
   cursor: pointer;
@@ -75,7 +76,7 @@
   padding: 0;
   background: var(--white);
   color: var(--ink);
-  border: var(--border-width) solid var(--ink);
+  border: var(--border-width) solid var(--outline);
   border-radius: 50%;
   cursor: pointer;
 }
@@ -92,7 +93,7 @@
   padding: 4px 16px 4px 4px;
   background: var(--white);
   color: var(--ink);
-  border: var(--border-width) solid var(--ink);
+  border: var(--border-width) solid var(--outline);
   border-radius: var(--radius-pill);
   font-weight: 800;
   text-decoration: none;
@@ -109,6 +110,7 @@ a.avatarChip:hover {
   justify-content: center;
   overflow: hidden;
   background: var(--gelato);
+  --icon-ink: var(--on-bright);
   border: 3px solid var(--user-accent, var(--citrus));
   border-radius: 50%;
 }
@@ -132,7 +134,7 @@ a.avatarChip:hover {
   height: var(--tap);
   padding: 0;
   background: var(--white);
-  border: var(--border-width) solid var(--ink);
+  border: var(--border-width) solid var(--outline);
   border-radius: 50%;
   cursor: pointer;
 }
@@ -145,7 +147,7 @@ a.avatarChip:hover {
   min-width: 200px;
   padding: 8px;
   background: var(--white);
-  border: var(--border-width) solid var(--ink);
+  border: var(--border-width) solid var(--outline);
   border-radius: 20px;
   box-shadow: var(--shadow-card);
 }

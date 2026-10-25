@@ -14,7 +14,7 @@
   gap: 8px;
   padding: 0;
   color: var(--ink);
-  border: var(--border-width) solid var(--ink);
+  border: var(--border-width) solid var(--outline);
   cursor: pointer;
   font-family: var(--font-body);
   font-weight: 800;
@@ -36,7 +36,8 @@
 .tile.selected,
 .tile.selected:hover:not(:disabled) {
   background: var(--citrus);
-  box-shadow: 3px 3px 0 var(--ink);
+  color: var(--on-bright);
+  box-shadow: 3px 3px 0 var(--outline);
 }
 
 .swatch {
@@ -54,7 +55,7 @@
 }
 
 .swatch.selected {
-  box-shadow: 0 0 0 3px var(--white), 0 0 0 5px var(--ink);
+  box-shadow: 0 0 0 3px var(--surface), 0 0 0 5px var(--outline);
 }
 
 .badge {

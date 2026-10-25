@@ -7,7 +7,7 @@
   padding: 0 16px;
   background: var(--white);
   color: var(--ink);
-  border: var(--border-width) solid var(--ink);
+  border: var(--border-width) solid var(--outline);
   border-radius: var(--radius-pill);
   font-family: var(--font-body);
   font-size: 0.95rem;
@@ -21,7 +21,7 @@
 .chip:active:not(:disabled) { transform: translateY(1px); }
 
 .active,
-.active:hover:not(:disabled) { background: var(--citrus); }
+.active:hover:not(:disabled) { background: var(--citrus); color: var(--on-bright); }
 
 .check { flex: none; }
 

@@ -35,12 +35,14 @@ const SystemSettingsPage = lazy(() => import('./pages/admin/SystemSettingsPage')
 
 import { AuthProvider } from './context/AuthProvider';
 import { NotificationProvider } from './context/NotificationProvider';
+import { ThemeProvider } from './context/ThemeProvider';
 
 export default function App() {
   return (
     <Router>
       {/* 2. I-WRAP ANG ROUTES SA LOOB NG AUTHPROVIDER */}
       <AuthProvider>
+      <ThemeProvider>
       <NotificationProvider>
         <Routes>
           {/* Public Landing & Login Page */}
@@ -133,6 +135,7 @@ export default function App() {
           <Route path="*" element={<Navigate to="/home" replace />} />
         </Routes>
       </NotificationProvider>
+      </ThemeProvider>
       </AuthProvider>
     </Router>
   );

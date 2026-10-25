@@ -25,7 +25,7 @@
   margin: 0;
   padding: 8px 14px;
   background: var(--citrus-tint);
-  border: var(--border-width) solid var(--ink);
+  border: var(--border-width) solid var(--outline);
   border-radius: var(--radius-input);
   font-weight: 700;
   font-size: 0.95rem;

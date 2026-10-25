@@ -6,7 +6,7 @@
   justify-content: center;
   gap: 1.1rem;
   background-color: var(--paper);
-  background-image: radial-gradient(circle, rgb(23 43 112 / 0.14) 1.4px, transparent 2px);
+  background-image: radial-gradient(circle, var(--pattern-dot) 1.4px, transparent 2px);
   background-size: 24px 24px;
   color: var(--ink);
 }
@@ -19,7 +19,7 @@
   margin: 0;
   padding: 6px 18px;
   background: var(--white);
-  border: var(--border-width) solid var(--ink);
+  border: var(--border-width) solid var(--outline);
   border-radius: var(--radius-pill);
   font-family: var(--font-heading);
   font-weight: 700;

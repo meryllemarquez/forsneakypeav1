@@ -3,6 +3,7 @@ package com.forsneakypea.fspbackend.controller;
 import com.forsneakypea.fspbackend.dto.AvatarUpdateRequestDTO;
 import com.forsneakypea.fspbackend.dto.ProfileDTO;
 import com.forsneakypea.fspbackend.dto.ProfileUpdateRequestDTO;
+import com.forsneakypea.fspbackend.dto.ThemeUpdateRequestDTO;
 import com.forsneakypea.fspbackend.dto.response.ApiResponse;
 import com.forsneakypea.fspbackend.entity.User;
 import com.forsneakypea.fspbackend.service.ProfileService;
@@ -35,6 +36,12 @@ public class ProfileController {
     public ResponseEntity<ApiResponse<ProfileDTO>> updateProfile(@Valid @RequestBody ProfileUpdateRequestDTO request) {
         ProfileDTO profile = profileService.updateProfile(getCurrentUserId(), request);
         return ResponseEntity.ok(ApiResponse.success(profile, "Profile updated successfully"));
+    }
+
+    @PutMapping("/theme")
+    public ResponseEntity<ApiResponse<ProfileDTO>> updateTheme(@Valid @RequestBody ThemeUpdateRequestDTO request) {
+        ProfileDTO profile = profileService.updateTheme(getCurrentUserId(), request.getThemePref());
+        return ResponseEntity.ok(ApiResponse.success(profile, "Theme saved"));
     }
 
     @PutMapping("/avatar")

@@ -9,7 +9,7 @@
   min-height: 78px;
   padding: 6px 10px calc(12px + env(safe-area-inset-bottom));
   background: var(--white);
-  border-top: var(--border-width) solid var(--ink);
+  border-top: var(--border-width) solid var(--outline);
 }
 
 .tab {
@@ -37,5 +37,6 @@
 
 .tab[aria-current='page'] .pill {
   background: var(--user-accent, var(--citrus));
-  border-color: var(--ink);
+  border-color: var(--outline);
+  --icon-ink: var(--user-accent-ink, var(--on-bright));
 }

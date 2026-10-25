@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
+import com.forsneakypea.fspbackend.exception.BadRequestException;
 import java.util.Set;
 
 @Service
@@ -120,6 +121,19 @@ public class ProfileService {
         return trimmed;
     }
 
+    private static final Set<String> ALLOWED_THEMES = Set.of("light", "dark", "system");
+
+    @Transactional
+    public ProfileDTO updateTheme(Long userId, String themePref) {
+        User user = findUser(userId);
+        String value = themePref == null ? "" : themePref.trim().toLowerCase();
+        if (!ALLOWED_THEMES.contains(value)) {
+            throw new BadRequestException("Theme must be light, dark or system.");
+        }
+        user.setThemePref(value);
+        return mapToDTO(userRepository.save(user));
+    }
+
     private ProfileDTO mapToDTO(User user) {
         return ProfileDTO.builder()
                 .id(user.getId())
@@ -129,6 +143,7 @@ public class ProfileService {
                 .bio(user.getBio())
                 .favoriteEmoji(user.getFavoriteEmoji())
                 .accentColor(user.getAccentColor())
+                .themePref(user.getThemePref())
                 .avatarUrl(mediaUrls.resolve(user.getAvatarUrl(), user.getAvatarDriveFileId(), MediaUrlService.Size.THUMB))
                 .role(user.getRole() != null ? user.getRole().name() : null)
                 .updatedAt(user.getUpdatedAt())

@@ -15,6 +15,7 @@ import ConfirmDialog from '../components/ui/ConfirmDialog/ConfirmDialog';
 import AnniversaryCounter from '../components/profile/AnniversaryCounter';
 import Navbar from '../components/layout/Navbar/Navbar';
 import Footer from '../components/layout/Footer/Footer';
+import ThemeToggle from '../components/ui/ThemeToggle/ThemeToggle';
 import styles from './ProfilePage.module.css';
 
 const line = { strokeWidth: 2.6, 'aria-hidden': true };
@@ -377,6 +378,14 @@ export default function ProfilePage() {
             </div>
 
             <div className={styles.cardDivider} />
+
+            <div className={styles.formGroup}>
+              <div className={styles.formLabelRow}>
+                <span className={styles.fieldLabel} id="profile-theme-label">Theme</span>
+              </div>
+              <p className={styles.cardSubtitle}>Lights on, or lights off?</p>
+              <ThemeToggle />
+            </div>
 
             <div className={styles.formGroup}>
               <div className={styles.formLabelRow}>

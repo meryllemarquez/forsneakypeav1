@@ -25,5 +25,6 @@ public class AuthResponse {
     private String bio;
     private String favoriteEmoji;
     private String accentColor;
+    private String themePref;
     private String avatarUrl;
 }

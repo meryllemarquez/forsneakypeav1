@@ -32,7 +32,7 @@
   padding: 10px 16px;
   background: var(--white);
   color: var(--ink);
-  border: var(--border-width) solid var(--ink);
+  border: var(--border-width) solid var(--outline);
   border-radius: var(--radius-input);
   font-family: var(--font-body);
   font-size: 1rem;
@@ -97,7 +97,8 @@
   height: 18px;
   margin-top: 1px;
   background: var(--citrus);
-  border: var(--border-width) solid var(--ink);
+  color: var(--on-bright);
+  border: var(--border-width) solid var(--outline);
   border-radius: 50%;
   font-size: 0.7rem;
   line-height: 1;
@@ -107,7 +108,7 @@
   margin: 0;
   padding: 8px 14px;
   background: var(--citrus-tint);
-  border: var(--border-width) solid var(--ink);
+  border: var(--border-width) solid var(--outline);
   border-radius: var(--radius-input);
   font-weight: 700;
   font-size: 0.95rem;
@@ -152,7 +153,7 @@
   width: 54px;
   height: 30px;
   background: var(--white);
-  border: var(--border-width) solid var(--ink);
+  border: var(--border-width) solid var(--outline);
   border-radius: var(--radius-pill);
   transition: background-color 0.15s ease;
 }
@@ -163,7 +164,7 @@
   left: 3px;
   width: 20px;
   height: 20px;
-  background: var(--ink);
+  background: var(--on-bright);
   border-radius: 50%;
   transition: transform 0.15s ease;
 }

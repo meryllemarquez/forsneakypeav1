@@ -3,7 +3,7 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  border: var(--border-width) solid var(--ink);
+  border: var(--border-width) solid var(--outline);
   border-radius: var(--radius-pill);
   font-family: var(--font-body);
   font-weight: 800;
@@ -27,18 +27,18 @@
 
 .primary {
   background: var(--tomato);
-  color: var(--white);
+  color: var(--on-tomato);
   box-shadow: var(--shadow-button);
 }
 
 .primary:hover:not(:disabled) {
   transform: translate(-1px, -1px);
-  box-shadow: 5px 5px 0 var(--ink);
+  box-shadow: 5px 5px 0 var(--outline);
 }
 
 .primary:active:not(:disabled) {
   transform: translate(3px, 3px);
-  box-shadow: 1px 1px 0 var(--ink);
+  box-shadow: 1px 1px 0 var(--outline);
 }
 
 .secondary {

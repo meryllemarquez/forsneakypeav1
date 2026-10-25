@@ -11,6 +11,7 @@ import Logo from '../Logo/Logo';
 import TabBar from '../TabBar/TabBar';
 import NotificationBell from '../../notifications/NotificationBell';
 import LogoutConfirm from '../LogoutConfirm/LogoutConfirm';
+import ThemeToggle, { ThemeCycleButton } from '../../ui/ThemeToggle/ThemeToggle';
 import styles from './Navbar.module.css';
 
 function Avatar({ user, size }) {
@@ -67,6 +68,7 @@ function AvatarMenu({ user, isCouple, isAdmin, onLogout }) {
       {open && (
         <div className={styles.menu} role="menu">
           <p className={styles.menuName}>{user?.name || user?.username}</p>
+          <ThemeToggle variant="compact" />
           {isCouple && (
             <button type="button" role="menuitem" className={styles.menuItem} onClick={() => go('/profile')}>
               <UserRound size={18} strokeWidth={2.4} aria-hidden="true" /> Profile
@@ -156,6 +158,7 @@ export default function Navbar() {
                   <span>{displayName}</span>
                 </div>
               )}
+              <ThemeCycleButton />
               <button type="button" className={styles.iconBtn} onClick={() => setLeaveOpen(true)} aria-label="Sign out">
                 <LogOut size={20} strokeWidth={2.4} aria-hidden="true" />
               </button>

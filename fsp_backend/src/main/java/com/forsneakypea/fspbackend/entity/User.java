@@ -62,6 +62,11 @@ public class User implements UserDetails {
     @Builder.Default
     private String accentColor = "rose";
 
+    // light | dark | system: lets a new device start in the theme chosen on another one.
+    @Column(name = "theme_pref", length = 8, nullable = false)
+    @Builder.Default
+    private String themePref = "system";
+
     @Column(name = "avatar_url", columnDefinition = "text")
     private String avatarUrl;
 

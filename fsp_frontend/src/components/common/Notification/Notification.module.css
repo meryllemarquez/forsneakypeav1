@@ -18,7 +18,7 @@
   padding: 10px 6px 10px 14px;
   background: var(--white);
   color: var(--ink);
-  border: var(--border-width) solid var(--ink);
+  border: var(--border-width) solid var(--outline);
   border-radius: 20px;
   box-shadow: var(--shadow-card);
   font-family: var(--font-body);
@@ -35,6 +35,8 @@
 
 .gold {
   background: var(--gelato);
+  color: var(--on-bright);
+  --icon-ink: var(--on-bright);
 }
 
 .message {
@@ -61,7 +63,7 @@
 }
 
 .dismissBtn:hover {
-  background: rgb(23 43 112 / 0.1);
+  background: color-mix(in srgb, var(--ink) 12%, transparent);
 }
 
 /* Phones: full width, lifted above the bottom tab bar. */
@@ -82,7 +84,7 @@
   width: 30px;
   height: 30px;
   background: var(--citrus);
-  color: var(--ink);
-  border: var(--border-width) solid var(--ink);
+  color: var(--on-bright);
+  border: var(--border-width) solid var(--outline);
   border-radius: 50%;
 }

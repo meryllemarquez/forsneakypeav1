@@ -29,6 +29,23 @@
   --sun-pale: #FFEBC0;
   --sun-peach: #FFD7A6;
 
+  /* Semantic tokens: components use these so the dark theme can swap them in one place.
+     --ink stays the TEXT colour; --outline is the border / offset-shadow colour (a softer ink in dark). */
+  --surface: var(--white);          /* cards, modals, inputs */
+  --surface-sunk: var(--paper);     /* wells, table stripes */
+  --outline: var(--ink);
+  --shadow-sea: var(--sea);         /* the coloured offset shadow of cards */
+  --on-tomato: #FFFFFF;             /* text on the tomato primary button */
+  --on-bright: var(--ink);          /* text on sea / citrus / gelato fills, which stay bright in dark */
+  --icon-ink: #172B70;              /* doodle outlines */
+  --icon-white: #FFFFFF;
+  --scrim: rgb(23 43 112 / 0.5);    /* modal backdrop */
+  --glow: #FFD27A;                  /* warm lamp / window light (dark scenes) */
+  --link: var(--amalfi);
+  --footer-bg: #1F55C9;
+  --pattern-dot: rgb(23 43 112 / 0.14);
+  color-scheme: light;
+
   /* Fonts */
   --font-heading: 'Shantell Sans', 'Comic Sans MS', cursive;
   --font-body: 'Nunito', system-ui, -apple-system, 'Segoe UI', sans-serif;
@@ -40,9 +57,9 @@
   --radius-card-lg: 28px;
   --radius-input: 14px;
   --radius-pill: 999px;
-  --shadow-card: 6px 6px 0 var(--sea);
+  --shadow-card: 6px 6px 0 var(--shadow-sea);
   --shadow-card-citrus: 6px 6px 0 var(--citrus);
-  --shadow-button: 4px 4px 0 var(--ink);
+  --shadow-button: 4px 4px 0 var(--outline);
 
   /* Focus ring (a11y): 3px tomato outline */
   --focus-ring: 3px solid var(--tomato);
@@ -80,4 +97,45 @@
   --shadow-modal: 0 20px 50px rgb(23 43 112 / 0.25);
   --font-serif: var(--font-heading);
   --font-sans: var(--font-body);
+}
+
+/*
+  Dark theme: navy night, warm glows, softer ink. Set by ThemeProvider / the pre-paint script in
+  index.html as <html data-theme="dark">. Only tokens change; components keep using the same names.
+*/
+:root[data-theme="dark"] {
+  --paper: #0E1533;
+  --white: #19224D;
+  --ink: #DCE5FF;
+  --ink-soft: #B4C2EE;
+  --ink-muted: #97A8DB;
+  --outline: #6F83CE;
+  --line-soft: #2E3C73;
+
+  --sea: #5CB3FF;
+  --sea-tint: #1B3466;
+  --shadow-sea: #2A4FA8;
+  --citrus: #FFAE3D;
+  --citrus-tint: #4A3A22;
+  --citrus-cover: #7A5320;
+  --gelato: #FFE680;
+  --gelato-tint: #4A4420;
+  --amalfi: #8DB2FF;
+  --amalfi-tint: #22346B;
+  --tomato: #FF5A44;
+
+  --on-tomato: #0E1533;
+  --on-bright: #0E1533;
+  --surface-sunk: #131B40;
+  --paper-warm: #121A3E;
+  --footer-ink: #E3EEFF;
+  --footer-bg: #12307A;
+  --icon-ink: #E8EEFF;
+  --icon-white: #F2F5FF;
+  --scrim: rgb(5 8 24 / 0.66);
+  --link: #8DB2FF;
+  --pattern-dot: rgb(220 229 255 / 0.07);
+  --shadow-soft: 0 8px 30px rgb(0 0 0 / 0.35);
+  --shadow-modal: 0 20px 50px rgb(0 0 0 / 0.55);
+  color-scheme: dark;
 }

@@ -1,7 +1,7 @@
 import { GLYPHS } from './glyphs';
 
 /**
- * Doodle icon from the for sneakypea kit (47 icons, ported from Icon.dc.html).
+ * Doodle icon from the for sneakypea kit (ported from Icon.dc.html, then hand-edited).
  *
  * name    one of ICON_NAMES
  * size    px, square
@@ -25,8 +25,8 @@ export default function Icon({ name, size = 24, sticker = false, tilt = 0, label
         height: size,
         borderRadius: '50%',
         background: 'var(--white)',
-        border: `${border}px solid var(--ink)`,
-        boxShadow: `${border}px ${border + 1}px 0 var(--ink)`,
+        border: `${border}px solid var(--outline, var(--ink))`,
+        boxShadow: `${border}px ${border + 1}px 0 var(--outline, var(--ink))`,
         transform: `rotate(${tilt}deg)`,
       }
     : {
@@ -40,7 +40,7 @@ export default function Icon({ name, size = 24, sticker = false, tilt = 0, label
   return (
     <span
       className={className}
-      style={{ ...wrapStyle, ...style }}
+      style={{ color: 'var(--icon-ink, #172B70)', ...wrapStyle, ...style }}
       {...(label ? { role: 'img', 'aria-label': label } : { 'aria-hidden': true })}
     >
       <svg
@@ -49,7 +49,7 @@ export default function Icon({ name, size = 24, sticker = false, tilt = 0, label
         height={sticker ? '72%' : '100%'}
         style={{ display: 'block' }}
         fill="none"
-        stroke="#172B70"
+        stroke="currentColor"
         strokeWidth="2.6"
         strokeLinecap="round"
         strokeLinejoin="round"
