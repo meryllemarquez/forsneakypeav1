@@ -214,7 +214,7 @@ export default function HomePage() {
             <div className={styles.emptyCard}>
               <Icon name="camera" size={72} sticker tilt={-6} />
               <p>No albums yet, love. Start your first one.</p>
-              <Link to="/memories" className={styles.primaryBtn}>
+              <Link to="/memories" className={styles.secondaryBtn}>
                 Create an album
                 <ArrowRight />
               </Link>
@@ -267,7 +267,7 @@ export default function HomePage() {
               <div className={styles.emptyInner}>
                 <Icon name="motmot" size={64} sticker tilt={-4} />
                 <p>Nothing planned yet.</p>
-                <Link to="/dates" className={styles.primaryBtn}>
+                <Link to="/dates" className={styles.secondaryBtn}>
                   Plan something
                   <ArrowRight />
                 </Link>

@@ -12,7 +12,7 @@ export default function TopBar({ title, onOpenSidebar, onOpenNotifications, unre
         </IconButton>
           </span>
         <div className="min-w-0">
-          <p className="m-0 flex items-center gap-1.5 text-[10.5px] font-bold tracking-[0.11em] text-(--color-admin-accent) uppercase">
+          <p className="m-0 flex items-center gap-1.5 text-xs font-bold tracking-[0.11em] text-(--color-admin-accent) uppercase">
             Admin Console
             <span className="font-normal tracking-normal text-(--color-admin-text-faint) normal-case">/</span>
             <span className="font-semibold text-(--color-admin-text-muted)">Merylle &amp; Cj</span>
@@ -42,7 +42,7 @@ export default function TopBar({ title, onOpenSidebar, onOpenNotifications, unre
               key={unreadCount}
               initial={{ scale: 0.5 }}
               animate={{ scale: 1 }}
-              className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-(--color-admin-danger) px-1 text-[11px] font-semibold text-(--white)"
+              className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-(--color-admin-danger) px-1 text-xs font-semibold text-(--white)"
             >
               {unreadCount > 9 ? '9+' : unreadCount}
             </motion.span>

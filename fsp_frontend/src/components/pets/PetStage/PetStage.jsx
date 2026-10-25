@@ -9,9 +9,9 @@ const ACTION_ICON = { feed: UtensilsCrossed, play: Volleyball, hug: Heart, walk:
 
 /**
  * The selected pet, big: figure + reaction, a warm mood line, the three meters, the action
- * buttons and who visited last. `busy` disables the buttons while a reaction plays.
+ * buttons and who visited last. `busy` disables the buttons while a reaction plays; `resting` ({ action: secondsLeft }) shows a cooldown countdown.
  */
-export default function PetStage({ pet, myId, size, reaction, busy, onAct, onReactionEnd }) {
+export default function PetStage({ pet, myId, size, reaction, busy, resting = {}, onAct, onReactionEnd }) {
   const isDog = pet.kind === 'dog';
   const last = lastLine(pet, myId);
 
@@ -30,10 +30,11 @@ export default function PetStage({ pet, myId, size, reaction, busy, onAct, onRea
       <div className={styles.actions} role="group" aria-label={`Things to do with ${pet.name}`}>
         {ACTIONS.filter((a) => isDog || !a.dogsOnly).map((a) => {
           const IconCmp = ACTION_ICON[a.id];
+          const left = resting[a.id];
           return (
-            <Button key={a.id} variant="secondary" size="sm" disabled={busy} aria-busy={busy || undefined} onClick={() => onAct(a.id)}>
+            <Button key={a.id} variant="secondary" size="sm" disabled={busy || !!left} aria-busy={busy || undefined} onClick={() => onAct(a.id)}>
               <IconCmp size={18} strokeWidth={2.4} aria-hidden="true" />
-              {a.label}
+              {left ? `resting ${left}s` : a.label}
             </Button>
           );
         })}

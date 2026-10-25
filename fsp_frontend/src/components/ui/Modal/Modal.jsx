@@ -96,6 +96,13 @@ export default function Modal({
 
   const isDrawer = placement === 'right';
 
+  // A focused field low in the sheet scrolls to the middle once the keyboard has come up.
+  const keepFieldVisible = (e) => {
+    const t = e.target;
+    if (!(t instanceof HTMLElement) || !t.matches('input:not([type=checkbox]):not([type=radio]):not([type=file]),textarea,select')) return;
+    setTimeout(() => t.isConnected && t.scrollIntoView({ block: 'center', behavior: 'smooth' }), 300);
+  };
+
   const tryClose = () => {
     if (!locked) onClose?.();
   };
@@ -121,6 +128,7 @@ export default function Modal({
             aria-labelledby={title ? titleId : undefined}
             aria-label={title ? undefined : ariaLabel}
             tabIndex={-1}
+            onFocus={keepFieldVisible}
             initial={isDrawer ? { x: '100%' } : { opacity: 0, y: 22, scale: 0.96 }}
             animate={isDrawer ? { x: 0 } : { opacity: 1, y: 0, scale: 1 }}
             exit={isDrawer ? { x: '100%' } : { opacity: 0, y: 14, scale: 0.97 }}

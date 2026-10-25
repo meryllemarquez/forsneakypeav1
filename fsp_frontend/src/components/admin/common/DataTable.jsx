@@ -91,7 +91,7 @@ export default function DataTable({ columns, rows, getRowKey, loading, emptyTitl
                 return (
                   <th
                     key={col.key}
-                    className={`sticky top-0 z-10 border-b border-(--color-admin-border) bg-(--color-admin-surface-2) px-4 py-3 text-[11px] font-semibold tracking-wide text-(--color-admin-text-muted) uppercase ${col.sortable ? 'cursor-pointer select-none hover:text-(--color-admin-text)' : ''}`}
+                    className={`sticky top-0 z-10 border-b border-(--color-admin-border) bg-(--color-admin-surface-2) px-4 py-3 text-xs font-semibold tracking-wide text-(--color-admin-text-muted) uppercase ${col.sortable ? 'cursor-pointer select-none hover:text-(--color-admin-text)' : ''}`}
                     style={col.width ? { width: col.width } : undefined}
                     onClick={col.sortable ? () => toggleSort(col.key) : undefined}
                   >

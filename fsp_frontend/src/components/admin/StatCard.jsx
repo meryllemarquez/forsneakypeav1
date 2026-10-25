@@ -22,7 +22,7 @@ export default function StatCard({ icon: Icon, label, value, tone = 'accent', de
           <Icon size={17} strokeWidth={2} />
         </div>
         {trend != null && trend > 0 && (
-          <span className="inline-flex items-center gap-0.5 rounded-full bg-(--color-admin-success-soft) px-2 py-0.5 text-[11.5px] font-semibold text-(--color-admin-success)">
+          <span className="inline-flex items-center gap-0.5 rounded-full bg-(--color-admin-success-soft) px-2 py-0.5 text-xs font-semibold text-(--color-admin-success)">
             <TrendingUp size={10} />+{trend} this week
           </span>
         )}

@@ -17,6 +17,7 @@ import styles from './MenuBook.module.css';
 
 const SAVE_DELAY = 600; // ms of no change (button reorders) before the order is sent
 const STAGGER_CAP = 12;
+const NO_ITEMS = []; // stable fallback: a fresh [] each render would re-run the sync effect forever
 
 function LovedBadge({ lovedBy }) {
   const names = lovedBy === 'both' ? ['her', 'him'] : [lovedBy];
@@ -32,7 +33,7 @@ function RowText({ item }) {
   const line = [item.place, item.pricePhp != null ? formatPrice(item.pricePhp) : null].filter(Boolean).join(' · ');
   return (
     <span className={styles.text}>
-      <span className={styles.name}>{item.name}</span>
+      <span className={styles.name} title={item.name}>{item.name}</span>
       {line && <span className={styles.line}>{line}</span>}
       {item.note && <span className={styles.note}>{item.note}</span>}
     </span>
@@ -43,7 +44,7 @@ function RowText({ item }) {
 export default function MenuBook({ open, onClose }) {
   const reduce = useReducedMotion();
   const { addToast } = useNotification();
-  const { data: items = [], isLoading, isError, refetch } = useMenuItems();
+  const { data: items = NO_ITEMS, isLoading, isError, refetch } = useMenuItems();
   const menu = useMenuMutations();
 
   const [filter, setFilter] = useState('all');

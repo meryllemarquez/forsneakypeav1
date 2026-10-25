@@ -14,6 +14,11 @@
   padding: 12px 16px 48px;
 }
 
+/* phones: clear the fixed tab bar even when the tray is the last thing on the page */
+@media (max-width: 900px) {
+  .main { padding-bottom: calc(78px + env(safe-area-inset-bottom) + 12px); }
+}
+
 .note {
   margin: 24px 0 12px;
   font-family: var(--font-hand);

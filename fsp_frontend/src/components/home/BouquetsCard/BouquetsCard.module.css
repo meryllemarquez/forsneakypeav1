@@ -1,9 +1,9 @@
 .card {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
   min-height: 88px;
-  padding: 14px 20px;
+  padding: 14px 16px;
   background: var(--surface);
   border: var(--border-width) solid var(--outline);
   border-radius: var(--radius-card);
@@ -37,6 +37,7 @@
   display: grid;
   flex: 1;
   min-width: 0;
+  gap: 2px;
 }
 
 .title {
@@ -50,6 +51,8 @@
   font-family: var(--font-hand);
   font-size: 1.4rem;
   color: var(--ink-muted);
+  line-height: 1.1;
+  text-wrap: balance;
 }
 
 .arrow {

@@ -5,6 +5,7 @@ import Modal from '../../ui/Modal/Modal';
 import Button from '../../ui/Button/Button';
 import IconButton from '../../ui/IconButton/IconButton';
 import Icon from '../../Icon/Icon';
+import StoryCover from '../../story/StoryCover/StoryCover';
 import { useMediaQuery } from '../../../hooks/useMediaQuery';
 import { STORY_PAGES } from '../../../constants/ourStory';
 import styles from './StoryBook.module.css';
@@ -23,27 +24,7 @@ const LABEL_H = 48; // the "psst" line and its arrow, upper-left of the book
 const doodle = (size) => ({ width: size, height: size });
 
 /** The cover, drawn with container units so it looks the same at 120px, 200px and 380px wide. */
-function CoverArt() {
-  return (
-    <span className={styles.cover}>
-      <span className={styles.spineLine} aria-hidden="true" />
-      <span className={styles.pill}>
-        <span className={styles.pair} aria-hidden="true">
-          <Icon name="her" size={64} style={doodle('21cqw')} />
-          <Icon name="him" size={64} style={doodle('21cqw')} />
-        </span>
-        <span className={styles.coverTitle}>Our story</span>
-      </span>
-      <span className={styles.since}>since 2023</span>
-      {[styles.star1, styles.star2, styles.star3].map((c) => (
-        <svg key={c} viewBox="-6 -6 12 12" className={`${styles.star} ${c}`} aria-hidden="true" focusable="false">
-          <path d="M0 -5 L1.6 -1.6 L5 0 L1.6 1.6 L0 5 L-1.6 1.6 L-5 0 L-1.6 -1.6 Z" fill="var(--gelato)" />
-        </svg>
-      ))}
-      <span className={styles.ribbon} aria-hidden="true" />
-    </span>
-  );
-}
+const CoverArt = () => <StoryCover className={styles.cover} />;
 
 /** Left page: chapter one, the two of them on a little hill, a paper plane between them, 2023. */
 function LeftPage() {

@@ -14,6 +14,9 @@ const EXIT_VARIANTS = {
 export default function Note({ note, boardScale = 1, panMode = false, isTop, exitReason, onOpen, onDragEnd, onBringToFront }) {
   const width = NOTE_CANVAS_WIDTH * NOTE_BOARD_SCALE;
   const height = NOTE_CANVAS_HEIGHT * NOTE_BOARD_SCALE;
+  // keep a 44px touch target when the board is zoomed out: the root is the (transparent) hit box, the note keeps its size inside
+  const padX = Math.max(0, (44 / boardScale - width) / 2);
+  const padY = Math.max(0, (44 / boardScale - height) / 2);
   const [isDragging, setIsDragging] = useState(false);
   const MoodIcon = MOOD_OPTIONS.find((m) => m.value === note.mood)?.icon;
 
@@ -38,10 +41,12 @@ export default function Note({ note, boardScale = 1, panMode = false, isTop, exi
     <motion.div
       className="absolute select-none"
       style={{
-        left: note.positionX,
-        top: note.positionY,
-        width,
-        height,
+        left: note.positionX - padX,
+        top: note.positionY - padY,
+        width: width + padX * 2,
+        height: height + padY * 2,
+        padding: `${padY}px ${padX}px`,
+        boxSizing: 'border-box',
         zIndex: note.zIndex || 1,
         rotate: note.rotation || 0,
         cursor: panMode ? 'inherit' : isDragging ? 'grabbing' : 'grab',

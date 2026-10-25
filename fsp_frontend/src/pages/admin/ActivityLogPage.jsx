@@ -52,7 +52,7 @@ export default function ActivityLogPage() {
       label: 'Status',
       render: (r) => (
         <span
-          className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${
+          className={`rounded-full px-2 py-0.5 text-xs font-medium ${
             r.status === 'FAILED' ? 'bg-(--color-admin-danger-soft) text-(--color-admin-danger)' : 'bg-(--color-admin-success-soft) text-(--color-admin-success)'
           }`}
         >
@@ -60,7 +60,7 @@ export default function ActivityLogPage() {
         </span>
       ),
     },
-    { key: 'entityId', label: 'Details', render: (r) => (r.entityId ? <span className="font-mono text-[11px] text-(--color-admin-text-muted)">{r.entityId.slice(0, 8)}…</span> : '—') },
+    { key: 'entityId', label: 'Details', render: (r) => (r.entityId ? <span className="font-mono text-xs text-(--color-admin-text-muted)">{r.entityId.slice(0, 8)}…</span> : '—') },
   ];
 
   return (

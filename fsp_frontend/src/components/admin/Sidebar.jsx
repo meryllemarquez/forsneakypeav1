@@ -62,7 +62,7 @@ export default function Sidebar({ onNavigate, onLogout, collapsed = false, onTog
         {!collapsed && (
           <div className="min-w-0">
             <p className="m-0 truncate text-[13px] font-semibold tracking-tight">Admin Console</p>
-            <p className="m-0 truncate text-[11px] text-(--footer-ink)/75">For Sneakypea</p>
+            <p className="m-0 truncate text-xs text-(--footer-ink)/75">For Sneakypea</p>
           </div>
         )}
       </div>
@@ -71,7 +71,7 @@ export default function Sidebar({ onNavigate, onLogout, collapsed = false, onTog
         {NAV_GROUPS.map((group) => (
           <div key={group.label}>
             {!collapsed && (
-              <p className="m-0 mb-1.5 px-3 text-[10px] font-semibold tracking-wider text-(--color-admin-golden) uppercase">
+              <p className="m-0 mb-1.5 px-3 text-xs font-semibold tracking-wider text-(--color-admin-golden) uppercase">
                 {group.label}
               </p>
             )}

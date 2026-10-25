@@ -52,7 +52,7 @@ export default function UsersPage() {
       label: 'Role',
       render: (r) => (
         <span
-          className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium ${
+          className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${
             r.role === 'ROLE_ADMIN' ? 'bg-(--color-admin-accent-soft) text-(--color-admin-accent)' : 'bg-(--color-admin-surface-2) text-(--color-admin-text-muted)'
           }`}
         >
@@ -65,7 +65,7 @@ export default function UsersPage() {
       key: 'active',
       label: 'Status',
       render: (r) => (
-        <span className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${r.active ? 'bg-(--color-admin-success-soft) text-(--color-admin-success)' : 'bg-(--color-admin-danger-soft) text-(--color-admin-danger)'}`}>
+        <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${r.active ? 'bg-(--color-admin-success-soft) text-(--color-admin-success)' : 'bg-(--color-admin-danger-soft) text-(--color-admin-danger)'}`}>
           {r.active ? 'Active' : 'Disabled'}
         </span>
       ),
@@ -80,7 +80,7 @@ export default function UsersPage() {
           disabled={r.id === currentUser?.id}
           onClick={() => setPending({ user: r, nextActive: !r.active })}
           title={r.id === currentUser?.id ? "You can't disable your own account" : undefined}
-          className={`inline-flex appearance-none items-center gap-1.5 rounded-lg border-0 px-2.5 py-1.5 text-[11.5px] font-medium transition disabled:cursor-not-allowed disabled:opacity-40 ${
+          className={`inline-flex appearance-none items-center gap-1.5 rounded-lg border-0 px-2.5 py-1.5 text-[13px] font-medium transition disabled:cursor-not-allowed disabled:opacity-40 ${
             r.active ? 'bg-(--color-admin-danger-soft) text-(--color-admin-danger) hover:opacity-80' : 'bg-(--color-admin-success-soft) text-(--color-admin-success) hover:opacity-80'
           }`}
         >

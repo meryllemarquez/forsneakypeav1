@@ -48,6 +48,26 @@
   color: var(--ink-muted);
 }
 
+.input[type='file'] {
+  display: flex;
+  align-items: center;
+  padding: 6px 8px;
+  cursor: pointer;
+}
+
+.input[type='file']::file-selector-button {
+  min-height: 36px;
+  margin-right: 12px;
+  padding: 0 16px;
+  background: var(--sea-tint);
+  color: var(--ink);
+  border: var(--border-width) solid var(--outline);
+  border-radius: var(--radius-pill);
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+}
+
 .input:focus-visible,
 .textarea:focus-visible,
 .select:focus-visible {
@@ -120,6 +140,11 @@
   justify-content: flex-end;
   gap: 12px;
   margin-top: 4px;
+  position: sticky;
+  bottom: 0;
+  z-index: 1;
+  padding: 12px 0 4px;
+  background: var(--white);
 }
 
 /* On/off switch: a real checkbox, restyled. */

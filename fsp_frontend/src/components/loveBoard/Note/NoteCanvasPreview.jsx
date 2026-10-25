@@ -46,6 +46,10 @@ export default function NoteCanvasPreview({ note, scale = 1, className = '' }) {
             color: b.color,
             textAlign: b.align || 'center',
             lineHeight: b.lineHeight ?? 1.3,
+            // whole lines only, with an ellipsis, so a cut-off preview looks intended
+            display: '-webkit-box',
+            WebkitBoxOrient: 'vertical',
+            WebkitLineClamp: Math.max(1, Math.floor((b.height * scale - 8) / (b.fontSize * scale * (b.lineHeight ?? 1.3)))),
             letterSpacing: `${b.letterSpacing ?? 0}px`,
           }}
         >

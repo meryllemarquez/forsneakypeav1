@@ -84,6 +84,7 @@
 .searchBar input {
   flex: 1 1 auto;
   min-width: 0;
+  min-height: 44px;
   padding: 0;
   background: transparent;
   border: none;
@@ -555,7 +556,7 @@
 
 .circularProgressLabel {
   position: absolute;
-  font-size: 0.6875rem;
+  font-size: 0.75rem;
   font-weight: 800;
 }
 
@@ -655,23 +656,35 @@
 }
 
 .checklistCheckbox {
+  position: relative;
   display: inline-flex;
   flex: none;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
-  margin: 6px 4px 0 0;
+  width: 44px;
+  height: 44px;
+  margin: 0 -2px 0 -6px; /* the 32px box below keeps its old place */
   padding: 0;
-  background: var(--white);
+  background: none;
   color: var(--ink);
-  border: var(--border-width) solid var(--outline);
-  border-radius: 10px;
+  border: 0;
   cursor: pointer;
 }
+.checklistCheckbox::before {
+  content: '';
+  position: absolute;
+  inset: 6px;
+  z-index: 0;
+  background: var(--white);
+  border: var(--border-width) solid var(--outline);
+  border-radius: 10px;
+}
+.checklistCheckbox > * { position: relative; }
 
-.checklistCheckboxDone {
+.checklistCheckboxDone::before {
   background: var(--citrus);
+}
+.checklistCheckboxDone {
   color: var(--on-bright);
   --icon-ink: var(--on-bright);
 }
@@ -686,7 +699,8 @@
 .checklistTextDone {
   display: block;
   width: 100%;
-  min-height: 32px;
+  min-height: 44px;
+  margin-block: -6px;
   padding: 0;
   background: none;
   border: none;

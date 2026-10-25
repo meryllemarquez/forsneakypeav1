@@ -213,7 +213,7 @@ export default function DashboardHome() {
                   <div className="h-8 w-8 shrink-0 overflow-hidden rounded-button bg-(--color-admin-surface-2)">
                     {m.coverImageUrl && <img src={m.coverImageUrl} alt="" className="h-full w-full object-cover" />}
                   </div>
-                  <span className="truncate text-[13.5px] text-(--color-admin-text)">{m.name}</span>
+                  <span className="truncate text-[13.5px] text-(--color-admin-text)" title={m.name}>{m.name}</span>
                 </li>
               ))}
             </ul>
@@ -231,7 +231,7 @@ export default function DashboardHome() {
               <span className="flex items-center gap-1.5 text-(--color-admin-text)">
                 <Wifi size={13} /> API
               </span>
-              <span className={`rounded-full px-2 py-0.5 text-[11.5px] font-semibold ${stats.systemHealth?.apiReachable ? 'bg-(--color-admin-success-soft) text-(--color-admin-success)' : 'bg-(--color-admin-danger-soft) text-(--color-admin-danger)'}`}>
+              <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${stats.systemHealth?.apiReachable ? 'bg-(--color-admin-success-soft) text-(--color-admin-success)' : 'bg-(--color-admin-danger-soft) text-(--color-admin-danger)'}`}>
                 {stats.systemHealth?.apiReachable ? 'Reachable' : 'Unreachable'}
               </span>
             </div>
@@ -239,7 +239,7 @@ export default function DashboardHome() {
               <span className="flex items-center gap-1.5 text-(--color-admin-text)">
                 <Database size={13} /> Database
               </span>
-              <span className={`rounded-full px-2 py-0.5 text-[11.5px] font-semibold ${stats.systemHealth?.databaseConnected ? 'bg-(--color-admin-success-soft) text-(--color-admin-success)' : 'bg-(--color-admin-danger-soft) text-(--color-admin-danger)'}`}>
+              <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${stats.systemHealth?.databaseConnected ? 'bg-(--color-admin-success-soft) text-(--color-admin-success)' : 'bg-(--color-admin-danger-soft) text-(--color-admin-danger)'}`}>
                 {stats.systemHealth?.databaseConnected ? 'Connected' : 'Disconnected'}
               </span>
             </div>
@@ -278,7 +278,7 @@ export default function DashboardHome() {
               {stats.recentNotifications.map((n, i) => (
                 <li key={i} className="text-[13.5px]">
                   <p className="m-0 font-medium text-(--color-admin-text)">{n.title}</p>
-                  <p className="m-0 truncate text-(--color-admin-text-muted)">{n.message}</p>
+                  <p className="m-0 truncate text-(--color-admin-text-muted)" title={n.message}>{n.message}</p>
                 </li>
               ))}
             </ul>

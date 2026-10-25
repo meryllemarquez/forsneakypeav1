@@ -17,7 +17,7 @@
   font-weight: 700;
   font-size: 1.5rem;
   line-height: 1;
-  color: var(--tomato);
+  color: var(--on-bright); /* the card is butter in both themes, so the ink must not flip */
 }
 
 .value {

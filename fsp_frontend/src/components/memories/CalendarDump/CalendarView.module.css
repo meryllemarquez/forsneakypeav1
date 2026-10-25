@@ -246,7 +246,7 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   /* Scales with the sheet so it stays proportional to the cell size. */
-  font-size: clamp(0.62rem, 1.05vw, 0.85rem);
+  font-size: clamp(0.75rem, 1.05vw, 0.85rem);
   line-height: 1;
   font-weight: 800;
   color: var(--ink);

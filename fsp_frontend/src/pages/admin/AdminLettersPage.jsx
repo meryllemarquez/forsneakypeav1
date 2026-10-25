@@ -74,7 +74,7 @@ export default function AdminLettersPage() {
       key: 'isArchived',
       label: 'Status',
       render: (r) => (
-        <span className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${r.isArchived ? 'bg-(--color-admin-warning-soft) text-(--color-admin-warning)' : 'bg-(--color-admin-success-soft) text-(--color-admin-success)'}`}>
+        <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${r.isArchived ? 'bg-(--color-admin-warning-soft) text-(--color-admin-warning)' : 'bg-(--color-admin-success-soft) text-(--color-admin-success)'}`}>
           {r.isArchived ? 'Archived' : 'Active'}
         </span>
       ),

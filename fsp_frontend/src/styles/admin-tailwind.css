@@ -57,6 +57,11 @@
   --shadow-modal: 6px 6px 0 var(--sea);
 }
 
+/* dark: lighten so danger text keeps 4.5:1 on its soft tint */
+:root[data-theme="dark"] {
+  --color-admin-danger: color-mix(in srgb, var(--tomato) 65%, white);
+}
+
 /* Touch targets: every button, field and nav link in the admin is at least 44px. */
 .admin-shell button,
 .admin-shell select,

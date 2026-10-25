@@ -1,0 +1,86 @@
+/* The storybook cover, drawn in container units: the parent needs position: relative and container-type: inline-size. */
+.cover {
+  position: absolute;
+  inset: 0;
+  display: block;
+  border: 2px solid var(--outline);
+  border-radius: 3cqw 7cqw 7cqw 3cqw;
+  background: #1f55c9;
+  box-shadow: 2.5cqw 3cqw 0 rgb(23 43 112 / 0.32);
+}
+.spineLine {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 7cqw;
+  width: 0;
+  border-left: 2px solid rgb(255 255 255 / 0.32);
+}
+.pill {
+  position: absolute;
+  top: 12%;
+  right: 9%;
+  left: 13%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1cqw;
+  padding: 5cqw 3cqw 5cqw;
+  border: 2px solid #172b70;
+  border-radius: 10cqw;
+  background: #fff8e8;
+  color: #172b70;
+}
+.pair {
+  display: flex;
+  gap: 0;
+}
+.coverTitle {
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: max(12px, 10.5cqw);
+  line-height: 1.05;
+  text-align: center;
+}
+.since {
+  position: absolute;
+  right: 9%;
+  bottom: 16%;
+  left: 13%;
+  color: var(--gelato);
+  font-family: var(--font-hand);
+  font-weight: 700;
+  font-size: 12.5cqw;
+  line-height: 1;
+  text-align: center;
+}
+.ribbon {
+  position: absolute;
+  top: 100%;
+  right: 20%;
+  width: 9cqw;
+  height: 17cqw;
+  margin-top: -2px;
+  border: 2px solid var(--outline);
+  border-top: 0;
+  background: var(--citrus);
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 78%, 0 100%);
+}
+
+@keyframes shimmer {
+  0%, 100% { opacity: 0.35; transform: scale(0.7) rotate(0deg); }
+  50% { opacity: 1; transform: scale(1.15) rotate(20deg); }
+}
+.star {
+  position: absolute;
+  width: 6cqw;
+  height: 6cqw;
+  animation: shimmer 2.6s ease-in-out infinite;
+}
+.star1 { top: 4%; left: 17%; }
+.star2 { top: 5%; right: 8%; animation-delay: -0.9s; }
+.star3 { right: 10%; bottom: 7%; animation-delay: -1.7s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .star { animation: none; }
+}

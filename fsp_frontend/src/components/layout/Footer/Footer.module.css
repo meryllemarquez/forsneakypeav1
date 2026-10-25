@@ -43,13 +43,16 @@
 .links {
   display: flex;
   flex-wrap: wrap;
-  gap: 0 22px;
+  gap: 0 10px;
 }
 
 .links a {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
+  min-width: 44px;
   min-height: var(--tap);
+  padding: 0 6px;
   color: var(--footer-ink);
   font-weight: 700;
   text-decoration: none;

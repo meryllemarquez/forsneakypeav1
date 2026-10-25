@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
@@ -16,6 +16,7 @@ import PetStage from '../components/pets/PetStage/PetStage';
 import styles from './PetsPage.module.css';
 
 const WIDE_QUERY = '(min-width: 1000px)';
+const COOLDOWN_MS = 8000; // mirrors PetService.COOLDOWN: the same action on the same pet
 
 // The 3x3 grid of faces. A radiogroup: arrow keys move, the selected tile is the one in the tab order.
 function PetGrid({ pets, selectedId, onSelect }) {
@@ -80,6 +81,16 @@ export default function PetsPage() {
   const [reaction, setReaction] = useState(null);
   const [busy, setBusy] = useState(false);
   const counter = useRef(0);
+  const inFlight = useRef(false);
+  const [cooldowns, setCooldowns] = useState({}); // 'petId:action' -> timestamp it is ready again
+  const [now, setNow] = useState(() => Date.now());
+
+  const resting = Object.values(cooldowns).some((until) => until > now);
+  useEffect(() => {
+    if (!resting) return undefined;
+    const t = setInterval(() => setNow(Date.now()), 250);
+    return () => clearInterval(t);
+  }, [resting]);
 
   const pets = data?.pets ?? [];
   const pet = pets.find((p) => p.id === pickedId) || pets[0];
@@ -91,25 +102,47 @@ export default function PetsPage() {
     setReaction(null);
   };
 
+  const startCooldown = useCallback((petId, action) => {
+    const t = Date.now();
+    setNow(t);
+    setCooldowns((c) => ({ ...c, [`${petId}:${action}`]: t + COOLDOWN_MS }));
+  }, []);
+
   const onAct = useCallback(
     async (action) => {
-      if (!pet || busy) return;
+      if (!pet || busy || inFlight.current) return;
+      const target = pet;
+      if ((cooldowns[`${target.id}:${action}`] ?? 0) > Date.now()) return;
+      inFlight.current = true;
       setBusy(true);
       try {
-        const res = await act(pet.id, action);
+        const res = await act(target.id, action);
+        startCooldown(target.id, action);
         setReaction({ id: ++counter.current, kind: res.reaction.kind, line: res.reaction.line });
       } catch (err) {
+        // 429 is the cooldown: rest that button, say so once, never retry
         if (err?.response?.status === 429) {
-          // the cooldown: a gentle head tilt, no toast
-          setReaction({ id: ++counter.current, kind: 'wait', line: `give ${pet.name} a moment, love` });
+          startCooldown(target.id, action);
+          addToast(`${target.name} needs a little break`, 'info');
         } else {
-          addToast(`Couldn't reach ${pet.name} just now. Try again?`, 'error');
-          setBusy(false);
+          addToast(`Couldn't reach ${target.name} just now. Try again?`, 'error');
         }
+        setBusy(false);
+      } finally {
+        inFlight.current = false;
       }
     },
-    [pet, busy, act, addToast],
+    [pet, busy, cooldowns, act, addToast, startCooldown],
   );
+
+  // seconds left per action for the picked pet, only while resting
+  const restingFor = {};
+  if (pet) {
+    for (const [key, until] of Object.entries(cooldowns)) {
+      const [id, action] = key.split(':');
+      if (id === pet.id && until > now) restingFor[action] = Math.ceil((until - now) / 1000);
+    }
+  }
 
   const reactionEnded = useCallback(() => setBusy(false), []);
 
@@ -132,6 +165,7 @@ export default function PetsPage() {
           size={wide ? 200 : 160}
           reaction={reaction}
           busy={busy}
+          resting={restingFor}
           onAct={onAct}
           onReactionEnd={reactionEnded}
         />

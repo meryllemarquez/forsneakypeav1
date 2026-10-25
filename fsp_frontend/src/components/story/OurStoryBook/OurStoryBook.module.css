@@ -121,7 +121,9 @@
   cursor: pointer;
 }
 @media (max-width: 480px) {
-  .dot { width: 34px; }
+  /* 8 x 44px is 352px: let the row use the sheet's side padding too */
+  .dots { margin-inline: -12px; }
+  .dot { flex: none; }
 }
 .dot span {
   display: block;
