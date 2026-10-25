@@ -1,10 +1,11 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { X, ArrowRight, KeyRound } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { authService } from '../services/authService';
 import LandingScene from '../components/landing/LandingScene';
+import StoryBook from '../components/landing/StoryBook/StoryBook';
 import styles from './AuthPage.module.css';
 
 // A 401 from any authenticated request redirects here and sets this flag (see axiosConfig.js's
@@ -17,6 +18,14 @@ function readSessionExpiredFlag() {
   } catch {
     return false;
   }
+}
+
+// Where the landing storybook's "Read our story" sends people after login. `next` is only honoured when it is a
+// path inside /home, so this page can never be used to bounce someone to another site.
+const STORY_NEXT = '/home#our-story';
+function safeNext(value) {
+  if (typeof value !== 'string') return '';
+  return /^\/home(?:[/?#]|$)/.test(value) ? value : '';
 }
 
 // Phones (and portrait tablets) get the tall scene and a bottom-sheet login.
@@ -34,7 +43,9 @@ function usePhone() {
 
 export default function AuthPage() {
   const [sessionExpired] = useState(readSessionExpiredFlag);
-  const [isCardOpen, setIsCardOpen] = useState(sessionExpired);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const nextPath = safeNext(searchParams.get('next'));
+  const [isCardOpen, setIsCardOpen] = useState(sessionExpired || Boolean(nextPath));
   const [mode, setMode] = useState('LOGIN'); // 'LOGIN' | 'INVITE' | 'REGISTER'
 
   const [username, setUsername] = useState('');
@@ -102,10 +113,17 @@ export default function AuthPage() {
     }
   }, [sessionExpired]);
 
+  const readStory = () => {
+    setSearchParams({ next: STORY_NEXT }, { replace: true });
+    setError('');
+    setMode('LOGIN');
+    setIsCardOpen(true);
+  };
+
   const finish = (response) => {
     login(response);
     closeCard();
-    navigate(response.role === 'ROLE_ADMIN' ? '/admin' : '/');
+    navigate(response.role === 'ROLE_ADMIN' ? '/admin' : nextPath || '/');
   };
 
   const handleLoginSubmit = async (e) => {
@@ -166,10 +184,11 @@ export default function AuthPage() {
     <div className={styles.page} ref={pageRef}>
       <div className={styles.sceneLayer}>
         <LandingScene phone={phone} />
+        <StoryBook phone={phone} hidden={isCardOpen} onContinue={readStory} />
       </div>
 
       <div className={`${styles.layout} ${layoutClass}`}>
-        <motion.div className={styles.hero} layout transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}>
+        <motion.div className={styles.hero} data-landing-hero layout transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}>
           <h1 className={styles.title}>for sneakypea.</h1>
           <p className={styles.subtitle}>Every memory deserves a place to stay.</p>
 
@@ -213,6 +232,7 @@ export default function AuthPage() {
                 <form onSubmit={handleLoginSubmit} className={styles.form}>
                   <div className={styles.header}>
                     <h2 id="auth-title" className={styles.title2}>Log in</h2>
+                    {nextPath && <p className={styles.lead}>Sign in to read it, love.</p>}
                   </div>
 
                   {error && <div className={styles.message} role="alert">{error}</div>}

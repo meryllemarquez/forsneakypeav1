@@ -254,6 +254,37 @@ function Tree() {
   );
 }
 
+// A slimmer second tree for the right side: an upright, pointed canopy so it is not a copy of the big round one.
+// Same trunk base (418, 650), so it can be placed with a transform.
+function TreeB() {
+  return (
+    <g className={styles.sway} style={{ animationDelay: '-3s' }}>
+      <path d="M416 650 C418 628 416 604 413 580 L425 580 C422 604 424 628 426 650 Z" fill="var(--ls-trunk)" />
+      <path d="M420 614 L441 592 M418 602 L401 585" stroke="var(--ls-trunk)" strokeWidth="5" strokeLinecap="round" fill="none" />
+      <g fill="var(--ls-leaf-0)">
+        <ellipse cx="420" cy="500" rx="46" ry="84" />
+        <ellipse cx="384" cy="542" rx="30" ry="48" transform="rotate(-18 384 542)" />
+        <ellipse cx="458" cy="540" rx="30" ry="48" transform="rotate(18 458 540)" />
+      </g>
+      <g fill="var(--ls-leaf-1)">
+        <ellipse cx="420" cy="494" rx="32" ry="66" />
+        <ellipse cx="392" cy="538" rx="18" ry="34" transform="rotate(-18 392 538)" />
+        <ellipse cx="450" cy="536" rx="18" ry="34" transform="rotate(18 450 536)" />
+      </g>
+      <g fill="var(--ls-leaf-2)" opacity="0.9">
+        <ellipse cx="428" cy="450" rx="9" ry="20" transform="rotate(14 428 450)" />
+        <ellipse cx="404" cy="500" rx="8" ry="17" transform="rotate(-10 404 500)" />
+        <ellipse cx="442" cy="520" rx="7" ry="15" transform="rotate(20 442 520)" />
+      </g>
+      <g fill="#FFC2D4">
+        <circle cx="398" cy="470" r="4" />
+        <circle cx="444" cy="486" r="4" />
+        <circle cx="414" cy="540" r="3.5" />
+      </g>
+    </g>
+  );
+}
+
 // The house, drawn in a 278x174 box with its base at y=174.
 function House() {
   return (
@@ -779,6 +810,9 @@ export default function LandingScene({ phone = false }) {
           <path d="M-100 648 C200 624 420 646 640 638 C860 630 1040 652 1300 634 V780 H-100 Z" fill="url(#lsMeadow)" />
           <path d={TUFT_PATH} stroke="var(--ls-tuft)" strokeWidth="1.6" strokeLinecap="round" fill="none" opacity="0.55" />
           <Tree />
+          <g transform="translate(432 78) scale(0.88)">
+            <TreeB />
+          </g>
           <g transform="translate(70 470)">
             <House />
           </g>

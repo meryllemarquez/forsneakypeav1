@@ -1,7 +1,8 @@
-import { useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth } from '../hooks/useAuth';
+import { useNotification } from '../hooks/useNotification';
 import { useHomeSummary } from '../queries/queries';
 import { getDaysTogether, ANNIVERSARY_LABEL } from '../constants/relationship';
 import { HOME_GREETINGS } from '../constants/homeGreetings';
@@ -11,6 +12,7 @@ import Navbar from '../components/layout/Navbar/Navbar';
 import Footer from '../components/layout/Footer/Footer';
 import StatusChip from '../components/ui/StatusChip/StatusChip';
 import UsualOrdersCounter from '../components/home/UsualOrdersCounter/UsualOrdersCounter';
+import StoryCoverCard from '../components/story/StoryCoverCard/StoryCoverCard';
 import WheelCard from '../components/home/WheelCard/WheelCard';
 import BouquetsCard from '../components/home/BouquetsCard/BouquetsCard';
 import styles from './HomePage.module.css';
@@ -76,6 +78,47 @@ export default function HomePage() {
   // make. `today` is the viewer's local date so "upcoming" matches their calendar.
   const today = useMemo(() => localDateString(), []);
   const { data: summary, isPending: loadingContent, isError } = useHomeSummary(today);
+
+  // "Our story": the book is a separate chunk, fetched the first time it is opened.
+  const { addToast } = useNotification();
+  const { hash } = useLocation();
+  const [Book, setBook] = useState(null);
+  const [storyOpen, setStoryOpen] = useState(false);
+  const [storyBusy, setStoryBusy] = useState(false);
+
+  const openStory = useCallback(async () => {
+    setStoryBusy(true);
+    try {
+      if (!Book) {
+        const mod = await import('../components/story/OurStoryBook/OurStoryBook');
+        setBook(() => mod.default);
+      }
+      setStoryOpen(true);
+    } catch {
+      addToast("Couldn't open the book. Try again?", 'error');
+    } finally {
+      setStoryBusy(false);
+    }
+  }, [Book, addToast]);
+
+  // Arriving from the landing storybook (/home#our-story): scroll to the card and open the book, once per device.
+  const hashHandled = useRef(false);
+  useEffect(() => {
+    if (hash !== '#our-story' || hashHandled.current) return;
+    hashHandled.current = true;
+    const t = setTimeout(() => {
+      document.getElementById('our-story')?.scrollIntoView({ block: 'center' });
+      let seen = false;
+      try {
+        seen = Boolean(localStorage.getItem('fsp-story-seen'));
+        localStorage.setItem('fsp-story-seen', '1');
+      } catch {
+        // storage unavailable: just open it
+      }
+      if (!seen) openStory();
+    }, 150);
+    return () => clearTimeout(t);
+  }, [hash, openStory]);
 
   const featuredFolders = summary?.folders ?? [];
   const upcomingDates = summary?.upcomingDates ?? [];
@@ -199,6 +242,11 @@ export default function HomePage() {
           )}
         </section>
 
+        {/* OUR STORY */}
+        <section className={styles.section} aria-label="Our story">
+          <StoryCoverCard onOpen={openStory} busy={storyBusy} />
+        </section>
+
         {/* NEXT ADVENTURES + LATEST LETTER */}
         <section className={`${styles.section} ${styles.twoCol}`}>
           <div className={styles.adventures} aria-labelledby="home-adventures">
@@ -308,6 +356,8 @@ export default function HomePage() {
       </main>
 
       <Footer />
+
+      {Book && <Book open={storyOpen} onClose={() => setStoryOpen(false)} />}
     </div>
   );
 }
