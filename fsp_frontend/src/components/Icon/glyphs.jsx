@@ -647,6 +647,93 @@ export const GLYPHS = {
       <circle cx="30" cy="31" r="2.6" fill="#FF9F1C" />
     </>
   ),
+  // Bouquet flowers: heads are centred at (32, 28) so a stem can attach at (32, 52).
+  rose: (
+    <>
+      <path d="M32 10 C16 10 10 26 18 38 C24 48 40 48 46 38 C54 26 48 10 32 10 Z" transform="translate(2 2)" fill="#FFD8A0" stroke="none" />
+      <path d="M32 10 C16 10 10 26 18 38 C24 48 40 48 46 38 C54 26 48 10 32 10 Z" fill="#FF8FB1" />
+      <path d="M32 20 C26 20 24 28 30 30 C36 32 40 26 36 22 C34 20 30 22 31 26" />
+      <path d="M19 30 C22 36 26 38 30 38 M45 30 C42 36 38 38 34 38" />
+      <path d="M22 17 C24 14 27 13 29 12.5" stroke="#FFFFFF" strokeWidth="2.2" />
+      <path d="M28 47 C24 48 22 46 21 43 C25 43 27 44 28 47 Z" fill="#5E9B4E" />
+      <path d="M36 47 C40 48 42 46 43 43 C39 43 37 44 36 47 Z" fill="#5E9B4E" />
+    </>
+  ),
+  sunflower: (
+    <>
+      {[0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330].map((deg) => (
+        <path key={deg} d="M32 6 L36 18 L28 18 Z" transform={`rotate(${deg} 32 28)`} fill="#FFE680" />
+      ))}
+      <path d="M30 9 L31 14" stroke="#FFFFFF" strokeWidth="2.2" />
+      <circle cx="32" cy="28" r="9" fill="#8A4B2A" />
+      <path d="M28 25 v.1 M35 24 v.1 M32 29 v.1 M27 32 v.1 M36 32 v.1" stroke="#172B70" strokeWidth="3" />
+    </>
+  ),
+  babysbreath: (
+    <>
+      <path d="M32 52 C32 44 30 38 24 32 M32 52 C33 42 36 36 42 30 M32 46 C32 36 32 28 32 20" />
+      <path d="M29 40 C26 38 22 38 19 38 M37 38 C40 36 44 36 47 36 M32 30 C30 26 28 24 27 22 M32 28 C35 26 37 24 38 22" />
+      <path d="M30 44 C24 44 19 44 15 44 M34 44 C40 44 46 44 50 43" />
+      <circle cx="24" cy="31" r="2.6" fill="#FFFFFF" />
+      <circle cx="42" cy="29" r="2.6" fill="#FFFFFF" />
+      <circle cx="32" cy="17.5" r="2.6" fill="#FFFFFF" />
+      <circle cx="27" cy="21" r="2.6" fill="#FFFFFF" />
+      <circle cx="38" cy="21" r="2.6" fill="#FFFFFF" />
+      <circle cx="15" cy="44" r="2.6" fill="#FFFFFF" />
+      <circle cx="50" cy="43" r="2.6" fill="#FFFFFF" />
+      <circle cx="19" cy="38" r="2.6" fill="#CDE7FF" />
+      <circle cx="47" cy="36" r="2.6" fill="#CDE7FF" />
+    </>
+  ),
+  lily: (
+    <>
+      <path d="M32 28 C24 32 16 32 12 38 C20 42 28 38 32 28 Z" fill="#FFD8A0" />
+      <path d="M32 28 C40 32 48 32 52 38 C44 42 36 38 32 28 Z" fill="#FFD8A0" />
+      <path d="M32 28 C28 36 28 44 32 50 C36 44 36 36 32 28 Z" fill="#FFD8A0" />
+      <path d="M32 28 C22 22 18 12 22 6 C28 10 32 18 32 28 Z" fill="#FFF0B3" />
+      <path d="M32 28 C42 22 46 12 42 6 C36 10 32 18 32 28 Z" fill="#FFF0B3" />
+      <path d="M32 28 C27 20 28 10 32 4 C36 10 37 20 32 28 Z" fill="#FFF0B3" />
+      <path d="M18 36 v.1 M46 36 v.1 M32 42 v.1" stroke="#FF9F1C" strokeWidth="3" />
+      <path d="M32 28 L27 19 M32 28 L37 19 M32 28 L32 16" />
+      <path d="M27 19 v.1 M37 19 v.1 M32 16 v.1" stroke="#FF9F1C" strokeWidth="4" />
+    </>
+  ),
+  // Greenery / fillers.
+  leaf: (
+    <>
+      <path d="M32 56 C16 46 16 20 32 8 C48 20 48 46 32 56 Z" transform="translate(2 2)" fill="#CDE7FF" stroke="none" />
+      <path d="M32 56 C16 46 16 20 32 8 C48 20 48 46 32 56 Z" fill="#5E9B4E" />
+      <path d="M32 54 V16 M32 38 L24 31 M32 38 L40 31" />
+      <path d="M23 22 C21 28 21 34 23 38" stroke="#FFFFFF" strokeWidth="2.2" />
+    </>
+  ),
+  fern: (
+    <>
+      <path d="M32 60 V10" />
+      <path d="M32 50 C27 50 23 46 21 41 C27 41 31 45 32 50 Z" fill="#5E9B4E" />
+      <path d="M32 50 C37 50 41 46 43 41 C37 41 33 45 32 50 Z" fill="#5E9B4E" />
+      <path d="M32 40 C27 40 23 36 21 31 C27 31 31 35 32 40 Z" fill="#5E9B4E" />
+      <path d="M32 40 C37 40 41 36 43 31 C37 31 33 35 32 40 Z" fill="#5E9B4E" />
+      <path d="M32 30 C28 30 25 27 24 23 C28 23 31 26 32 30 Z" fill="#5E9B4E" />
+      <path d="M32 30 C36 30 39 27 40 23 C36 23 33 26 32 30 Z" fill="#5E9B4E" />
+      <path d="M32 20 C29 20 27 18 26 15 C29 15 31 17 32 20 Z" fill="#5E9B4E" />
+      <path d="M32 20 C35 20 37 18 38 15 C35 15 33 17 32 20 Z" fill="#5E9B4E" />
+    </>
+  ),
+  eucalyptus: (
+    <>
+      <path d="M20 58 C26 44 34 30 44 8" />
+      <ellipse cx="17" cy="44" rx="6" ry="4.6" transform="rotate(-25 17 44)" fill="#5E9B4E" />
+      <ellipse cx="32" cy="50" rx="6" ry="4.6" transform="rotate(25 32 50)" fill="#CDE7FF" />
+      <ellipse cx="22" cy="34" rx="6" ry="4.6" transform="rotate(-25 22 34)" fill="#CDE7FF" />
+      <ellipse cx="37" cy="40" rx="6" ry="4.6" transform="rotate(25 37 40)" fill="#5E9B4E" />
+      <ellipse cx="27" cy="24" rx="6" ry="4.6" transform="rotate(-25 27 24)" fill="#5E9B4E" />
+      <ellipse cx="42" cy="30" rx="6" ry="4.6" transform="rotate(25 42 30)" fill="#CDE7FF" />
+      <ellipse cx="32" cy="14" rx="6" ry="4.6" transform="rotate(-25 32 14)" fill="#CDE7FF" />
+      <ellipse cx="47" cy="20" rx="6" ry="4.6" transform="rotate(25 47 20)" fill="#5E9B4E" />
+      <ellipse cx="44" cy="7" rx="4" ry="5" fill="#5E9B4E" />
+    </>
+  ),
 };
 
 export const ICON_NAMES = Object.keys(GLYPHS);
