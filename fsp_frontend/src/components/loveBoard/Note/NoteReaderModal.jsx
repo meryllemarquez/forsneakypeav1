@@ -106,7 +106,7 @@ export default function NoteReaderModal({ note, onClose, onSave, onToggleFavorit
             <span aria-hidden="true">·</span>
             <span>{current.updatedAt ? new Date(current.updatedAt).toLocaleDateString() : ''}</span>
             {current.isPrivate && (
-              <span className="inline-flex items-center gap-1 rounded-full border-2 border-solid border-(--ink) bg-(--gelato) px-2.5 py-0.5 text-(--ink)">
+              <span className="inline-flex items-center gap-1 rounded-full border-2 border-solid border-(--outline) bg-(--gelato) px-2.5 py-0.5 text-(--on-bright) [--icon-ink:var(--on-bright)]">
                 <Lock size={14} strokeWidth={2.6} aria-hidden="true" />
                 Private
               </span>
@@ -117,7 +117,7 @@ export default function NoteReaderModal({ note, onClose, onSave, onToggleFavorit
             <div className="flex flex-col items-center text-center">
               <NoteCanvasPreview
                 note={current}
-                className="drop-shadow-[4px_5px_0_rgba(23,43,112,0.22)]"
+                className="drop-shadow-[4px_5px_0_var(--drop-shadow)]"
               />
               {moodInfo && (
                 <p className="mt-4 inline-flex items-center gap-1.5 text-sm font-extrabold text-(--ink)">

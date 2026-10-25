@@ -39,11 +39,11 @@ export default function StickerLibrary({ open, onAdd, onClose }) {
               onClick={() => onAdd(stickerValue(name))}
               whileHover={{ y: -3, rotate: 3 }}
               whileTap={{ scale: 0.92 }}
-              className="lb-focus flex h-[84px] shrink-0 cursor-pointer appearance-none items-center justify-center rounded-2xl border-2 border-solid border-(--ink) bg-(--paper) p-2 transition-colors hover:bg-(--gelato-tint)"
+              className="lb-focus flex h-[84px] shrink-0 cursor-pointer appearance-none items-center justify-center rounded-2xl border-2 border-solid border-(--outline) bg-(--paper) p-2 transition-colors hover:bg-(--gelato-tint)"
               aria-label={`Add sticker: ${label}`}
               title={label}
             >
-              <Icon name={name} size={60} sticker />
+              <span data-theme="light" className="contents"><Icon name={name} size={60} sticker /></span>
             </motion.button>
           );
         })}

@@ -53,16 +53,16 @@ export default function Sidebar({ onNavigate, onLogout, collapsed = false, onTog
     <motion.div
       animate={{ width: collapsed ? 76 : 256 }}
       transition={{ type: 'spring', stiffness: 300, damping: 32 }}
-      className="flex h-full shrink-0 flex-col overflow-hidden bg-(--color-admin-sidebar) text-white"
+      className="flex h-full shrink-0 flex-col overflow-hidden bg-(--color-admin-sidebar) text-(--footer-ink)"
     >
       <div className="flex items-center gap-2.5 px-5 py-5">
-        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-button bg-(--color-admin-accent) text-white">
+        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-button bg-(--color-admin-accent) text-(--footer-ink)">
           <ShieldCheck size={16} strokeWidth={2.25} />
         </div>
         {!collapsed && (
           <div className="min-w-0">
             <p className="m-0 truncate text-[13px] font-semibold tracking-tight">Admin Console</p>
-            <p className="m-0 truncate text-[11px] text-white/75">For Sneakypea</p>
+            <p className="m-0 truncate text-[11px] text-(--footer-ink)/75">For Sneakypea</p>
           </div>
         )}
       </div>
@@ -86,8 +86,8 @@ export default function Sidebar({ onNavigate, onLogout, collapsed = false, onTog
                   className={({ isActive }) =>
                     `group relative flex items-center gap-2.5 rounded-button px-3 py-2 text-[13px] font-medium no-underline transition-colors ${
                       isActive
-                        ? 'bg-white/10 text-white'
-                        : 'text-white/85 hover:bg-(--color-admin-sidebar-hover) hover:text-white'
+                        ? 'bg-(--footer-ink)/10 text-(--footer-ink)'
+                        : 'text-(--footer-ink)/85 hover:bg-(--color-admin-sidebar-hover) hover:text-(--footer-ink)'
                     }`
                   }
                 >
@@ -113,12 +113,12 @@ export default function Sidebar({ onNavigate, onLogout, collapsed = false, onTog
         ))}
       </nav>
 
-      <div className="space-y-0.5 border-t border-white/10 px-3 py-3">
+      <div className="space-y-0.5 border-t border-(--footer-ink)/10 px-3 py-3">
         {onToggleCollapse && (
           <button
             type="button"
             onClick={onToggleCollapse}
-            className="hidden w-full appearance-none items-center gap-2.5 rounded-button border-0 bg-transparent px-3 py-2 text-[13px] font-medium text-white/80 transition hover:bg-(--color-admin-sidebar-hover) hover:text-white lg:flex"
+            className="hidden w-full appearance-none items-center gap-2.5 rounded-button border-0 bg-transparent px-3 py-2 text-[13px] font-medium text-(--footer-ink)/80 transition hover:bg-(--color-admin-sidebar-hover) hover:text-(--footer-ink) lg:flex"
           >
             {collapsed ? <ChevronsRight size={16} strokeWidth={2} /> : <ChevronsLeft size={16} strokeWidth={2} />}
             {!collapsed && <span>Collapse</span>}
@@ -128,7 +128,7 @@ export default function Sidebar({ onNavigate, onLogout, collapsed = false, onTog
           type="button"
           onClick={onLogout}
           title={collapsed ? 'Logout' : undefined}
-          className="flex w-full appearance-none items-center gap-2.5 rounded-button border-0 bg-transparent px-3 py-2 text-[13px] font-medium text-white/80 transition hover:bg-(--color-admin-sidebar-hover) hover:text-white"
+          className="flex w-full appearance-none items-center gap-2.5 rounded-button border-0 bg-transparent px-3 py-2 text-[13px] font-medium text-(--footer-ink)/80 transition hover:bg-(--color-admin-sidebar-hover) hover:text-(--footer-ink)"
         >
           <LogOut size={16} strokeWidth={2} />
           {!collapsed && 'Logout'}

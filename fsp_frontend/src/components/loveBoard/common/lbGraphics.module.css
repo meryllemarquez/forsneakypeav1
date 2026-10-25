@@ -4,46 +4,46 @@
 .paper {
   position: absolute;
   box-sizing: border-box;
-  border: 2px solid var(--ink);
+  border: 2px solid var(--outline);
   border-radius: 6px;
-  box-shadow: 4px 5px 0 rgb(23 43 112 / 0.18);
+  box-shadow: 4px 5px 0 var(--drop-shadow);
   pointer-events: none;
 }
 
 /* Sticky notes: a soft colour with a darker sticky strip along the top. */
 .gelato {
   background-color: var(--gelato);
-  background-image: linear-gradient(to bottom, rgb(255 159 28 / 0.28) 0 14%, transparent 14%);
+  background-image: linear-gradient(to bottom, color-mix(in srgb, var(--citrus) 28%, transparent) 0 14%, transparent 14%);
 }
 
 .sea {
   background-color: var(--sea-tint);
-  background-image: linear-gradient(to bottom, rgb(92 179 255 / 0.4) 0 14%, transparent 14%);
+  background-image: linear-gradient(to bottom, color-mix(in srgb, var(--sea) 40%, transparent) 0 14%, transparent 14%);
 }
 
 .citrus {
   background-color: var(--citrus-tint);
-  background-image: linear-gradient(to bottom, rgb(255 159 28 / 0.4) 0 14%, transparent 14%);
+  background-image: linear-gradient(to bottom, color-mix(in srgb, var(--citrus) 40%, transparent) 0 14%, transparent 14%);
 }
 
 .lined {
   background-color: var(--white);
-  background-image: repeating-linear-gradient(to bottom, transparent 0, transparent 16px, rgb(92 179 255 / 0.55) 16px, rgb(92 179 255 / 0.55) 18px);
+  background-image: repeating-linear-gradient(to bottom, transparent 0, transparent 16px, color-mix(in srgb, var(--sea) 55%, transparent) 16px, color-mix(in srgb, var(--sea) 55%, transparent) 18px);
 }
 
 .grid {
   background-color: var(--white);
   background-image:
-    linear-gradient(rgb(92 179 255 / 0.4) 1.5px, transparent 1.5px),
-    linear-gradient(90deg, rgb(92 179 255 / 0.4) 1.5px, transparent 1.5px);
+    linear-gradient(color-mix(in srgb, var(--sea) 40%, transparent) 1.5px, transparent 1.5px),
+    linear-gradient(90deg, color-mix(in srgb, var(--sea) 40%, transparent) 1.5px, transparent 1.5px);
   background-size: 18px 18px;
 }
 
 .outline {
   position: absolute;
   filter:
-    drop-shadow(2px 0 0 var(--ink)) drop-shadow(-2px 0 0 var(--ink)) drop-shadow(0 2px 0 var(--ink)) drop-shadow(0 -2px 0 var(--ink))
-    drop-shadow(4px 5px 0 rgb(23 43 112 / 0.18));
+    drop-shadow(2px 0 0 var(--outline)) drop-shadow(-2px 0 0 var(--outline)) drop-shadow(0 2px 0 var(--outline)) drop-shadow(0 -2px 0 var(--outline))
+    drop-shadow(4px 5px 0 var(--drop-shadow));
   pointer-events: none;
 }
 
@@ -55,8 +55,8 @@
   box-shadow: none;
   background-color: var(--paper-warm);
   background-image:
-    linear-gradient(to right, transparent 13%, rgb(224 48 26 / 0.45) 13%, rgb(224 48 26 / 0.45) 14.5%, transparent 14.5%),
-    repeating-linear-gradient(to bottom, transparent 0, transparent 16px, rgb(92 179 255 / 0.6) 16px, rgb(92 179 255 / 0.6) 18px);
+    linear-gradient(to right, transparent 13%, color-mix(in srgb, var(--tomato) 45%, transparent) 13%, color-mix(in srgb, var(--tomato) 45%, transparent) 14.5%, transparent 14.5%),
+    repeating-linear-gradient(to bottom, transparent 0, transparent 16px, color-mix(in srgb, var(--sea) 60%, transparent) 16px, color-mix(in srgb, var(--sea) 60%, transparent) 18px);
   clip-path: polygon(
     0 0, 100% 0, 100% 93%, 95% 98%, 90% 92%, 85% 99%, 80% 93%, 75% 100%, 70% 94%, 65% 99%, 60% 92%,
     55% 98%, 50% 93%, 45% 100%, 40% 94%, 35% 99%, 30% 92%, 25% 98%, 20% 93%, 15% 100%, 10% 94%, 5% 99%, 0 93%
@@ -76,10 +76,10 @@
 .pinHead {
   width: 62%;
   aspect-ratio: 1;
-  border: 2px solid var(--ink);
+  border: 2px solid var(--outline);
   border-radius: 50%;
-  background-image: radial-gradient(circle at 34% 30%, rgb(255 255 255 / 0.75) 0 14%, transparent 15%);
-  box-shadow: 2px 3px 0 rgb(23 43 112 / 0.3);
+  background-image: radial-gradient(circle at 34% 30%, color-mix(in srgb, var(--white) 75%, transparent) 0 14%, transparent 15%);
+  box-shadow: 2px 3px 0 var(--drop-shadow);
 }
 
 .c_tomato { background-color: var(--tomato); }
@@ -94,11 +94,11 @@
   height: 34%;
   border-left: 2px dashed var(--white);
   border-right: 2px dashed var(--white);
-  box-shadow: 0 1px 2px rgb(23 43 112 / 0.25);
+  box-shadow: 0 1px 2px var(--drop-shadow);
 }
 
-.t_tomato { background-color: rgb(224 48 26 / 0.75); }
-.t_citrus { background-color: rgb(255 159 28 / 0.8); }
-.t_gelato { background-color: rgb(255 230 128 / 0.9); }
-.t_sea { background-color: rgb(92 179 255 / 0.8); }
-.t_amalfi { background-color: rgb(31 85 201 / 0.7); }
+.t_tomato { background-color: color-mix(in srgb, var(--tomato) 75%, transparent); }
+.t_citrus { background-color: color-mix(in srgb, var(--citrus) 80%, transparent); }
+.t_gelato { background-color: color-mix(in srgb, var(--gelato) 90%, transparent); }
+.t_sea { background-color: color-mix(in srgb, var(--sea) 80%, transparent); }
+.t_amalfi { background-color: color-mix(in srgb, var(--amalfi) 70%, transparent); }

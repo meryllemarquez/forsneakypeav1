@@ -55,7 +55,7 @@ export default function NotificationCard({ notification, onMarkRead, onDelete })
           : 'border-(--color-admin-accent)/20 bg-(--color-admin-accent-soft)/40'
       }`}
     >
-      <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${notification.isRead ? 'bg-(--color-admin-surface-2) text-(--color-admin-text-muted)' : 'bg-(--color-admin-accent) text-white'}`}>
+      <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${notification.isRead ? 'bg-(--color-admin-surface-2) text-(--color-admin-text-muted)' : 'bg-(--color-admin-accent) text-(--white)'}`}>
         <Icon size={14} strokeWidth={2} />
       </div>
       <div className="min-w-0 flex-1">

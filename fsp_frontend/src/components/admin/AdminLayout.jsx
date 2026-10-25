@@ -65,7 +65,7 @@ export default function AdminLayout() {
         {mobileSidebarOpen && (
           <>
             <motion.div
-              className="fixed inset-0 z-[160] bg-black/40 lg:hidden"
+              className="fixed inset-0 z-[160] bg-(--scrim) lg:hidden"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}

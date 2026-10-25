@@ -1,3 +1,129 @@
+/* Scene colours as variables: day values here, the night palette just below. */
+.scene,
+.phoneSky {
+  --ls-sky-0: #8FC7F7;
+  --ls-sky-1: #CFE6F7;
+  --ls-sky-2: #FFEBC0;
+  --ls-sky-3: #FFD7A6;
+  --ls-glow-0: #FFF3B8;
+  --ls-glow-1: #FFE9A0;
+  --ls-sun-ray: #FFB02E;
+  --ls-sun-fill: #FFD45C;
+  --ls-sun-disc-0: #FFF4B0;
+  --ls-sun-disc-1: #FFB02E;
+  --ls-sun-cheek: #FF8F6B;
+  --ls-cloud-0: #FFFFFF;
+  --ls-cloud-1: #E3EBFC;
+  --ls-cloud-shade: #B9C9EE;
+  --ls-cloud-hi: #FFFFFF;
+  --ls-mtn-far-0: #A9C6F0;
+  --ls-mtn-far-1: #E4ECF8;
+  --ls-mtn-near-0: #7FA8E0;
+  --ls-mtn-near-1: #CCDDF2;
+  --ls-haze: #F3EEDC;
+  --ls-hill1-0: #BFD67E;
+  --ls-hill1-1: #EADB8E;
+  --ls-hill2-0: #8FC367;
+  --ls-hill2-1: #CBD97D;
+  --ls-meadow-0: #A5D06A;
+  --ls-meadow-1: #DFE08A;
+  --ls-tuft: #5E9B4E;
+  --ls-trunk: #8B5A2B;
+  --ls-leaf-0: #5E9B4E;
+  --ls-leaf-1: #79B65B;
+  --ls-leaf-2: #A6D470;
+  --ls-wall: #FFF1CF;
+  --ls-wall-stroke: #C99A6B;
+  --ls-wall-band: #F2D9A8;
+  --ls-chimney: #E3A67A;
+  --ls-roof-0: #F0845C;
+  --ls-roof-1: #D8603F;
+  --ls-roof-shade: #B5543A;
+  --ls-door: #4B78D6;
+  --ls-door-stroke: #2F57A8;
+  --ls-frame: #C99A6B;
+  --ls-smoke: #FFFFFF;
+  --ls-path-0: #F4E2B6;
+  --ls-path-1: #E2C98F;
+  --ls-road: #F6E7C6;
+  --ls-road-dash: #FFFFFF;
+  --ls-star: #FFFFFF;
+}
+
+:root[data-theme="dark"] .scene,
+:root[data-theme="dark"] .phoneSky {
+  --ls-sky-0: #0A1030;
+  --ls-sky-1: #162257;
+  --ls-sky-2: #2A3578;
+  --ls-sky-3: #3A3F85;
+  --ls-glow-0: #DDE4FF;
+  --ls-glow-1: #8FA3E8;
+  --ls-sun-ray: #9FB0F0;
+  --ls-sun-fill: #F1EFD6;
+  --ls-sun-disc-0: #FFFFFF;
+  --ls-sun-disc-1: #B8C4F0;
+  --ls-sun-cheek: #C9B8D8;
+  --ls-cloud-0: #3C4894;
+  --ls-cloud-1: #2A3676;
+  --ls-cloud-shade: #1B2766;
+  --ls-cloud-hi: #6574C4;
+  --ls-mtn-far-0: #2A3980;
+  --ls-mtn-far-1: #1D2A6C;
+  --ls-mtn-near-0: #22307A;
+  --ls-mtn-near-1: #18235F;
+  --ls-haze: #2C3A86;
+  --ls-hill1-0: #1E2D68;
+  --ls-hill1-1: #1A2656;
+  --ls-hill2-0: #18265A;
+  --ls-hill2-1: #141F4C;
+  --ls-meadow-0: #1A2650;
+  --ls-meadow-1: #131C45;
+  --ls-tuft: #3A5A9A;
+  --ls-trunk: #4A3B66;
+  --ls-leaf-0: #1F3F6B;
+  --ls-leaf-1: #294F7E;
+  --ls-leaf-2: #35639A;
+  --ls-wall: #5A5F9E;
+  --ls-wall-stroke: #2E3270;
+  --ls-wall-band: #4A4F8F;
+  --ls-chimney: #6B5A86;
+  --ls-roof-0: #8F4A74;
+  --ls-roof-1: #6F3A66;
+  --ls-roof-shade: #3A2A5C;
+  --ls-door: #2F4FA3;
+  --ls-door-stroke: #1D2F78;
+  --ls-frame: #C99A6B;
+  --ls-smoke: #8A93C8;
+  --ls-path-0: #2A3470;
+  --ls-path-1: #38458A;
+  --ls-road: #232D68;
+  --ls-road-dash: #8F9CD8;
+  --ls-star: #FFF3C4;
+}
+
+/* Things that only exist after dark: stars and the big window glow. */
+.nightOnly {
+  display: none;
+}
+
+:root[data-theme="dark"] .nightOnly {
+  display: inline;
+}
+
+.twinkle {
+  animation: twinkle var(--dur, 3s) ease-in-out var(--delay, 0s) infinite alternate;
+}
+
+/* fireflies glow brighter against the night */
+:root[data-theme="dark"] .firefly circle:first-child {
+  opacity: 0.55;
+}
+
+@keyframes twinkle {
+  from { opacity: 0.25; }
+  to { opacity: 1; }
+}
+
 .scene {
   position: absolute;
   inset: 0;
@@ -201,6 +327,7 @@
   .smoke,
   .squish,
   .firefly,
+  .twinkle,
   .petal,
   .bob,
   .character:hover .wiggle,

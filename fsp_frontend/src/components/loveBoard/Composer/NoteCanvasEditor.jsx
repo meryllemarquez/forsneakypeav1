@@ -66,7 +66,7 @@ export default function NoteCanvasEditor({ paper, textBoxes, attachments, onChan
       </div>
 
       <div
-        className="relative mx-auto overflow-hidden rounded-lg border-2 border-solid border-(--ink) shadow-[5px_5px_0_var(--sea)]"
+        className="relative mx-auto overflow-hidden rounded-lg border-2 border-solid border-(--outline) shadow-[5px_5px_0_var(--sea)]"
         style={{ width: NOTE_CANVAS_WIDTH, height: NOTE_CANVAS_HEIGHT }}
         onClick={() => setSelection(null)}
       >
@@ -104,7 +104,7 @@ export default function NoteCanvasEditor({ paper, textBoxes, attachments, onChan
       </div>
 
       {replacingId && (
-        <div className="rounded-2xl border-2 border-solid border-(--ink) bg-white p-3">
+        <div className="rounded-2xl border-2 border-solid border-(--outline) bg-(--white) p-3">
           <div className="mb-2 flex items-center justify-between">
             <p className="m-0 text-sm font-extrabold">Choose replacement</p>
             <PillButton onClick={() => setReplacingId(null)} className="!min-h-11 !px-4">
@@ -120,7 +120,7 @@ export default function NoteCanvasEditor({ paper, textBoxes, attachments, onChan
                   updateAttachment(replacingId, { image: opt.value });
                   setReplacingId(null);
                 }}
-                className="lb-focus min-h-11 cursor-pointer appearance-none rounded-xl border-2 border-solid border-(--ink) bg-(--paper) p-1 hover:bg-(--gelato-tint)"
+                className="lb-focus min-h-11 cursor-pointer appearance-none rounded-xl border-2 border-solid border-(--outline) bg-(--paper) p-1 hover:bg-(--gelato-tint)"
                 aria-label={`Use ${opt.label}`}
                 title={opt.label}
               >
@@ -134,7 +134,7 @@ export default function NoteCanvasEditor({ paper, textBoxes, attachments, onChan
       )}
 
       {selectedBlock && (
-        <div className="space-y-3 rounded-2xl border-2 border-solid border-(--ink) bg-white p-4">
+        <div className="space-y-3 rounded-2xl border-2 border-solid border-(--outline) bg-(--white) p-4">
           <div className="flex items-center justify-between">
             <p className="m-0 font-caveat text-2xl leading-none font-bold text-(--tomato)">Text style</p>
             <RoundButton label="Delete text box" onClick={() => removeBlock(selectedBlock.id)}>
@@ -194,7 +194,7 @@ export default function NoteCanvasEditor({ paper, textBoxes, attachments, onChan
                 aria-label={`Text colour ${color}`}
                 aria-pressed={selectedBlock.color === color}
                 className={`lb-focus size-11 cursor-pointer appearance-none rounded-full border-2 border-solid border-(--ink) ${
-                  selectedBlock.color === color ? 'shadow-[0_0_0_3px_white,0_0_0_5px_var(--ink)]' : ''
+                  selectedBlock.color === color ? 'shadow-[0_0_0_3px_white,0_0_0_5px_var(--outline)]' : ''
                 }`}
               />
             ))}

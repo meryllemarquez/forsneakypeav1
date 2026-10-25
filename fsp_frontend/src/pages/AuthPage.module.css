@@ -53,7 +53,7 @@
   position: absolute;
   inset: -30px -40px;
   z-index: -1;
-  background: radial-gradient(closest-side, rgb(255 248 232 / 0.85), rgb(255 248 232 / 0));
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--paper) 85%, transparent), color-mix(in srgb, var(--paper) 0%, transparent));
 }
 
 .layoutCentered .hero {
@@ -67,7 +67,7 @@
   margin: 0 0 14px;
   padding: 6px 16px 6px 8px;
   background: var(--white);
-  border: var(--border-width) solid var(--ink);
+  border: var(--border-width) solid var(--outline);
   border-radius: var(--radius-pill);
   font-family: var(--font-heading);
   font-weight: 800;
@@ -101,8 +101,8 @@
   min-height: 52px;
   padding: 0 30px;
   background: var(--tomato);
-  color: var(--white);
-  border: var(--border-width) solid var(--ink);
+  color: var(--on-tomato);
+  border: var(--border-width) solid var(--outline);
   border-radius: var(--radius-pill);
   box-shadow: var(--shadow-button);
   font-family: inherit;
@@ -123,7 +123,7 @@
   max-width: 420px;
   padding: 36px 32px 28px;
   background: var(--white);
-  border: var(--border-width) solid var(--ink);
+  border: var(--border-width) solid var(--outline);
   border-radius: var(--radius-card-lg);
   box-shadow: var(--shadow-card);
 }
@@ -191,7 +191,7 @@
   padding: 0 16px;
   background: var(--white);
   color: var(--ink);
-  border: var(--border-width) solid var(--ink);
+  border: var(--border-width) solid var(--outline);
   border-radius: var(--radius-input);
   font-family: inherit;
   font-size: 1rem;
@@ -205,8 +205,8 @@
   min-height: 52px;
   margin-top: 6px;
   background: var(--tomato);
-  color: var(--white);
-  border: var(--border-width) solid var(--ink);
+  color: var(--on-tomato);
+  border: var(--border-width) solid var(--outline);
   border-radius: var(--radius-pill);
   box-shadow: var(--shadow-button);
   font-family: inherit;
@@ -249,7 +249,7 @@
   padding: 12px 14px;
   background: var(--citrus-tint);
   color: var(--ink);
-  border: var(--border-width) solid var(--ink);
+  border: var(--border-width) solid var(--outline);
   border-radius: 16px;
   font-size: 0.9375rem;
   font-weight: 700;
@@ -304,7 +304,7 @@
     position: fixed;
     inset: 0;
     z-index: 2;
-    background: rgb(23 43 112 / 0.28);
+    background: var(--scrim);
   }
 
   .card {
@@ -321,7 +321,7 @@
     padding: 30px 20px calc(20px + env(safe-area-inset-bottom));
     border-width: var(--border-width) 0 0;
     border-radius: 28px 28px 0 0;
-    box-shadow: 0 -5px 0 var(--sea);
+    box-shadow: 0 -5px 0 var(--shadow-sea);
   }
 
   /* a little grab handle, like any bottom sheet */
@@ -335,6 +335,8 @@
     margin-left: -22px;
     background: var(--sea);
     border-radius: 3px;
+    color: var(--on-bright);
+    --icon-ink: var(--on-bright);
   }
 
   .closeBtn {

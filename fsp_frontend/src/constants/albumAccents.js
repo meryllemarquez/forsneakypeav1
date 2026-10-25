@@ -2,13 +2,18 @@
 // page header band, and the selected / highlighted photo rings (CSS variables --album-accent and
 // --album-accent-ink, set inline by MemoriesPage). Tomato is not offered: it is reserved for
 // primary actions and hearts.
+// value = what is saved; ink = text colour on it in the light theme; css / inkCss = what is drawn, which
+// follows the theme (Amalfi lightens and Ink becomes a periwinkle on navy so neither disappears).
 export const PALETTE_ACCENTS = [
-  { name: 'Citrus', value: '#FF9F1C', ink: '#172B70' },
-  { name: 'Sea', value: '#5CB3FF', ink: '#172B70' },
-  { name: 'Gelato', value: '#FFE680', ink: '#172B70' },
-  { name: 'Amalfi', value: '#1F55C9', ink: '#FFFFFF' },
-  { name: 'Ink', value: '#172B70', ink: '#FFFFFF' },
+  { name: 'Citrus', value: '#FF9F1C', ink: '#172B70', css: '#FF9F1C', inkCss: 'var(--on-bright)' },
+  { name: 'Sea', value: '#5CB3FF', ink: '#172B70', css: '#5CB3FF', inkCss: 'var(--on-bright)' },
+  { name: 'Gelato', value: '#FFE680', ink: '#172B70', css: '#FFE680', inkCss: 'var(--on-bright)' },
+  { name: 'Amalfi', value: '#1F55C9', ink: '#FFFFFF', css: 'var(--amalfi)', inkCss: 'var(--album-amalfi-on)' },
+  { name: 'Ink', value: '#172B70', ink: '#FFFFFF', css: 'var(--album-ink-fill)', inkCss: 'var(--album-ink-on)' },
 ];
+
+/** Colour choices for ColorSwatchGroup: the swatch is drawn in the theme-aware colour. */
+export const ACCENT_SWATCHES = PALETTE_ACCENTS.map((a) => ({ value: a.value, name: a.name, color: a.css }));
 
 export const DEFAULT_ACCENT = PALETTE_ACCENTS[0].value;
 
@@ -50,6 +55,7 @@ export function albumAccent(stored, id) {
 
 /** CSS custom properties for an element (card, header, gallery). */
 export function accentVars(stored, id) {
-  const { hex, ink } = albumAccent(stored, id);
-  return { '--album-accent': hex, '--album-accent-ink': ink };
+  const { hex } = albumAccent(stored, id);
+  const entry = PALETTE_ACCENTS.find((a) => a.value === hex);
+  return { '--album-accent': entry.css, '--album-accent-ink': entry.inkCss };
 }

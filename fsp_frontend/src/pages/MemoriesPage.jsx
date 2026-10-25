@@ -20,7 +20,7 @@ import { useFolders } from '../queries/queries';
 import { useMemoryMutations } from '../queries/mutations';
 import PhotoUploadModal from '../components/memories/PhotoUploadModal/PhotoUploadModal';
 import AlbumDownloadModal from '../components/memories/AlbumDownloadModal/AlbumDownloadModal';
-import { PALETTE_ACCENTS, DEFAULT_ACCENT, albumAccent, accentVars } from '../constants/albumAccents';
+import { ACCENT_SWATCHES, DEFAULT_ACCENT, albumAccent, accentVars } from '../constants/albumAccents';
 import Tabs, { panelId, tabId } from '../components/ui/Tabs/Tabs';
 import RadioGroup, { ColorSwatchGroup } from '../components/ui/RadioGroup/RadioGroup';
 import Field from '../components/ui/Field/Field';
@@ -939,7 +939,7 @@ export default function MemoriesPage() {
               label="Accent color"
               value={folderForm.accentColor}
               onChange={(accentColor) => setFolderForm({ ...folderForm, accentColor })}
-              colors={PALETTE_ACCENTS}
+              colors={ACCENT_SWATCHES}
             />
             <div className={styles.accentPreview} style={accentVars(folderForm.accentColor)} aria-hidden="true">
               <span className={styles.accentPreviewCover} />

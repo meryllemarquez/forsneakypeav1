@@ -42,7 +42,7 @@ export default function TopBar({ title, onOpenSidebar, onOpenNotifications, unre
               key={unreadCount}
               initial={{ scale: 0.5 }}
               animate={{ scale: 1 }}
-              className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-(--color-admin-danger) px-1 text-[11px] font-semibold text-white"
+              className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-(--color-admin-danger) px-1 text-[11px] font-semibold text-(--white)"
             >
               {unreadCount > 9 ? '9+' : unreadCount}
             </motion.span>

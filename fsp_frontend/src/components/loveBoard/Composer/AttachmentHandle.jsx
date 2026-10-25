@@ -111,7 +111,7 @@ export default function AttachmentHandle({ attachment, scale = 1, isSelected, on
             className="absolute top-0 left-1/2 flex h-8 w-8 -translate-x-1/2 cursor-grab appearance-none items-center justify-center border-0 bg-transparent active:cursor-grabbing"
             style={{ transform: 'translate(-50%, calc(-100% - 16px))', touchAction: 'none' }}
           >
-            <span className="flex h-4 w-4 items-center justify-center rounded-full border border-(--ink) bg-white text-(--tomato) shadow">
+            <span className="flex h-4 w-4 items-center justify-center rounded-full border border-(--outline) bg-(--white) text-(--tomato) shadow">
               <RotateCw size={9} strokeWidth={2.5} />
             </span>
           </button>
@@ -121,12 +121,12 @@ export default function AttachmentHandle({ attachment, scale = 1, isSelected, on
             className="absolute flex h-8 w-8 appearance-none items-center justify-center border-0 bg-transparent"
             style={{ top: '100%', left: '100%', transform: 'translate(-50%, -50%)', cursor: 'nwse-resize', touchAction: 'none' }}
           >
-            <span className="h-2.5 w-2.5 rounded-sm border border-(--ink) bg-white shadow" />
+            <span className="h-2.5 w-2.5 rounded-sm border border-(--outline) bg-(--white) shadow" />
           </button>
 
           <AnimatePresence>
             <motion.div
-              className="absolute top-full left-1/2 z-50 mt-2 flex -translate-x-1/2 gap-1 rounded-2xl border-2 border-solid border-white bg-(--ink) p-1 text-white shadow-[3px_3px_0_var(--sea)]"
+              className="absolute top-full left-1/2 z-50 mt-2 flex -translate-x-1/2 gap-1 rounded-2xl border-2 border-solid border-(--white) bg-(--ink) p-1 text-(--white) shadow-[3px_3px_0_var(--sea)]"
               initial={{ opacity: 0, y: -4 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -4 }}
@@ -138,7 +138,7 @@ export default function AttachmentHandle({ attachment, scale = 1, isSelected, on
                 onClick={onReplace}
                 title="Replace"
                 aria-label="Replace"
-                className="flex size-11 cursor-pointer appearance-none items-center justify-center rounded-xl border-0 bg-white/15 p-0 text-white transition hover:bg-white/25"
+                className="flex size-11 cursor-pointer appearance-none items-center justify-center rounded-xl border-0 bg-(--white)/15 p-0 text-(--white) transition hover:bg-(--white)/25"
               >
                 <RefreshCw size={18} strokeWidth={2.6} aria-hidden="true" />
               </button>
@@ -147,7 +147,7 @@ export default function AttachmentHandle({ attachment, scale = 1, isSelected, on
                 onClick={onRemove}
                 title="Remove"
                 aria-label="Remove"
-                className="flex size-11 cursor-pointer appearance-none items-center justify-center rounded-xl border-0 bg-(--tomato) p-0 text-white transition hover:brightness-110"
+                className="flex size-11 cursor-pointer appearance-none items-center justify-center rounded-xl border-0 bg-(--tomato) p-0 text-(--on-tomato) transition hover:brightness-110"
               >
                 <Trash2 size={18} strokeWidth={2.6} aria-hidden="true" />
               </button>

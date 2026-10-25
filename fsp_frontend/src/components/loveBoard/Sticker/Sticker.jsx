@@ -163,12 +163,12 @@ export default function Sticker({
     >
       <div className="relative h-full w-full">
         {/* The doodle fills ~80% of the box, like the old patches did, so saved sizes keep their footprint. */}
-        <div className="pointer-events-none flex h-full w-full items-center justify-center">
+        <div data-theme="light" className="pointer-events-none flex h-full w-full items-center justify-center">
           <Icon name={resolveStickerIcon(sticker.image)} size={Math.round(renderedSize * 0.8)} sticker />
         </div>
         {sticker.isLocked && (
           <span
-            className="absolute -top-1 -right-1 rounded-full bg-white/90 p-0.5 text-(--ink) shadow"
+            className="absolute -top-1 -right-1 rounded-full bg-(--white)/90 p-0.5 text-(--ink) shadow"
             style={{ transform: `scale(${chromeScale})`, transformOrigin: 'top right' }}
           >
             <Lock size={11} strokeWidth={2.25} />
@@ -179,7 +179,7 @@ export default function Sticker({
           <>
             {/* Rotation handle + connecting stem */}
             <div
-              className="pointer-events-none absolute top-0 left-1/2 h-6 w-px bg-white/70"
+              className="pointer-events-none absolute top-0 left-1/2 h-6 w-px bg-(--white)/70"
               style={{ transform: `translate(-50%, calc(-100% + ${6 * chromeScale}px)) scaleY(${chromeScale})`, transformOrigin: 'bottom' }}
             />
             <button
@@ -195,7 +195,7 @@ export default function Sticker({
                 touchAction: 'none',
               }}
             >
-              <span className="flex h-5 w-5 items-center justify-center rounded-full border border-(--ink) bg-white text-(--tomato) shadow">
+              <span className="flex h-5 w-5 items-center justify-center rounded-full border border-(--outline) bg-(--white) text-(--tomato) shadow">
                 <RotateCw size={11} strokeWidth={2.25} />
               </span>
             </button>
@@ -223,7 +223,7 @@ export default function Sticker({
                   touchAction: 'none',
                 }}
               >
-                <span className="h-3 w-3 rounded-sm border border-(--ink) bg-white shadow" />
+                <span className="h-3 w-3 rounded-sm border border-(--outline) bg-(--white) shadow" />
               </button>
             ))}
 
@@ -236,7 +236,7 @@ export default function Sticker({
       <AnimatePresence>
         {isSelected && interactive && (
           <motion.div
-            className="absolute top-full left-1/2 z-50 mt-3 w-56 rounded-3xl border-2 border-solid border-white bg-(--ink) p-2 text-white shadow-[4px_4px_0_var(--sea)]"
+            className="absolute top-full left-1/2 z-50 mt-3 w-56 rounded-3xl border-2 border-solid border-(--white) bg-(--ink) p-2 text-(--white) shadow-[4px_4px_0_var(--sea)]"
             style={{ x: '-50%', scale: chromeScale, transformOrigin: 'top center' }}
             initial={{ opacity: 0, y: -6 }}
             animate={{ opacity: 1, y: 0 }}
@@ -258,7 +258,7 @@ export default function Sticker({
       {decorateMode && sticker.isLocked && (
         <button
           type="button"
-          className="absolute -top-2 -right-2 flex size-11 appearance-none items-center justify-center rounded-full border-2 border-solid border-(--ink) bg-white p-0 text-(--ink) transition hover:bg-(--gelato)"
+          className="absolute -top-2 -right-2 flex size-11 appearance-none items-center justify-center rounded-full border-2 border-solid border-(--outline) bg-(--white) p-0 text-(--on-bright) transition hover:bg-(--gelato) [--icon-ink:var(--on-bright)]"
           style={{ transform: `scale(${chromeScale})`, transformOrigin: 'top right' }}
           onClick={(e) => {
             e.stopPropagation();
@@ -279,8 +279,8 @@ function PopoverAction({ icon, label, onClick, danger }) {
     <button
       type="button"
       onClick={onClick}
-      className={`flex min-h-11 cursor-pointer flex-col items-center justify-center gap-0.5 appearance-none rounded-xl border-0 py-1.5 text-white transition ${
-        danger ? 'bg-(--tomato) hover:brightness-110' : 'bg-white/15 hover:bg-white/25'
+      className={`flex min-h-11 cursor-pointer flex-col items-center justify-center gap-0.5 appearance-none rounded-xl border-0 py-1.5 text-(--white) transition ${
+        danger ? 'bg-(--tomato) hover:brightness-110' : 'bg-(--white)/15 hover:bg-(--white)/25'
       }`}
     >
       {icon}

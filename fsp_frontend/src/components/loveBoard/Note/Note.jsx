@@ -60,18 +60,18 @@ export default function Note({ note, boardScale = 1, panMode = false, isTop, exi
           onOpen?.(note);
         }
       }}
-      whileHover={panMode || isDragging ? undefined : { scale: 1.03, boxShadow: '0 22px 32px -10px rgba(23,43,112,0.35)' }}
+      whileHover={panMode || isDragging ? undefined : { scale: 1.03, boxShadow: '0 22px 32px -10px var(--drop-shadow)' }}
       animate={
         isDragging
-          ? { scale: 1.06, opacity: 1, boxShadow: '0 30px 45px -12px rgba(23, 43, 112, 0.4)' }
-          : { scale: 1, opacity: 1, boxShadow: '0 0px 0px rgba(0,0,0,0)' }
+          ? { scale: 1.06, opacity: 1, boxShadow: '0 30px 45px -12px var(--drop-shadow)' }
+          : { scale: 1, opacity: 1, boxShadow: '0 0px 0px transparent' }
       }
       initial={{ scale: 0.4, opacity: 0 }}
       exit={EXIT_VARIANTS[exitReason] || EXIT_VARIANTS.delete}
       transition={{ type: 'spring', stiffness: 300, damping: 22 }}
     >
       <div
-        className="relative h-full w-full drop-shadow-[0_10px_18px_rgba(23,43,112,0.3)]"
+        className="relative h-full w-full drop-shadow-[0_10px_18px_var(--drop-shadow)]"
         style={{ zIndex: isTop ? 2 : 1 }}
       >
         <NoteCanvasPreview note={note} scale={NOTE_BOARD_SCALE} />

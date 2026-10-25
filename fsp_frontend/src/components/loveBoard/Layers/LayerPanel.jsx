@@ -22,14 +22,14 @@ export default function LayerPanel({ open, items = [], onClose, onSelect, onBrin
           {items.map((item) => (
             <li
               key={`${item.type}-${item.id}`}
-              className="flex items-center gap-2 rounded-2xl border-2 border-solid border-(--ink) bg-(--paper) p-2"
+              className="flex items-center gap-2 rounded-2xl border-2 border-solid border-(--outline) bg-(--paper) p-2"
             >
               <button
                 type="button"
                 onClick={() => onSelect?.(item)}
                 className="lb-focus flex min-h-11 min-w-0 flex-1 cursor-pointer appearance-none items-center gap-2.5 rounded-xl border-0 bg-transparent p-0 text-left text-(--ink)"
               >
-                <span className="flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-xl border-2 border-solid border-(--ink) bg-white">
+                <span className="flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-xl border-2 border-solid border-(--outline) bg-(--white)">
                   {item.icon ? <Icon name={item.icon} size={30} /> : <LbPaperThumb value={item.paper} size={40} />}
                 </span>
                 <span className="min-w-0 flex-1">

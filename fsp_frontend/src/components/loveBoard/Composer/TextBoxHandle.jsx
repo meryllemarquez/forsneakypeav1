@@ -174,7 +174,7 @@ export default function TextBoxHandle({ block, scale = 1, isSelected, isEditing,
             className="absolute top-0 left-1/2 flex h-8 w-8 -translate-x-1/2 cursor-grab appearance-none items-center justify-center border-0 bg-transparent active:cursor-grabbing"
             style={{ transform: 'translate(-50%, calc(-100% - 20px))', touchAction: 'none' }}
           >
-            <span className="h-4 w-4 rounded-full border border-(--ink) bg-white shadow" />
+            <span className="h-4 w-4 rounded-full border border-(--outline) bg-(--white) shadow" />
           </button>
 
           {['tl', 'tr', 'bl', 'br'].map((corner) => (
@@ -191,7 +191,7 @@ export default function TextBoxHandle({ block, scale = 1, isSelected, isEditing,
                 touchAction: 'none',
               }}
             >
-              <span className="h-2.5 w-2.5 rounded-sm border border-(--ink) bg-white shadow" />
+              <span className="h-2.5 w-2.5 rounded-sm border border-(--outline) bg-(--white) shadow" />
             </button>
           ))}
         </>

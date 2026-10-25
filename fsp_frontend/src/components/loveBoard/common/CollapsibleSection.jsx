@@ -7,7 +7,7 @@ export default function CollapsibleSection({ title, icon, defaultOpen = false, c
   const panelId = useId();
 
   return (
-    <div className="overflow-hidden rounded-2xl border-2 border-solid border-(--ink) bg-white">
+    <div className="overflow-hidden rounded-2xl border-2 border-solid border-(--outline) bg-(--white)">
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
@@ -31,7 +31,7 @@ export default function CollapsibleSection({ title, icon, defaultOpen = false, c
             transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
             className="overflow-hidden"
           >
-            <div className="border-0 border-t-2 border-solid border-(--ink) px-3.5 py-3.5">{children}</div>
+            <div className="border-0 border-t-2 border-solid border-(--outline) px-3.5 py-3.5">{children}</div>
           </motion.div>
         )}
       </AnimatePresence>

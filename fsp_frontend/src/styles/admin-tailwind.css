@@ -32,7 +32,7 @@
   --color-admin-border: var(--ink);
   --color-admin-text: var(--ink);
   --color-admin-text-muted: var(--ink-muted);
-  --color-admin-text-faint: #5b6a8f;
+  --color-admin-text-faint: var(--ink-muted);
 
   --color-admin-sidebar: var(--ink);
   --color-admin-sidebar-hover: var(--amalfi);
@@ -67,4 +67,9 @@
 
 .admin-shell button {
   min-width: 44px;
+}
+
+/* The admin sidebar is a dark panel in both themes: navy by day, a deeper night navy after dark. */
+:root[data-theme="dark"] {
+  --color-admin-sidebar: var(--surface-sunk);
 }

@@ -23,9 +23,9 @@ export default function ArchiveDrawer({ open, notes = [], onClose, onRestore, on
               initial={{ opacity: 0, x: -12 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, scale: 0.9 }}
-              className="flex items-center gap-3 rounded-2xl border-2 border-solid border-(--ink) bg-(--paper) p-3"
+              className="flex items-center gap-3 rounded-2xl border-2 border-solid border-(--outline) bg-(--paper) p-3"
             >
-              <span className="shrink-0 overflow-hidden rounded-lg border-2 border-solid border-(--ink) bg-white">
+              <span className="shrink-0 overflow-hidden rounded-lg border-2 border-solid border-(--outline) bg-(--white)">
                 <LbPaperThumb value={note.paperImage} size={44} />
               </span>
               <div className="min-w-0 flex-1">

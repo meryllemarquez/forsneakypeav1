@@ -6,7 +6,7 @@ export default function ProtectedRoute({ children, allowedRoles }) {
 
   if (loading) {
     return (
-      <div style={{ textAlign: 'center', padding: '4rem', color: 'var(--color-brown-primary, #4a2c2a)' }}>
+      <div style={{ textAlign: 'center', padding: '4rem', color: 'var(--ink)' }}>
         ✨ Loading application...
       </div>
     );

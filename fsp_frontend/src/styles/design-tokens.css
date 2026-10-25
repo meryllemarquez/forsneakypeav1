@@ -47,6 +47,9 @@
   --link: var(--amalfi);
   --footer-bg: #1F55C9;
   --pattern-dot: rgb(23 43 112 / 0.14);
+  --album-ink-fill: #172B70;
+  --album-ink-on: #FFFFFF;
+  --album-amalfi-on: #FFFFFF;
   --scrim-strong: rgb(23 43 112 / 0.88);   /* lightbox / fullscreen backdrops */
   --drop-shadow: rgb(23 43 112 / 0.18);    /* soft cast shadows under stickers and notes */
   color-scheme: light;
@@ -139,7 +142,14 @@
   --icon-white: #F2F5FF;
   --scrim: rgb(5 8 24 / 0.66);
   --link: #8DB2FF;
+  --album-ink-fill: #6F83CE;
+  --album-ink-on: #0E1533;
+  --album-amalfi-on: #0E1533;
   --pattern-dot: rgb(220 229 255 / 0.07);
+  --sky-deep: #0A1030;
+  --sky-pale: #162257;
+  --sun-pale: #2A3578;
+  --sun-peach: #3A3F85;
   --scrim-strong: rgb(5 8 24 / 0.92);
   --drop-shadow: rgb(0 0 0 / 0.45);
   --shadow-soft: 0 8px 30px rgb(0 0 0 / 0.35);

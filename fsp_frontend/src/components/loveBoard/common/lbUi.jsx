@@ -6,7 +6,7 @@ import { useIsMobile } from '../../../hooks/useIsMobile';
 // Small building blocks shared by the Love Board panels (Tailwind, on the shared design tokens).
 
 export const inputClass =
-  'lb-focus min-h-11 w-full rounded-2xl border-2 border-solid border-(--ink) bg-white px-4 text-base text-(--ink) placeholder:text-(--ink-muted)';
+  'lb-focus min-h-11 w-full rounded-2xl border-2 border-solid border-(--outline) bg-(--white) px-4 text-base text-(--ink) placeholder:text-(--ink-muted)';
 
 export const labelClass = 'mb-1.5 block text-sm font-extrabold text-(--ink)';
 
@@ -17,7 +17,7 @@ export function Chip({ active, onClick, children, className = '', ...rest }) {
       onClick={onClick}
       aria-pressed={!!active}
       className={`lb-focus inline-flex min-h-11 cursor-pointer appearance-none items-center gap-1.5 rounded-full border-2 border-solid border-(--ink) px-4 text-sm font-extrabold text-(--ink) transition ${
-        active ? 'bg-(--citrus)' : 'bg-white hover:bg-(--sea-tint)'
+        active ? 'bg-(--citrus) text-(--on-bright) [--icon-ink:var(--on-bright)]' : 'bg-(--white) hover:bg-(--sea-tint)'
       } ${className}`}
       {...rest}
     >
@@ -30,12 +30,12 @@ export function Chip({ active, onClick, children, className = '', ...rest }) {
 export function PillButton({ variant = 'secondary', className = '', children, ...rest }) {
   const look =
     variant === 'primary'
-      ? 'bg-(--tomato) text-white shadow-[4px_4px_0_var(--ink)] hover:not-disabled:-translate-x-px hover:not-disabled:-translate-y-px'
-      : 'bg-white text-(--ink) hover:not-disabled:bg-(--sea-tint)';
+      ? 'bg-(--tomato) text-(--on-tomato) shadow-[4px_4px_0_var(--outline)] hover:not-disabled:-translate-x-px hover:not-disabled:-translate-y-px'
+      : 'bg-(--white) text-(--ink) hover:not-disabled:bg-(--sea-tint)';
   return (
     <button
       type="button"
-      className={`lb-focus inline-flex min-h-11 cursor-pointer appearance-none items-center justify-center gap-2 rounded-full border-2 border-solid border-(--ink) px-5 text-sm font-extrabold transition disabled:cursor-not-allowed disabled:opacity-50 ${look} ${className}`}
+      className={`lb-focus inline-flex min-h-11 cursor-pointer appearance-none items-center justify-center gap-2 rounded-full border-2 border-solid border-(--outline) px-5 text-sm font-extrabold transition disabled:cursor-not-allowed disabled:opacity-50 ${look} ${className}`}
       {...rest}
     >
       {children}
@@ -50,7 +50,7 @@ export function RoundButton({ label, children, className = '', ...rest }) {
       type="button"
       aria-label={label}
       title={label}
-      className={`lb-focus inline-flex size-11 shrink-0 cursor-pointer appearance-none items-center justify-center rounded-full border-2 border-solid border-(--ink) bg-white p-0 text-(--ink) transition hover:bg-(--sea-tint) disabled:cursor-not-allowed disabled:opacity-40 ${className}`}
+      className={`lb-focus inline-flex size-11 shrink-0 cursor-pointer appearance-none items-center justify-center rounded-full border-2 border-solid border-(--outline) bg-(--white) p-0 text-(--ink) transition hover:bg-(--sea-tint) disabled:cursor-not-allowed disabled:opacity-40 ${className}`}
       {...rest}
     >
       {children}
@@ -96,7 +96,7 @@ export function DrawerPanel({ open, onClose, side = 'right', eyebrow, title, chi
         <motion.aside
           role="dialog"
           aria-label={title}
-          className={`fixed z-[120] flex w-full flex-col border-solid border-(--ink) bg-white text-(--ink) ${
+          className={`fixed z-[120] flex w-full flex-col border-solid border-(--outline) bg-(--white) text-(--ink) ${
             isMobile ? 'inset-x-0 bottom-0 max-h-[75vh] rounded-t-[28px] border-t-2 shadow-[0_-6px_0_var(--sea)]' : sideClass
           }`}
           initial={isMobile ? { y: '100%' } : { x: hidden }}

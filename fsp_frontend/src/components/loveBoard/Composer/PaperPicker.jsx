@@ -16,7 +16,7 @@ export default function PaperPicker({ value, onChange }) {
           onClick={() => onChange(paperValue(paper.id))}
           title={paper.label}
           className={`lb-focus flex cursor-pointer appearance-none flex-col items-center gap-1 rounded-2xl border-2 border-solid border-(--ink) p-1.5 text-xs font-extrabold text-(--ink) transition ${
-            current === paper.id ? 'bg-(--citrus) shadow-[3px_3px_0_var(--ink)]' : 'bg-white hover:bg-(--sea-tint)'
+            current === paper.id ? 'bg-(--citrus) shadow-[3px_3px_0_var(--outline)] text-(--on-bright) [--icon-ink:var(--on-bright)]' : 'bg-(--white) hover:bg-(--sea-tint)'
           }`}
         >
           <LbPaperThumb value={paperValue(paper.id)} size={72} />

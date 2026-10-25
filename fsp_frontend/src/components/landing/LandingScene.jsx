@@ -22,7 +22,7 @@ import styles from './LandingScene.module.css';
   With prefers-reduced-motion nothing moves; characters only show their speech bubble.
 */
 
-const INK = '#172B70';
+const INK = 'var(--icon-ink)';
 
 // Small seeded random so the grass, petals and fireflies are the same on every render.
 function seeded(seed) {
@@ -45,6 +45,22 @@ function tufts(rand, count, x0, x1, y0, y1) {
 const rand = seeded(42);
 const TUFT_PATH = tufts(rand, 90, -40, 1240, 648, 720);
 const TUFT_PATH_PHONE = tufts(seeded(7), 34, -10, 410, 604, 745);
+
+const STARS = Array.from({ length: 46 }, () => ({
+  x: -100 + rand() * 1400,
+  y: -60 + rand() * 500,
+  r: 0.9 + rand() * 1.5,
+  delay: -rand() * 6,
+  dur: 2.6 + rand() * 3,
+}));
+
+const STARS_PHONE = Array.from({ length: 30 }, () => ({
+  x: rand() * 400,
+  y: rand() * 430,
+  r: 0.9 + rand() * 1.5,
+  delay: -rand() * 6,
+  dur: 2.6 + rand() * 3,
+}));
 
 const FIREFLIES = Array.from({ length: 12 }, () => ({
   x: 40 + rand() * 1120,
@@ -148,9 +164,9 @@ function Bubble({ cx, y, text, show, bounds }) {
   const tip = Math.min(Math.max(cx - (x - width / 2), 20), width - 20);
   return (
     <g className={styles.bubble} data-show={show} transform={`translate(${x - width / 2} ${y})`} aria-hidden="true">
-      <rect width={width} height="42" rx="21" fill="#fff" stroke={INK} strokeWidth="3" />
-      <path d={`M${tip - 8} 41 L${tip} 54 L${tip + 8} 41`} fill="#fff" stroke={INK} strokeWidth="3" strokeLinejoin="round" />
-      <path d={`M${tip - 6} 40 H${tip + 6}`} stroke="#fff" strokeWidth="5" />
+      <rect width={width} height="42" rx="21" fill="var(--surface)" stroke={INK} strokeWidth="3" />
+      <path d={`M${tip - 8} 41 L${tip} 54 L${tip + 8} 41`} fill="var(--surface)" stroke={INK} strokeWidth="3" strokeLinejoin="round" />
+      <path d={`M${tip - 6} 40 H${tip + 6}`} stroke="var(--surface)" strokeWidth="5" />
       <text x={width / 2} y="29" textAnchor="middle" className={styles.bubbleText}>
         {text}
       </text>
@@ -163,7 +179,7 @@ function Cloud({ x, y, scale = 1, duration = 30, delay = 0, opacity = 1 }) {
   return (
     <g transform={`translate(${x} ${y}) scale(${scale})`} opacity={opacity} aria-hidden="true">
       <g className={styles.drift} style={{ '--duration': `${duration}s`, '--delay': `${delay}s` }}>
-        <ellipse cx="102" cy="76" rx="100" ry="12" fill="#B9C9EE" opacity="0.45" />
+        <ellipse cx="102" cy="76" rx="100" ry="12" fill="var(--ls-cloud-shade)" opacity="0.45" />
         <g fill="url(#lsCloud)">
           <circle cx="30" cy="54" r="24" />
           <circle cx="62" cy="38" r="32" />
@@ -172,8 +188,8 @@ function Cloud({ x, y, scale = 1, duration = 30, delay = 0, opacity = 1 }) {
           <circle cx="176" cy="58" r="20" />
           <rect x="14" y="52" width="176" height="24" rx="12" />
         </g>
-        <circle cx="96" cy="20" r="22" fill="#fff" opacity="0.7" />
-        <circle cx="58" cy="30" r="14" fill="#fff" opacity="0.6" />
+        <circle cx="96" cy="20" r="22" fill="var(--ls-cloud-hi)" opacity="0.7" />
+        <circle cx="58" cy="30" r="14" fill="var(--ls-cloud-hi)" opacity="0.6" />
       </g>
     </g>
   );
@@ -186,15 +202,15 @@ function Sun({ x, y }) {
       <circle className={styles.halo} r="86" fill="url(#lsGlow)" />
       <g className={styles.sun}>
         {rays.map((a) => (
-          <path key={a} d="M0 -40 V-54" stroke="#FFB02E" strokeWidth="5" strokeLinecap="round" transform={`rotate(${a})`} />
+          <path key={a} d="M0 -40 V-54" stroke="var(--ls-sun-ray)" strokeWidth="5" strokeLinecap="round" transform={`rotate(${a})`} />
         ))}
       </g>
-      <circle r="31" fill="#FFD45C" />
+      <circle r="31" fill="var(--ls-sun-fill)" />
       <circle r="31" fill="url(#lsSunDisc)" />
       <ellipse cx="-10" cy="-2" rx="2.4" ry="4" fill={INK} />
       <ellipse cx="10" cy="-2" rx="2.4" ry="4" fill={INK} />
-      <circle cx="-17" cy="8" r="4.2" fill="#FF8F6B" opacity="0.5" />
-      <circle cx="17" cy="8" r="4.2" fill="#FF8F6B" opacity="0.5" />
+      <circle cx="-17" cy="8" r="4.2" fill="var(--ls-sun-cheek)" opacity="0.5" />
+      <circle cx="17" cy="8" r="4.2" fill="var(--ls-sun-cheek)" opacity="0.5" />
       <path d="M-8 9 Q0 15 8 9" fill="none" stroke={INK} strokeWidth="2.6" strokeLinecap="round" />
     </g>
   );
@@ -203,7 +219,7 @@ function Sun({ x, y }) {
 function Wild({ x, y, c }) {
   return (
     <g>
-      <path d={`M${x} ${y} q-2 10 0 18`} stroke="#5E9B4E" strokeWidth="2" fill="none" strokeLinecap="round" />
+      <path d={`M${x} ${y} q-2 10 0 18`} stroke="var(--ls-tuft)" strokeWidth="2" fill="none" strokeLinecap="round" />
       <circle cx={x} cy={y} r="4" fill={c} />
       <circle cx={x} cy={y} r="1.5" fill="#FF9F1C" />
     </g>
@@ -214,21 +230,21 @@ function Wild({ x, y, c }) {
 function Tree() {
   return (
     <g className={styles.sway}>
-      <path d="M414 650 C416 620 410 596 404 574 L430 574 C426 598 434 622 438 650 Z" fill="#8B5A2B" />
-      <path d="M424 600 L452 570 M420 590 L398 566" stroke="#8B5A2B" strokeWidth="6" strokeLinecap="round" fill="none" />
-      <g fill="#5E9B4E">
+      <path d="M414 650 C416 620 410 596 404 574 L430 574 C426 598 434 622 438 650 Z" fill="var(--ls-trunk)" />
+      <path d="M424 600 L452 570 M420 590 L398 566" stroke="var(--ls-trunk)" strokeWidth="6" strokeLinecap="round" fill="none" />
+      <g fill="var(--ls-leaf-0)">
         <circle cx="372" cy="520" r="44" />
         <circle cx="470" cy="516" r="48" />
         <circle cx="420" cy="470" r="56" />
         <circle cx="418" cy="548" r="46" />
       </g>
-      <g fill="#79B65B">
+      <g fill="var(--ls-leaf-1)">
         <circle cx="386" cy="510" r="34" />
         <circle cx="462" cy="500" r="36" />
         <circle cx="418" cy="470" r="42" />
         <circle cx="420" cy="534" r="34" />
       </g>
-      <g fill="#A6D470" opacity="0.9">
+      <g fill="var(--ls-leaf-2)" opacity="0.9">
         <circle cx="396" cy="486" r="18" />
         <circle cx="440" cy="458" r="20" />
         <circle cx="470" cy="494" r="14" />
@@ -242,22 +258,23 @@ function Tree() {
 function House() {
   return (
     <g>
-      <rect x="26" y="62" width="226" height="112" rx="6" fill="#FFF1CF" stroke="#C99A6B" strokeWidth="2" />
-      <rect x="26" y="150" width="226" height="24" fill="#F2D9A8" opacity="0.7" />
-      <rect x="190" y="6" width="28" height="56" fill="#E3A67A" stroke="#C99A6B" strokeWidth="2" />
-      <path d="M0 68 L139 0 L278 68 Z" fill="url(#lsRoof)" stroke="#B5543A" strokeWidth="2" strokeLinejoin="round" />
-      <path d="M139 0 L278 68 H139 Z" fill="#B5543A" opacity="0.18" />
+      <rect x="26" y="62" width="226" height="112" rx="6" fill="var(--ls-wall)" stroke="var(--ls-wall-stroke)" strokeWidth="2" />
+      <rect x="26" y="150" width="226" height="24" fill="var(--ls-wall-band)" opacity="0.7" />
+      <rect x="190" y="6" width="28" height="56" fill="var(--ls-chimney)" stroke="var(--ls-wall-stroke)" strokeWidth="2" />
+      <path d="M0 68 L139 0 L278 68 Z" fill="url(#lsRoof)" stroke="var(--ls-roof-shade)" strokeWidth="2" strokeLinejoin="round" />
+      <path d="M139 0 L278 68 H139 Z" fill="var(--ls-roof-shade)" opacity="0.18" />
       <path d="M139 50 C126 42 120 34 125 29 C130 25 137 28 139 33 C141 28 148 25 153 29 C158 34 152 42 139 50 Z" fill="#E0301A" />
-      <path d="M64 174 V120 a26 26 0 0 1 52 0 V174 Z" fill="#4B78D6" stroke="#2F57A8" strokeWidth="2" />
+      <path d="M64 174 V120 a26 26 0 0 1 52 0 V174 Z" fill="var(--ls-door)" stroke="var(--ls-door-stroke)" strokeWidth="2" />
       <circle cx="104" cy="140" r="3.5" fill="#FFE680" />
       {/* warm window */}
       <circle className={styles.glow} cx="196" cy="122" r="116" fill="url(#lsWindow)" />
-      <rect x="158" y="92" width="76" height="62" rx="8" fill="#FFE680" stroke="#C99A6B" strokeWidth="3" />
-      <path d="M196 92 V154 M158 123 H234" stroke="#C99A6B" strokeWidth="3" />
-      <rect x="152" y="152" width="88" height="8" rx="4" fill="#C99A6B" />
+      <circle className={styles.nightOnly} cx="196" cy="122" r="170" fill="url(#lsWindow)" opacity="0.75" />
+      <rect x="158" y="92" width="76" height="62" rx="8" fill="#FFE680" stroke="var(--ls-frame)" strokeWidth="3" />
+      <path d="M196 92 V154 M158 123 H234" stroke="var(--ls-frame)" strokeWidth="3" />
+      <rect x="152" y="152" width="88" height="8" rx="4" fill="var(--ls-frame)" />
       {/* chimney smoke curling up */}
       {[0, 1.4, 2.8].map((d) => (
-        <circle key={d} className={styles.smoke} style={{ '--delay': `${d}s` }} cx="204" cy="-8" r="10" fill="#fff" />
+        <circle key={d} className={styles.smoke} style={{ '--delay': `${d}s` }} cx="204" cy="-8" r="10" fill="var(--ls-smoke)" />
       ))}
     </g>
   );
@@ -266,8 +283,8 @@ function House() {
 function PathToDoor() {
   return (
     <>
-      <path d="M134 644 H186 C194 672 262 690 318 730 H206 C148 702 126 674 134 644 Z" fill="#F4E2B6" />
-      <path d="M150 664 q14 6 24 0 M172 690 q16 6 28 2 M204 712 q14 4 26 0" stroke="#E2C98F" strokeWidth="3" strokeLinecap="round" fill="none" />
+      <path d="M134 644 H186 C194 672 262 690 318 730 H206 C148 702 126 674 134 644 Z" fill="var(--ls-path-0)" />
+      <path d="M150 664 q14 6 24 0 M172 690 q16 6 28 2 M204 712 q14 4 26 0" stroke="var(--ls-path-1)" strokeWidth="3" strokeLinecap="round" fill="none" />
     </>
   );
 }
@@ -289,55 +306,74 @@ function Fireflies({ list }) {
   );
 }
 
+// Night sky sprinkle; hidden by day (CSS) and held still with reduced motion.
+function Stars({ list }) {
+  return (
+    <g className={styles.nightOnly} aria-hidden="true" pointerEvents="none">
+      {list.map((st, i) => (
+        <circle
+          key={i}
+          className={styles.twinkle}
+          style={{ '--dur': `${st.dur}s`, '--delay': `${st.delay}s` }}
+          cx={st.x}
+          cy={st.y}
+          r={st.r}
+          fill="var(--ls-star)"
+        />
+      ))}
+    </g>
+  );
+}
+
 function Defs() {
   return (
     <defs>
       <linearGradient id="lsSky" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0" stopColor="#8FC7F7" />
-        <stop offset="0.45" stopColor="#CFE6F7" />
-        <stop offset="0.75" stopColor="#FFEBC0" />
-        <stop offset="1" stopColor="#FFD7A6" />
+        <stop offset="0" stopColor="var(--ls-sky-0)" />
+        <stop offset="0.45" stopColor="var(--ls-sky-1)" />
+        <stop offset="0.75" stopColor="var(--ls-sky-2)" />
+        <stop offset="1" stopColor="var(--ls-sky-3)" />
       </linearGradient>
       <radialGradient id="lsGlow">
-        <stop offset="0" stopColor="#FFF3B8" stopOpacity="0.95" />
-        <stop offset="0.5" stopColor="#FFE9A0" stopOpacity="0.35" />
-        <stop offset="1" stopColor="#FFE9A0" stopOpacity="0" />
+        <stop offset="0" stopColor="var(--ls-glow-0)" stopOpacity="0.95" />
+        <stop offset="0.5" stopColor="var(--ls-glow-1)" stopOpacity="0.35" />
+        <stop offset="1" stopColor="var(--ls-glow-1)" stopOpacity="0" />
       </radialGradient>
       <radialGradient id="lsSunLight">
         <stop offset="0" stopColor="#FFF1B0" stopOpacity="0.7" />
         <stop offset="1" stopColor="#FFF1B0" stopOpacity="0" />
       </radialGradient>
       <radialGradient id="lsSunDisc" cx="0.4" cy="0.35" r="0.8">
-        <stop offset="0" stopColor="#FFF4B0" stopOpacity="0.9" />
-        <stop offset="1" stopColor="#FFB02E" stopOpacity="0.25" />
+        <stop offset="0" stopColor="var(--ls-sun-disc-0)" stopOpacity="0.9" />
+        <stop offset="1" stopColor="var(--ls-sun-disc-1)" stopOpacity="0.25" />
       </radialGradient>
       <linearGradient id="lsCloud" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0" stopColor="#FFFFFF" />
-        <stop offset="1" stopColor="#E3EBFC" />
+        <stop offset="0" stopColor="var(--ls-cloud-0)" />
+        <stop offset="1" stopColor="var(--ls-cloud-1)" />
       </linearGradient>
       <linearGradient id="lsMtnFar" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0" stopColor="#A9C6F0" />
-        <stop offset="1" stopColor="#E4ECF8" />
+        <stop offset="0" stopColor="var(--ls-mtn-far-0)" />
+        <stop offset="1" stopColor="var(--ls-mtn-far-1)" />
       </linearGradient>
       <linearGradient id="lsMtnNear" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0" stopColor="#7FA8E0" />
-        <stop offset="1" stopColor="#CCDDF2" />
+        <stop offset="0" stopColor="var(--ls-mtn-near-0)" />
+        <stop offset="1" stopColor="var(--ls-mtn-near-1)" />
       </linearGradient>
       <linearGradient id="lsHill1" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0" stopColor="#BFD67E" />
-        <stop offset="1" stopColor="#EADB8E" />
+        <stop offset="0" stopColor="var(--ls-hill1-0)" />
+        <stop offset="1" stopColor="var(--ls-hill1-1)" />
       </linearGradient>
       <linearGradient id="lsHill2" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0" stopColor="#8FC367" />
-        <stop offset="1" stopColor="#CBD97D" />
+        <stop offset="0" stopColor="var(--ls-hill2-0)" />
+        <stop offset="1" stopColor="var(--ls-hill2-1)" />
       </linearGradient>
       <linearGradient id="lsMeadow" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0" stopColor="#A5D06A" />
-        <stop offset="1" stopColor="#DFE08A" />
+        <stop offset="0" stopColor="var(--ls-meadow-0)" />
+        <stop offset="1" stopColor="var(--ls-meadow-1)" />
       </linearGradient>
       <linearGradient id="lsRoof" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0" stopColor="#F0845C" />
-        <stop offset="1" stopColor="#D8603F" />
+        <stop offset="0" stopColor="var(--ls-roof-0)" />
+        <stop offset="1" stopColor="var(--ls-roof-1)" />
       </linearGradient>
       <radialGradient id="lsWindow">
         <stop offset="0" stopColor="#FFE680" stopOpacity="0.95" />
@@ -658,17 +694,18 @@ export default function LandingScene({ phone = false }) {
           <Defs />
 
           <g aria-hidden="true">
+            <Stars list={STARS_PHONE} />
             <Cloud x={20} y={392} scale={0.42} duration={34} delay={-8} opacity={0.85} />
             <path
               d="M-40 520 L20 470 L70 495 L130 440 L190 490 L240 460 L300 505 L350 455 L440 510 V620 H-40 Z"
               fill="url(#lsMtnFar)"
             />
             <path d="M-40 548 L40 506 L110 536 L180 492 L250 540 L320 506 L440 548 V620 H-40 Z" fill="url(#lsMtnNear)" opacity="0.9" />
-            <rect x="-40" y="500" width="480" height="110" fill="#F3EEDC" opacity="0.4" />
+            <rect x="-40" y="500" width="480" height="110" fill="var(--ls-haze)" opacity="0.4" />
             <path d="M-40 566 C60 522 160 524 230 558 C300 592 360 542 440 550 V650 H-40 Z" fill="url(#lsHill1)" />
             <path d="M-40 594 C80 566 180 570 250 590 C320 610 380 582 440 588 V690 H-40 Z" fill="url(#lsHill2)" />
             <path d="M-40 604 C100 592 250 608 440 596 V830 H-40 Z" fill="url(#lsMeadow)" />
-            <path d={TUFT_PATH_PHONE} stroke="#5E9B4E" strokeWidth="1.4" strokeLinecap="round" fill="none" opacity="0.55" />
+            <path d={TUFT_PATH_PHONE} stroke="var(--ls-tuft)" strokeWidth="1.4" strokeLinecap="round" fill="none" opacity="0.55" />
 
             <g transform="translate(61 201) scale(0.62)">
               <Tree />
@@ -683,9 +720,9 @@ export default function LandingScene({ phone = false }) {
               <Wild key={`${f.x}-${f.y}`} {...f} />
             ))}
 
-            <rect x="-40" y="752" width="480" height="60" fill="#F6E7C6" />
-            <path d="M-40 752 H440" stroke="#E2C98F" strokeWidth="3" />
-            <path d="M-40 780 H440" stroke="#FFFFFF" strokeWidth="4" strokeDasharray="22 18" opacity="0.9" />
+            <rect x="-40" y="752" width="480" height="60" fill="var(--ls-road)" />
+            <path d="M-40 752 H440" stroke="var(--ls-path-1)" strokeWidth="3" />
+            <path d="M-40 780 H440" stroke="var(--ls-road-dash)" strokeWidth="4" strokeDasharray="22 18" opacity="0.9" />
           </g>
 
           <Fireflies list={FIREFLIES_PHONE} />
@@ -701,6 +738,7 @@ export default function LandingScene({ phone = false }) {
 
       {/* sky, with warm light around the sun */}
       <rect x="-600" y="-500" width="2400" height="1500" fill="url(#lsSky)" />
+      <Stars list={STARS} />
       <circle cx={sunPos.x} cy={sunPos.y} r="320" fill="url(#lsSunLight)" aria-hidden="true" />
 
       <motion.g style={{ x: sunX }}>
@@ -727,7 +765,7 @@ export default function LandingScene({ phone = false }) {
           opacity="0.9"
           strokeLinejoin="round"
         />
-        <rect x="-100" y="540" width="1400" height="110" fill="#F3EEDC" opacity="0.4" />
+        <rect x="-100" y="540" width="1400" height="110" fill="var(--ls-haze)" opacity="0.4" />
       </motion.g>
 
       {/* rolling hills */}
@@ -739,7 +777,7 @@ export default function LandingScene({ phone = false }) {
       <motion.g style={{ x: nearX }}>
         <g aria-hidden="true">
           <path d="M-100 648 C200 624 420 646 640 638 C860 630 1040 652 1300 634 V780 H-100 Z" fill="url(#lsMeadow)" />
-          <path d={TUFT_PATH} stroke="#5E9B4E" strokeWidth="1.6" strokeLinecap="round" fill="none" opacity="0.55" />
+          <path d={TUFT_PATH} stroke="var(--ls-tuft)" strokeWidth="1.6" strokeLinecap="round" fill="none" opacity="0.55" />
           <Tree />
           <g transform="translate(70 470)">
             <House />
@@ -772,9 +810,9 @@ export default function LandingScene({ phone = false }) {
       <motion.g style={{ x: frontX }}>
         {/* the road Motmot parks on */}
         <g aria-hidden="true">
-          <rect x="-100" y="728" width="1400" height="50" fill="#F6E7C6" />
-          <path d="M-100 728 H1300" stroke="#E2C98F" strokeWidth="3" />
-          <path d="M-100 752 H1300" stroke="#FFFFFF" strokeWidth="4" strokeDasharray="26 22" opacity="0.9" />
+          <rect x="-100" y="728" width="1400" height="50" fill="var(--ls-road)" />
+          <path d="M-100 728 H1300" stroke="var(--ls-path-1)" strokeWidth="3" />
+          <path d="M-100 752 H1300" stroke="var(--ls-road-dash)" strokeWidth="4" strokeDasharray="26 22" opacity="0.9" />
         </g>
         {characters}
       </motion.g>

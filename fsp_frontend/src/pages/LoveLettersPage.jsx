@@ -534,13 +534,13 @@ export default function LoveLettersPage() {
 
   return (
     <div className="lb-room fixed inset-0 flex flex-col font-sans text-(--ink)">
-      <header className="z-[110] flex flex-wrap items-center justify-between gap-2 border-0 border-b-2 border-solid border-(--ink) bg-(--white) px-3 py-3 text-(--ink) sm:gap-4 sm:px-6">
+      <header className="z-[110] flex flex-wrap items-center justify-between gap-2 border-0 border-b-2 border-solid border-(--outline) bg-(--white) px-3 py-3 text-(--ink) sm:gap-4 sm:px-6">
         <div className="flex shrink-0 items-center gap-3 sm:gap-4">
           <button
             type="button"
             onClick={() => navigate('/home')}
             aria-label="Back to Home"
-            className="inline-flex min-h-11 shrink-0 cursor-pointer appearance-none items-center gap-1.5 rounded-full border-2 border-solid border-(--ink) bg-(--white) px-3 text-sm font-extrabold text-(--ink) transition hover:bg-(--sea-tint) sm:px-4"
+            className="inline-flex min-h-11 shrink-0 cursor-pointer appearance-none items-center gap-1.5 rounded-full border-2 border-solid border-(--outline) bg-(--white) px-3 text-sm font-extrabold text-(--ink) transition hover:bg-(--sea-tint) sm:px-4"
           >
             <ArrowLeft size={18} strokeWidth={2.8} aria-hidden="true" />
             <span className="hidden sm:inline">Home</span>
@@ -583,11 +583,11 @@ export default function LoveLettersPage() {
       <main className="relative flex-1 overflow-hidden">
         {loading && (
           <div className="absolute inset-0 z-[130] flex items-center justify-center bg-(--paper)/85" role="status" aria-live="polite">
-            <p className="m-0 rounded-full border-2 border-solid border-(--ink) bg-white px-6 py-2 font-serif text-lg font-bold">Loading your board…</p>
+            <p className="m-0 rounded-full border-2 border-solid border-(--outline) bg-(--white) px-6 py-2 font-serif text-lg font-bold">Loading your board…</p>
           </div>
         )}
         {error && (
-          <div role="alert" className="absolute top-4 left-1/2 z-[130] flex -translate-x-1/2 items-center gap-3 rounded-2xl border-2 border-solid border-(--ink) bg-(--citrus-tint) px-4 py-2 text-sm font-bold text-(--ink)">
+          <div role="alert" className="absolute top-4 left-1/2 z-[130] flex -translate-x-1/2 items-center gap-3 rounded-2xl border-2 border-solid border-(--outline) bg-(--citrus-tint) px-4 py-2 text-sm font-bold text-(--ink)">
             <Icon name="bell" size={28} />
             {error}
           </div>

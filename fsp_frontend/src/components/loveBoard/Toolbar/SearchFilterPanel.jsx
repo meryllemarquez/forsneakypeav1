@@ -29,7 +29,7 @@ export default function SearchFilterPanel({
         <motion.div
           role="search"
           aria-label="Search and filter letters"
-          className="fixed top-24 left-1/2 z-[110] max-h-[calc(100vh-8rem)] w-[92vw] max-w-md -translate-x-1/2 overflow-y-auto rounded-[28px] border-2 border-solid border-(--ink) bg-white p-5 text-(--ink) shadow-[6px_6px_0_var(--sea)]"
+          className="fixed top-24 left-1/2 z-[110] max-h-[calc(100vh-8rem)] w-[92vw] max-w-md -translate-x-1/2 overflow-y-auto rounded-[28px] border-2 border-solid border-(--outline) bg-(--white) p-5 text-(--ink) shadow-[6px_6px_0_var(--sea)]"
           initial={{ opacity: 0, y: -16, scale: 0.97 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: -16, scale: 0.97 }}

@@ -318,7 +318,7 @@ const CorkBoard = forwardRef(function CorkBoard(
 
         {notes.length === 0 && stickers.length === 0 && (
           <div className="absolute inset-0 flex items-center justify-center">
-            <div className="flex flex-col items-center gap-4 rounded-[48px] border-4 border-solid border-(--ink) bg-white px-16 py-12 text-center shadow-[10px_10px_0_var(--citrus)]">
+            <div className="flex flex-col items-center gap-4 rounded-[48px] border-4 border-solid border-(--outline) bg-(--white) px-16 py-12 text-center shadow-[10px_10px_0_var(--citrus)]">
               <Icon name="envelope" size={160} sticker tilt={-6} />
               <p className="m-0 font-caveat text-6xl leading-none font-bold text-(--tomato)">Pin your first letter to the board</p>
             </div>

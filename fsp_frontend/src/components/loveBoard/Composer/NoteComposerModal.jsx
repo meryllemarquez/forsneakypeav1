@@ -74,7 +74,7 @@ export default function NoteComposerModal({ open, onClose, onCreate, creating })
 
       {step === 0 && (
         <div className="flex gap-5">
-          <div className="hidden w-56 shrink-0 flex-col items-center justify-center gap-3 rounded-2xl border-2 border-solid border-(--ink) bg-(--gelato-tint) p-4 sm:flex">
+          <div className="hidden w-56 shrink-0 flex-col items-center justify-center gap-3 rounded-2xl border-2 border-solid border-(--outline) bg-(--gelato-tint) p-4 sm:flex">
             <LbPaperThumb value={form.paperImage} size={176} />
             <p className="m-0 text-center text-sm text-(--ink-soft)">Pick the paper, then design it on the next step.</p>
           </div>

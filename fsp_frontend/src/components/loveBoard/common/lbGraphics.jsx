@@ -14,12 +14,12 @@ export function LbPaper({ value }) {
   if (id === 'torn') {
     // The torn edge is a clip-path, so the ink outline is drawn by stacked drop-shadows.
     return (
-      <span className={styles.outline} style={position} aria-hidden="true">
+      <span className={styles.outline} style={position} data-theme="light" aria-hidden="true">
         <span className={`${styles.paper} ${styles.torn}`} />
       </span>
     );
   }
-  return <span className={`${styles.paper} ${styles[id]}`} style={position} aria-hidden="true" />;
+  return <span className={`${styles.paper} ${styles[id]}`} style={position} data-theme="light" aria-hidden="true" />;
 }
 
 // A small stand-in for a paper (pickers, archive rows, layers): the full 280x320 canvas, scaled.
@@ -38,7 +38,7 @@ export function LbPaperThumb({ value, size = 80, className = '' }) {
 export function LbPin({ value }) {
   const color = resolvePinColor(value);
   return (
-    <span className={styles.attachment} aria-hidden="true">
+    <span className={styles.attachment} data-theme="light" aria-hidden="true">
       <span className={`${styles.pinHead} ${styles[`c_${color}`]}`} />
     </span>
   );
@@ -47,7 +47,7 @@ export function LbPin({ value }) {
 export function LbTape({ value }) {
   const color = resolveTapeColor(value);
   return (
-    <span className={styles.attachment} aria-hidden="true">
+    <span className={styles.attachment} data-theme="light" aria-hidden="true">
       <span className={`${styles.tape} ${styles[`t_${color}`]}`} />
     </span>
   );

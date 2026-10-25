@@ -11,11 +11,11 @@ function ToolbarButton({ label, active, onClick, children }) {
       aria-label={label}
       aria-pressed={active}
       whileTap={{ scale: 0.94 }}
-      className="lb-focus flex min-h-12 shrink-0 cursor-pointer appearance-none items-center gap-2 rounded-full border-0 bg-transparent py-0 pr-3 pl-1.5 text-[15px] font-extrabold text-white transition-colors hover:bg-white/10 sm:pr-4"
+      className="lb-focus flex min-h-12 shrink-0 cursor-pointer appearance-none items-center gap-2 rounded-full border-0 bg-transparent py-0 pr-3 pl-1.5 text-[15px] font-extrabold text-(--white) transition-colors hover:bg-(--white)/10 sm:pr-4"
     >
       <span
         className={`flex size-[34px] shrink-0 items-center justify-center rounded-full text-(--ink) ${
-          active ? 'bg-(--citrus)' : 'bg-white'
+          active ? 'bg-(--citrus) text-(--on-bright) [--icon-ink:var(--on-bright)]' : 'bg-(--white)'
         }`}
       >
         {children}
@@ -41,7 +41,7 @@ export default function BoardToolbar({ onWriteLetter, stickerLibraryOpen, onTogg
         type="button"
         onClick={onWriteLetter}
         aria-label="Write a letter"
-        className="lb-focus flex min-h-12 shrink-0 cursor-pointer appearance-none items-center gap-2 rounded-full border-2 border-solid border-white bg-(--tomato) py-0 pr-4 pl-2.5 text-base font-extrabold text-white sm:pr-5"
+        className="lb-focus flex min-h-12 shrink-0 cursor-pointer appearance-none items-center gap-2 rounded-full border-2 border-solid border-(--white) bg-(--tomato) py-0 pr-4 pl-2.5 text-base font-extrabold text-(--on-tomato) sm:pr-5"
       >
         <Icon name="envelope" size={30} />
         <span className="hidden min-[420px]:inline">Write a letter</span>

@@ -58,7 +58,7 @@ export default function BoardMenu({
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
         aria-controls={panelId}
-        className="lb-focus inline-flex min-h-11 cursor-pointer appearance-none items-center gap-2 rounded-full border-2 border-solid border-(--ink) bg-white px-4 text-sm font-extrabold text-(--ink) transition hover:bg-(--sea-tint)"
+        className="lb-focus inline-flex min-h-11 cursor-pointer appearance-none items-center gap-2 rounded-full border-2 border-solid border-(--outline) bg-(--white) px-4 text-sm font-extrabold text-(--ink) transition hover:bg-(--sea-tint)"
       >
         <Ellipsis size={20} strokeWidth={2.8} aria-hidden="true" />
         More
@@ -70,7 +70,7 @@ export default function BoardMenu({
             id={panelId}
             role="dialog"
             aria-label="More board options"
-            className="absolute top-[calc(100%+10px)] right-0 z-[130] max-h-[calc(100vh-7rem)] w-[min(92vw,22rem)] overflow-y-auto rounded-[28px] border-2 border-solid border-(--ink) bg-white p-4 text-(--ink) shadow-[6px_6px_0_var(--sea)]"
+            className="absolute top-[calc(100%+10px)] right-0 z-[130] max-h-[calc(100vh-7rem)] w-[min(92vw,22rem)] overflow-y-auto rounded-[28px] border-2 border-solid border-(--outline) bg-(--white) p-4 text-(--ink) shadow-[6px_6px_0_var(--sea)]"
             initial={{ opacity: 0, y: -8, scale: 0.97 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -8, scale: 0.97 }}
@@ -130,7 +130,7 @@ export default function BoardMenu({
               </Chip>
             </div>
 
-            <div className="mt-4 border-0 border-t-2 border-dashed border-(--ink)/40 pt-3">
+            <div className="mt-4 border-0 border-t-2 border-dashed border-(--outline)/40 pt-3">
               <PillButton onClick={run(onDeleteAll)} className="w-full justify-start">
                 <Trash2 size={18} strokeWidth={2.6} aria-hidden="true" />
                 Delete all letters and stickers…
